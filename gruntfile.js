@@ -4,7 +4,13 @@ module.exports = function (grunt) {
 
     grunt.initConfig({
       jshint: {
-        all: ['gruntfile.js', 'plugin.js']
+        all: [ 'gruntfile.js', 'index.js' ]
+      },
+      browserify: {
+        dist: {
+          src: 'index.js',
+          dest: 'plugin.js'
+        }
       },
       uglify: {
         dist: {
@@ -33,5 +39,5 @@ module.exports = function (grunt) {
       },
     });
 
-    grunt.registerTask('default', ['jshint','uglify']);
+    grunt.registerTask('default', ['browserify','jshint','uglify']);
 };
