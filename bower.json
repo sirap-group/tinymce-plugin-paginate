@@ -1,0 +1,22 @@
+{
+  "name": "paginate",
+  "version": "0.1.0",
+  "authors": [
+    "Rémi Becheras <rbecheras@sirap.fr>"
+  ],
+  "description": "A tinymce plugin that provides pagination",
+  "main": "plugin.js",
+  "keywords": [
+    "tinymce",
+    "plugin",
+    "tinymce","plugin","pagination"
+  ],
+  "license": "LGPL-2.1",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
