@@ -1,5 +1,5 @@
 {
-  "name": "paginate",
+  "name": "tinymce-plugin-paginate",
   "version": "0.1.0",
   "description": "A tinymce plugin that provides pagination",
   "main": "plugin.js",
