@@ -13,17 +13,40 @@
 /*global tinymce:true */
 
 var Paginator = require('./classes/Paginator');
-var Page = require('./classes/Page');
+var ui = require('.utils/ui');
+// var Page = require('./classes/Page');
 
 tinymce.PluginManager.add('paginate', function(editor) {
 
-  var paginator = new Paginator();
-  var page = new Page();
+  var display;
+  var paginator;
 
-  editor.on('change',function(evt){
-    var doc = editor.getDoc();
-    var height = $(doc).height();
-    console.log(height);
+  // Create and display pages navigation buttons
+  ui.appendNavigationButtons();
+
+
+  editor.on('init',function(evt){
+
+    // console.log('editor.getWin()',editor.getWin().frameElement);
+
+    paginator = new Paginator('A4','portait', editor.getDoc());
+
+    // on first load, fill paginator with editor.getContent();
+    // editor.once('change',function(evt){
+    // });
+    editor.on('change',function(evt){
+      // console.log(new Error().stack);
+      // console.log('change');
+      paginator.fill(editor.getContent());
+      // paginator.watchPage(paginator.pages[0]);
+    });
   });
+
+
+
+  editor.on('SetContent',function(evt,a){
+    // console.log('setcontent',evt,a);
+  });
+
 
 });
