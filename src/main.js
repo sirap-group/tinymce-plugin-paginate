@@ -13,7 +13,7 @@
 /*global tinymce:true */
 
 var Paginator = require('./classes/Paginator');
-var ui = require('.utils/ui');
+var ui = require('./utils/ui');
 // var Page = require('./classes/Page');
 
 tinymce.PluginManager.add('paginate', function(editor) {
