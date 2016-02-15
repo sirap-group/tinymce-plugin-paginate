@@ -12,9 +12,9 @@ BadOrientationError.prototype = Error.prototype;
  * @param {String} formatLabel
  * @param {Sring} orientation
  * @param {Number} rank
- * @param {String} content
+ * @param {DOMElement} wrappedPageDiv
  */
-function Page(formatLabel, orientation, rank, content){
+function Page(formatLabel, orientation, rank, wrappedPageDiv){
   this._content = null;
   this.rank = null;
 
@@ -25,18 +25,25 @@ function Page(formatLabel, orientation, rank, content){
     this.rank = rank;
   }
 
-  if (content !== undefined || content !== null) {
-    this.content(content);
+  if (wrappedPageDiv !== undefined || wrappedPageDiv !== null) {
+    this.content(wrappedPageDiv);
   }
 }
 
 /**
+ * Getter-setter for page content Elements
  * @method set the page's content
- * @param {String} content The content to fill the page
- * @return void
+ * @param {DOMElement} wrappedPageDiv The content to fill the page
+ * @return {HTMLCollection|void}
  */
-Page.prototype.content = function(content){
-  this._content = content;
+Page.prototype.content = function(wrappedPageDiv){
+  if (wrappedPageDiv === undefined) {
+    return this._content;
+  } else {
+    console.log('wrappedPageDiv',wrappedPageDiv);
+    this._content = wrappedPageDiv.children;
+    console.log('page._content',this._content);
+  }
 };
 
 /**

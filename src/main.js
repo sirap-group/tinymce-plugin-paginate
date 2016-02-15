@@ -14,7 +14,6 @@
 
 var Paginator = require('./classes/Paginator');
 var ui = require('./utils/ui');
-// var Page = require('./classes/Page');
 
 tinymce.PluginManager.add('paginate', function(editor) {
 
@@ -24,29 +23,39 @@ tinymce.PluginManager.add('paginate', function(editor) {
   // Create and display pages navigation buttons
   ui.appendNavigationButtons();
 
-
   editor.on('init',function(evt){
-
-    // console.log('editor.getWin()',editor.getWin().frameElement);
-
+    // Instantiate the paginator
     paginator = new Paginator('A4','portait', editor.getDoc());
+
+    editor.once('change',function(evt){
+      console.log(editor.getContent());
+      console.info('content changed once');
+      alert('content changed once');
+      paginator.init();
+    });
+    editor.on('SetContent',function(evt){
+      if (evt.content) {
+        paginator.init();
+      }
+    });
 
     // on first load, fill paginator with editor.getContent();
     // editor.once('change',function(evt){
     // });
+
     editor.on('change',function(evt){
+      // console.info('editor change event fired');
+      paginator.watchPage();
       // console.log(new Error().stack);
-      // console.log('change');
-      paginator.fill(editor.getContent());
       // paginator.watchPage(paginator.pages[0]);
     });
+
+
   });
-
-
-
-  editor.on('SetContent',function(evt,a){
-    // console.log('setcontent',evt,a);
+  editor.on('NodeChange',function(evt){
+    // console.info('editor NodeChange event fired',evt);
+    // console.log(new Error().stack);
+    // paginator.watchPage(paginator.pages[0]);
   });
-
 
 });
