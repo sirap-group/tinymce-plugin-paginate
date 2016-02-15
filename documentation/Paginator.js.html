@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: Paginator.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: Paginator.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * Paginator class module
+ * @module classes/Paginator
+ */
+
+'use strict';
+
+// var _ = require('lodash');
+var Display = require('./Display');
+var Page = require('./Page');
+var parser = require('./paginator/parser');
+
+var errors = require('./paginator/errors'),
+  InvalidPageRankError = errors.InvalidPageRankError;
+
+/**
+ * Paginator is the page manager
+ * @constructor
+ * @param {string} pageFormatLabel The label of the paper format for all pages. For example, 'A4'
+ * @param {string} pageOrientation The label of the orientation for all pages. May be 'portait' or 'landscape'
+ * @param {DOMDocument} doc The document given by editor.getDoc() of the tinymce API
+ *
+ * @example
+ paginator = new Paginator('A4','portait', editor.getDoc());
+ *
+ * @see utils/page-formats
+ */
+function Paginator(pageFormatLabel, pageOrientation, doc){
+
+  /**
+   * @property {DOMDocument} _document The DOMDocument given in the constructor
+   */
+  this._document = doc;
+  /**
+   * @property {Display} _display The Display to manage screen and dimensions
+   */
+  this._display = new Display(doc);
+  this._defaultPage = new Page(pageFormatLabel, pageOrientation);
+  this._body = doc.getElementsByTagName('body');
+
+}
+
+/**
+ * @property {Page} currentPage
+ * @private
+ */
+var currentPage;
+
+/**
+ * @property {Array} pages
+ * @private
+ */
+var pages = [];
+
+/***************************************
+ * Getters
+ */
+
+/**
+ * @method getCurrentPage
+ * @return {Page} the current page loaded in editor
+ */
+Paginator.prototype.getCurrentPage = function(){
+  return currentPage;
+};
+
+/**
+ * @method getPage Get the page with the given rank
+ * @param {Number} rank The requested page rank
+ * @return {Page} The requested page
+ */
+Paginator.prototype.getPage = function(rank){
+  if (rank-1 &lt; 0 || rank-1 > pages.length) throw new InvalidPageRankError(rank);
+  else return pages[rank-1];
+};
+
+/**
+ * @method getPages Get all pages in paginator
+ * @return {Array&lt;Page>} all paginator pages
+ */
+Paginator.prototype.getPages = function(){
+  return pages;
+};
+
+/**
+ * @method getPrevious Return the previous page
+ * @return {Page} The previous page
+ */
+Paginator.prototype.getPrevious = function(){
+  try {
+    return this.getPage(currentPage.rank-1);
+  } catch(err) {
+    return null;
+  }
+};
+
+/**
+ * @method getNext Get the next page
+ * @return {Page} The next page
+ */
+Paginator.prototype.getNext = function(){
+  try {
+    return this.getPage(currentPage.rank+1);
+  } catch(err) {
+    return null;
+  }
+};
+
+/***************************************
+ * Navigation
+ */
+
+/**
+ * @method gotoPage Navigate to the given page
+ * @param {Page} the page to navigate to
+ */
+Paginator.prototype.gotoPage = function(page){
+
+  /**
+   * @TODO the method must be implemented
+   */
+
+};
+
+/**
+ * @method previous Navigate to the previous page
+ * @return {Page} The previous page after navigation is done
+ */
+Paginator.prototype.gotoPrevious = function(){
+  return this.gotoPage(this.getPrevious());
+};
+
+/**
+ * @method next Navigate to the next page
+ * @return {Page} The next page after navigation is done
+ */
+Paginator.prototype.next = function(){
+  return this.gotoPage(this.getNext());
+};
+
+Paginator.prototype.watchPage = function(){
+
+  console.log('body clientHeight', this._body.clientHeight,'body scrollHeight', this._body.scrollHeight);
+
+  var padding = {
+    top: $(this._body).css('padding-top'),
+    right: $(this._body).css('padding-right'),
+    bottom: $(this._body).css('padding-bottom'),
+    left: $(this._body).css('padding-left')
+  };
+
+  console.log('padding',padding);
+
+  // console.log('default height:', this._defaultPage.height);
+  // console.log('page (Display) height (px): ', this._display.height('px') + ' px');
+  // console.log('page (Display) height (mm): ', this._display.height('mm') + ' mm');
+  // console.log('page content', page.content());
+};
+
+/**
+ * @method init Initialize the paginator
+ * @return void
+ */
+Paginator.prototype.init = function(){
+  function findPageWrappers(){
+    return $('div[data-paginator-page-rank]',that._body);
+  }
+  var that = this;
+
+  // search the paginator page wrappers
+  var wrappedPages = findPageWrappers();
+  var wp ;
+
+  // wrap unwrapped content
+  if (!wrappedPages.length){
+    $(this._body).wrapInner('&lt;div data-paginator-page-rank="1">&lt;/div>');
+    wrappedPages = findPageWrappers();
+  }
+
+  $.each(wrappedPages,function(i,el){
+    pages.push(new Page(this._defaultPage.format().label, this._defaultPage.orientation, i+1, el));
+  });
+
+  // this.watchPage(firstPage);
+};
+
+/**
+ * Paginator class
+ */
+module.exports = Paginator;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-classes_Paginator.html">classes/Paginator</a></li></ul><h3>Classes</h3><ul><li><a href="module-classes_Paginator-Paginator.html">Paginator</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Mon Feb 15 2016 00:48:48 GMT+0100 (CET)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
