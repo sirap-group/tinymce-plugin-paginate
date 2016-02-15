@@ -1,3 +1,8 @@
+/**
+ * Paginator class module
+ * @module classes/Paginator
+ */
+
 'use strict';
 
 // var _ = require('lodash');
@@ -9,14 +14,29 @@ var errors = require('./paginator/errors'),
   InvalidPageRankError = errors.InvalidPageRankError;
 
 /**
+ * Paginator is the page manager
  * @constructor
- * @param pageFormatLabel
+ * @param {string} pageFormatLabel The label of the paper format for all pages. For example, 'A4'
+ * @param {string} pageOrientation The label of the orientation for all pages. May be 'portait' or 'landscape'
+ * @param {DOMDocument} doc The document given by editor.getDoc() of the tinymce API
+ *
+ * @example
+ paginator = new Paginator('A4','portait', editor.getDoc());
+ *
+ * @see utils/page-formats
  */
 function Paginator(pageFormatLabel, pageOrientation, doc){
 
+  /**
+   * @property {DOMDocument} _document The DOMDocument given in the constructor
+   */
   this._document = doc;
+  /**
+   * @property {Display} _display The Display to manage screen and dimensions
+   */
   this._display = new Display(doc);
   this._defaultPage = new Page(pageFormatLabel, pageOrientation);
+  this._body = doc.getElementsByTagName('body');
 
 }
 
@@ -28,6 +48,7 @@ var currentPage;
 
 /**
  * @property {Array} pages
+ * @private
  */
 var pages = [];
 
@@ -96,7 +117,7 @@ Paginator.prototype.getNext = function(){
 Paginator.prototype.gotoPage = function(page){
 
   /**
-   * @TODO
+   * @TODO the method must be implemented
    */
 
 };
@@ -117,7 +138,24 @@ Paginator.prototype.next = function(){
   return this.gotoPage(this.getNext());
 };
 
-Paginator.prototype.watchPage = function(page){
+/**
+ * Watch the current page, to check if content overflows the page's max-height.
+ * @todo If it overflows, put the content that overflows in the next page, else, check if
+ * the text on the next page can fill the current one without overflowing.
+ */
+Paginator.prototype.watchPage = function(){
+
+  console.log('body clientHeight', this._body.clientHeight,'body scrollHeight', this._body.scrollHeight);
+
+  var padding = {
+    top: $(this._body).css('padding-top'),
+    right: $(this._body).css('padding-right'),
+    bottom: $(this._body).css('padding-bottom'),
+    left: $(this._body).css('padding-left')
+  };
+
+  console.log('padding',padding);
+
   // console.log('default height:', this._defaultPage.height);
   // console.log('page (Display) height (px): ', this._display.height('px') + ' px');
   // console.log('page (Display) height (mm): ', this._display.height('mm') + ' mm');
@@ -125,22 +163,33 @@ Paginator.prototype.watchPage = function(page){
 };
 
 /**
- * @method fill the paginator with the full document content
- * @param {String} content to be filled in paginator
+ * @method init Initialize the paginator
  * @return void
  */
-Paginator.prototype.fill = function(content){
-  this._fullContent = content;
+Paginator.prototype.init = function(){
+  function findPageWrappers(){
+    return $('div[data-paginator-page-rank]',that._body);
+  }
+  var that = this;
 
-  var parsedDoc = parser.document(this._document,content);
-  console.log('parsedDoc',parsedDoc);
+  // search the paginator page wrappers
+  var wrappedPages = findPageWrappers();
+  var wp ;
 
-  // console.log('content',content);
+  // wrap unwrapped content
+  if (!wrappedPages.length){
+    $(this._body).wrapInner('<div data-paginator-page-rank="1"></div>');
+    wrappedPages = findPageWrappers();
+  }
 
-  // var firstPage = new Page(this._defaultPage.format().label, this._defaultPage.orientation, 1, content);
-  // pages.push(firstPage);
-  //
+  $.each(wrappedPages,function(i,el){
+    pages.push(new Page(that._defaultPage.format().label, that._defaultPage.orientation, i+1, el));
+  });
+
   // this.watchPage(firstPage);
 };
 
+/**
+ * Paginator class
+ */
 module.exports = Paginator;
