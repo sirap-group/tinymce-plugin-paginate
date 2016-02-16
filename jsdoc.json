@@ -1,0 +1,29 @@
+{
+    "tags": {
+        "allowUnknownTags": true,
+        "dictionaries": ["jsdoc","closure"]
+    },
+    "source": {
+        "includePattern": ".+\\.js(doc)?$",
+        "excludePattern": "(^|\\/|\\\\)_"
+    },
+    "plugins": [],
+    "templates": {
+        "cleverLinks": false,
+        "monospaceLinks": false,
+        "systemName"            : "tinymce-plugin-paginate",
+        "footer"                : "www.github.com/sirap-group",
+        "copyright"             : "Copyright Groupe SIRAP © 2016",
+        "includeDate"           : true,
+        "navType"               : "vertical",
+        "theme"                 : "simplex",
+        "linenums"              : true,
+        "collapseSymbols"       : true,
+        "inverseNav"            : false,
+        "outputSourceFiles"     : true ,
+        "outputSourcePath"      : true,
+        "dateFormat"            : "DD/MM/YYYY",
+        "syntaxTheme"           : "dark",
+        "sort"                  : true
+    }
+}
