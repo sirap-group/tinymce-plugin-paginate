@@ -36,7 +36,7 @@ var testDPIElement;
  * @method
  * @return the screen DPI
  */
-Display.prototype._setScreenDPI = function screenDPI(){
+Display.prototype._setScreenDPI = function(){
   createTestDPIElement();
 
   if (testDPIElement[0].offsetWidth !== testDPIElement[0].offsetHeight)
@@ -57,7 +57,7 @@ Display.prototype.height = function(unit){
   if (!unit) throw new Error('Explicit unit for getting document height is required');
 
   var pixels = $('body',this.document).height();
-  
+
   if (unit === 'px') return pixels;
   if (unit === 'mm') return this.px2mm(pixels);
 };
@@ -95,7 +95,7 @@ Display.prototype.px2mm = function(px){
 Display.prototype.mm2px = function(mm){
   if (!this.screenDPI)
     throw new Error('Screen DPI is not defined. Is Display object instantied ?');
-  return mm * this.screenDPI() / 254;
+  return mm * this.screenDPI / 254;
 };
 
 module.exports = Display;
