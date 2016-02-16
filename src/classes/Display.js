@@ -27,7 +27,7 @@ function Display(_document){
 }
 
 /**
- * @property
+ * @property {Element}
  * @private
  */
 var testDPIElement;

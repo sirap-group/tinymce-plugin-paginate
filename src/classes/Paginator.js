@@ -31,20 +31,25 @@ function Paginator(pageFormatLabel, pageOrientation, ed){
   /**
    * The DOMDocument given in the constructor
    * @property {DOMDocument}
+   * @private
    */
   this._document = ed.getDoc();
   /**
    * The Display to manage screen and dimensions
    * @property {Display}
+   * @private
    */
   this._display = new Display(this._document);
   /**
    * The default abstract page from all real pages inherits
+   * @property {Page}
+   * @private
    */
   this._defaultPage = new Page(pageFormatLabel, pageOrientation);
   /**
    * The body element of the full document
    * @property {Element}
+   * @private
    */
   this._body = this._document.getElementsByTagName('body');
 
@@ -66,7 +71,7 @@ var pages = [];
 
 /**
  * Current editor
- * @property
+ * @property {Editor}
  * @private
  */
 var editor;
@@ -158,6 +163,7 @@ Paginator.prototype.gotoPage = function(toPage){
 
 /**
  * Get the currently focused page div
+ * @method
  * @return {Element} The parent div element having an attribute data-paginator
  */
 Paginator.prototype.getFocusedPageDiv = function(){
@@ -173,6 +179,11 @@ Paginator.prototype.getFocusedPageDiv = function(){
   else return ret;
 };
 
+/**
+ * Go to the page having the focus
+ * @method
+ * @return void
+ */
 Paginator.prototype.gotoFocusedPage = function(){
   var focusedDiv = this.getFocusedPageDiv();
   var pageRank = $(focusedDiv).attr('data-paginator-page-rank');
@@ -205,20 +216,22 @@ Paginator.prototype.gotoNext = function(){
  * Watch the current page, to check if content overflows the page's max-height.
  * @method
  * @return void
- * @todo If it overflows, put the content that overflows in the next page, else, check if
- * the text on the next page can fill the current one without overflowing.
  */
 Paginator.prototype.watchPage = function(){
 
-  // console.log('body clientHeight', this._body.clientHeight,'body scrollHeight', this._body.scrollHeight);
+  var maxHeight = Math.ceil(this._getPageInnerHeight());
+  var currentHeight = Number($(currentPage.content()).css('height').split('px').join(''));
+  console.info('normal inner page height',maxHeight);
+  console.info('currentPage inner height',currentHeight);
+
+  if (currentHeight > maxHeight) {
+    alert('Dépassement de page !');
+    this._repage();
+  }
+
+};
 
 
-  // console.log('padding',padding);
-
-  // console.log('default height:', this._defaultPage.height);
-  // console.log('page (Display) height (px): ', this._display.height('px') + ' px');
-  // console.log('page (Display) height (mm): ', this._display.height('mm') + ' mm');
-  // console.log('page content', page.content());
 };
 
 /**
@@ -288,9 +301,6 @@ Paginator.prototype.init = function(){
   $.each(wrappedPages,function(i,el){
     pages.push(new Page(that._defaultPage.format().label, that._defaultPage.orientation, i+1, el));
   });
-
-
-  console.log(pages);
 
 };
 
