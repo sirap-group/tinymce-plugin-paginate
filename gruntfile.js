@@ -43,5 +43,5 @@ module.exports = function (grunt) {
     grunt.registerTask('jsdoc', function(){
       shell.exec('npm run jsdoc');
     });
-    grunt.registerTask('default', ['browserify','jshint','uglify']);
+    grunt.registerTask('default', ['browserify','jshint','uglify','jsdoc']);
 };
