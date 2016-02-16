@@ -231,12 +231,7 @@ Paginator.prototype.watchPage = function(){
 
 };
 
-  // console.log('padding',padding);
 
-  // console.log('default height:', this._defaultPage.height);
-  // console.log('page (Display) height (px): ', this._display.height('px') + ' px');
-  // console.log('page (Display) height (mm): ', this._display.height('mm') + ' mm');
-  // console.log('page content', page.content());
 };
 
 /**
@@ -306,9 +301,6 @@ Paginator.prototype.init = function(){
   $.each(wrappedPages,function(i,el){
     pages.push(new Page(that._defaultPage.format().label, that._defaultPage.orientation, i+1, el));
   });
-
-
-  console.log(pages);
 
 };
 
