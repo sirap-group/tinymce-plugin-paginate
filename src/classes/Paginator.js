@@ -216,8 +216,6 @@ Paginator.prototype.gotoNext = function(){
  * Watch the current page, to check if content overflows the page's max-height.
  * @method
  * @return void
- * @todo If it overflows, put the content that overflows in the next page, else, check if
- * the text on the next page can fill the current one without overflowing.
  */
 Paginator.prototype.watchPage = function(){
 
