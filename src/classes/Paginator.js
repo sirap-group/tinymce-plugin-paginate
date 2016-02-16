@@ -219,7 +219,15 @@ Paginator.prototype.gotoNext = function(){
  */
 Paginator.prototype.watchPage = function(){
 
-  // console.log('body clientHeight', this._body.clientHeight,'body scrollHeight', this._body.scrollHeight);
+  var maxHeight = Math.ceil(this._getPageInnerHeight());
+  var currentHeight = Number($(currentPage.content()).css('height').split('px').join(''));
+  console.info('normal inner page height',maxHeight);
+  console.info('currentPage inner height',currentHeight);
+
+  if (currentHeight > maxHeight) {
+    alert('Dépassement de page !');
+    this._repage();
+  }
 
 
   // console.log('padding',padding);
