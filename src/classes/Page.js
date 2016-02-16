@@ -3,9 +3,19 @@
 var supportedFormats = require('../utils/page-formats');
 
 
-
-function BadOrientationError(){}
-BadOrientationError.prototype = Error.prototype;
+var InvalidOrientationLabelError = (function(){
+  /**
+   * @constructor InvalidOrientationLabelError Must be thrown when trying to orientate a page with an invalid orientation label
+   * @param {string} label The invalid orientation label
+   */
+  function InvalidOrientationLabelError(label){
+    this.name = 'InvalidOrientationLabelError';
+    this.message = label + ' is an invalid orientation label !';
+    this.stack = (new Error()).stack;
+  }
+  InvalidOrientationLabelError.prototype = new Error;
+  return InvalidOrientationLabelError;
+})();
 
 /**
  * @constructor
@@ -31,18 +41,16 @@ function Page(formatLabel, orientation, rank, wrappedPageDiv){
 }
 
 /**
- * Getter-setter for page content Elements
- * @method set the page's content
- * @param {DOMElement} wrappedPageDiv The content to fill the page
- * @return {HTMLCollection|void}
+ * Getter-setter for page div content Element
+ * @method
+ * @param {DOMElement} The content to fill the page
+ * @return {DOMElement|void} The page div Element to return in getter usage
  */
 Page.prototype.content = function(wrappedPageDiv){
   if (wrappedPageDiv === undefined) {
     return this._content;
   } else {
-    console.log('wrappedPageDiv',wrappedPageDiv);
-    this._content = wrappedPageDiv.children;
-    console.log('page._content',this._content);
+    this._content = wrappedPageDiv;
   }
 };
 
@@ -53,17 +61,20 @@ Page.prototype.content = function(wrappedPageDiv){
  * @return void
  */
 Page.prototype.orientate = function(orientation){
-  if ( typeof(orientation) !== 'string' && !(orientation.toLowerCase() in ['portrait','paysage']) )
-    throw new BadOrientationError('orientation must be `portrait` or `paysage`');
+  var inValidType = (typeof(orientation) !== 'string');
+  var inValidLabel = (orientation.toLowerCase() !== 'portrait' && orientation.toLowerCase() !== 'paysage') ;
+
+  if (inValidType || inValidLabel)
+    throw new InvalidOrientationLabelError(orientation);
 
   this.orientation = orientation;
 
   if (orientation === 'portrait') {
-    this.width = this.format.short;
-    this.height = this.format.long;
+    this.width = this.format().short;
+    this.height = this.format().long;
   } else {
-    this.width = this.format.long;
-    this.height = this.format.short;
+    this.width = this.format().long;
+    this.height = this.format().short;
   }
 
 };

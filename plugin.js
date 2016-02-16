@@ -44,7 +44,7 @@ var testDPIElement;
  * @method
  * @return the screen DPI
  */
-Display.prototype._setScreenDPI = function screenDPI(){
+Display.prototype._setScreenDPI = function(){
   createTestDPIElement();
 
   if (testDPIElement[0].offsetWidth !== testDPIElement[0].offsetHeight)
@@ -65,7 +65,7 @@ Display.prototype.height = function(unit){
   if (!unit) throw new Error('Explicit unit for getting document height is required');
 
   var pixels = $('body',this.document).height();
-  
+
   if (unit === 'px') return pixels;
   if (unit === 'mm') return this.px2mm(pixels);
 };
@@ -103,7 +103,7 @@ Display.prototype.px2mm = function(px){
 Display.prototype.mm2px = function(mm){
   if (!this.screenDPI)
     throw new Error('Screen DPI is not defined. Is Display object instantied ?');
-  return mm * this.screenDPI() / 254;
+  return mm * this.screenDPI / 254;
 };
 
 module.exports = Display;
@@ -114,9 +114,19 @@ module.exports = Display;
 var supportedFormats = require('../utils/page-formats');
 
 
-
-function BadOrientationError(){}
-BadOrientationError.prototype = Error.prototype;
+var InvalidOrientationLabelError = (function(){
+  /**
+   * @constructor InvalidOrientationLabelError Must be thrown when trying to orientate a page with an invalid orientation label
+   * @param {string} label The invalid orientation label
+   */
+  function InvalidOrientationLabelError(label){
+    this.name = 'InvalidOrientationLabelError';
+    this.message = label + ' is an invalid orientation label !';
+    this.stack = (new Error()).stack;
+  }
+  InvalidOrientationLabelError.prototype = new Error;
+  return InvalidOrientationLabelError;
+})();
 
 /**
  * @constructor
@@ -142,18 +152,16 @@ function Page(formatLabel, orientation, rank, wrappedPageDiv){
 }
 
 /**
- * Getter-setter for page content Elements
- * @method set the page's content
- * @param {DOMElement} wrappedPageDiv The content to fill the page
- * @return {HTMLCollection|void}
+ * Getter-setter for page div content Element
+ * @method
+ * @param {DOMElement} The content to fill the page
+ * @return {DOMElement|void} The page div Element to return in getter usage
  */
 Page.prototype.content = function(wrappedPageDiv){
   if (wrappedPageDiv === undefined) {
     return this._content;
   } else {
-    console.log('wrappedPageDiv',wrappedPageDiv);
-    this._content = wrappedPageDiv.children;
-    console.log('page._content',this._content);
+    this._content = wrappedPageDiv;
   }
 };
 
@@ -164,17 +172,20 @@ Page.prototype.content = function(wrappedPageDiv){
  * @return void
  */
 Page.prototype.orientate = function(orientation){
-  if ( typeof(orientation) !== 'string' && !(orientation.toLowerCase() in ['portrait','paysage']) )
-    throw new BadOrientationError('orientation must be `portrait` or `paysage`');
+  var inValidType = (typeof(orientation) !== 'string');
+  var inValidLabel = (orientation.toLowerCase() !== 'portrait' && orientation.toLowerCase() !== 'paysage') ;
+
+  if (inValidType || inValidLabel)
+    throw new InvalidOrientationLabelError(orientation);
 
   this.orientation = orientation;
 
   if (orientation === 'portrait') {
-    this.width = this.format.short;
-    this.height = this.format.long;
+    this.width = this.format().short;
+    this.height = this.format().long;
   } else {
-    this.width = this.format.long;
-    this.height = this.format.short;
+    this.width = this.format().long;
+    this.height = this.format().short;
   }
 
 };
@@ -228,39 +239,55 @@ var errors = require('./paginator/errors'),
  *
  * @see utils/page-formats
  */
-function Paginator(pageFormatLabel, pageOrientation, doc){
+function Paginator(pageFormatLabel, pageOrientation, ed){
 
+  editor = ed;
   /**
-   * @property {DOMDocument} _document The DOMDocument given in the constructor
+   * The DOMDocument given in the constructor
+   * @property {DOMDocument}
    */
-  this._document = doc;
+  this._document = ed.getDoc();
   /**
-   * @property {Display} _display The Display to manage screen and dimensions
+   * The Display to manage screen and dimensions
+   * @property {Display}
    */
-  this._display = new Display(doc);
+  this._display = new Display(this._document);
+  /**
+   * The default abstract page from all real pages inherits
+   */
   this._defaultPage = new Page(pageFormatLabel, pageOrientation);
-  this._body = doc.getElementsByTagName('body');
+  /**
+   * The body element of the full document
+   * @property {Element}
+   */
+  this._body = this._document.getElementsByTagName('body');
 
 }
 
 /**
- * @property {Page} currentPage
+ * The current page
+ * @property {Page}
  * @private
  */
 var currentPage;
 
 /**
- * @property {Array} pages
+ * The list of pages
+ * @property {Array}
  * @private
  */
 var pages = [];
 
-/***************************************
- * Getters
+/**
+ * Current editor
+ * @property
+ * @private
  */
+var editor;
 
 /**
- * @method getCurrentPage
+ * Get the current page
+ * @method
  * @return {Page} the current page loaded in editor
  */
 Paginator.prototype.getCurrentPage = function(){
@@ -268,17 +295,25 @@ Paginator.prototype.getCurrentPage = function(){
 };
 
 /**
- * @method getPage Get the page with the given rank
+ * Get the page with the given rank
+ * @method
  * @param {Number} rank The requested page rank
  * @return {Page} The requested page
  */
 Paginator.prototype.getPage = function(rank){
-  if (rank-1 < 0 || rank-1 > pages.length) throw new InvalidPageRankError(rank);
+  if (!pages.length)
+    throw new Error('Paginator pages length in null. Can\'t iterate on it.');
+
+  var isLower = rank-1 < 0;
+  var isGreater = rank-1 > pages.length;
+
+  if (isLower || isGreater) throw new InvalidPageRankError(rank);
   else return pages[rank-1];
 };
 
 /**
- * @method getPages Get all pages in paginator
+ * Get all pages in paginator
+ * @method
  * @return {Array<Page>} all paginator pages
  */
 Paginator.prototype.getPages = function(){
@@ -286,78 +321,113 @@ Paginator.prototype.getPages = function(){
 };
 
 /**
- * @method getPrevious Return the previous page
+ * Return the previous page
+ * @method
  * @return {Page} The previous page
  */
 Paginator.prototype.getPrevious = function(){
   try {
-    return this.getPage(currentPage.rank-1);
+    console.log('this.getCurrentPage()',currentPage);
+    return this.getPage(this.getCurrentPage().rank-1);
   } catch(err) {
+    console.error(err.stck);
     return null;
   }
 };
 
 /**
- * @method getNext Get the next page
+ * Get the next page
+ * @method
  * @return {Page} The next page
  */
 Paginator.prototype.getNext = function(){
   try {
-    return this.getPage(currentPage.rank+1);
+    return this.getPage(this.getCurrentPage().rank+1);
   } catch(err) {
     return null;
   }
 };
 
-/***************************************
- * Navigation
- */
-
 /**
- * @method gotoPage Navigate to the given page
+ * Navigate to the given page
+ * @method
  * @param {Page} the page to navigate to
+ * @return void
  */
-Paginator.prototype.gotoPage = function(page){
+Paginator.prototype.gotoPage = function(toPage){
 
-  /**
-   * @TODO the method must be implemented
-   */
+  // Show the destination page
+  $(toPage._content).css({ 'display': 'block' });
+
+  // Hide all other pages
+  $.each(pages,function(i, loopPage){
+    if (toPage.rank !== loopPage.rank) {
+      $(loopPage._content).css({ 'display': 'none' });
+    }
+  });
+
+  currentPage = toPage;
 
 };
 
 /**
- * @method previous Navigate to the previous page
+ * Get the currently focused page div
+ * @return {Element} The parent div element having an attribute data-paginator
+ */
+Paginator.prototype.getFocusedPageDiv = function(){
+  var selectedElement = editor.selection.getRng().startContainer;
+  var parents = editor.dom.getParents(selectedElement,'div',editor.getDoc().body);
+  var ret;
+  $.each(parents,function(i,parent){
+    if ($(parent).attr('data-paginator')) {
+      ret = parent;
+    }
+  });
+  if (!ret) throw new Error('No parent page found ! You are out of a page.');
+  else return ret;
+};
+
+Paginator.prototype.gotoFocusedPage = function(){
+  var focusedDiv = this.getFocusedPageDiv();
+  var pageRank = $(focusedDiv).attr('data-paginator-page-rank');
+  var focusedPage = this.getPage(pageRank);
+  currentPage = focusedPage;
+  this.gotoPage(focusedPage);
+};
+
+/**
+ * Navigate to the previous page
+ * @method
  * @return {Page} The previous page after navigation is done
  */
 Paginator.prototype.gotoPrevious = function(){
+  console.info('goto previous page');
   return this.gotoPage(this.getPrevious());
 };
 
 /**
- * @method next Navigate to the next page
+ * Navigate to the next page
+ * @method
  * @return {Page} The next page after navigation is done
  */
-Paginator.prototype.next = function(){
+Paginator.prototype.gotoNext = function(){
+  console.info('goto next page');
   return this.gotoPage(this.getNext());
 };
 
 /**
  * Watch the current page, to check if content overflows the page's max-height.
+ * @method
+ * @return void
  * @todo If it overflows, put the content that overflows in the next page, else, check if
  * the text on the next page can fill the current one without overflowing.
  */
 Paginator.prototype.watchPage = function(){
 
-  console.log('body clientHeight', this._body.clientHeight,'body scrollHeight', this._body.scrollHeight);
+  // console.log('body clientHeight', this._body.clientHeight,'body scrollHeight', this._body.scrollHeight);
 
-  var padding = {
-    top: $(this._body).css('padding-top'),
-    right: $(this._body).css('padding-right'),
-    bottom: $(this._body).css('padding-bottom'),
-    left: $(this._body).css('padding-left')
-  };
 
-  console.log('padding',padding);
+  // console.log('padding',padding);
 
   // console.log('default height:', this._defaultPage.height);
   // console.log('page (Display) height (px): ', this._display.height('px') + ' px');
@@ -366,7 +436,40 @@ Paginator.prototype.watchPage = function(){
 };
 
 /**
- * @method init Initialize the paginator
+ * Get the current computed padding
+ * @method
+ * @return {object}
+ */
+Paginator.prototype._getDocPadding = function(){
+  var that = this;
+  return {
+    top: $(that._body).css('padding-top'),
+    right: $(that._body).css('padding-right'),
+    bottom: $(that._body).css('padding-bottom'),
+    left: $(that._body).css('padding-left')
+  };
+}
+
+/**
+ * Compute the page inner height in pixels
+ * @method
+ * @return {Number} The resulted height in pixels
+ */
+Paginator.prototype._getPageInnerHeight = function(){
+
+  var outerHeight = Number(this._display.mm2px(this._defaultPage.height)*10); // @TODO (*10) is a bug fix
+  var docPadding = this._getDocPadding();
+  var paddingTop = Number(docPadding.top.split('px').join(''));
+  var paddingBottom = Number(docPadding.bottom.split('px').join(''));
+
+  var innerHeight = outerHeight - paddingTop - paddingBottom;
+
+  return innerHeight-1 // -1 because of a bug in border-bottom pdf rendering
+};
+
+/**
+ * Initialize the paginator
+ * @method
  * @return void
  */
 Paginator.prototype.init = function(){
@@ -377,19 +480,32 @@ Paginator.prototype.init = function(){
 
   // search the paginator page wrappers
   var wrappedPages = findPageWrappers();
-  var wp ;
+  var wrapper = $('<div>');
+  wrapper.attr({
+    'data-paginator': true,
+    'data-paginator-page-rank': 1
+  }).css({
+    'page-break-after': 'always',
+    'height': that._getPageInnerHeight(),
+    // 'border': 'solid red 1px',
+    // 'background': 'yellow',
+    'overflow': 'hidden'
+  });
 
   // wrap unwrapped content
   if (!wrappedPages.length){
-    $(this._body).wrapInner('<div data-paginator-page-rank="1"></div>');
+    $(this._body).wrapInner(wrapper);
     wrappedPages = findPageWrappers();
   }
 
+  pages = [];
   $.each(wrappedPages,function(i,el){
     pages.push(new Page(that._defaultPage.format().label, that._defaultPage.orientation, i+1, el));
   });
 
-  // this.watchPage(firstPage);
+
+  console.log(pages);
+
 };
 
 /**
@@ -440,45 +556,41 @@ var ui = require('./utils/ui');
 
 tinymce.PluginManager.add('paginate', function(editor) {
 
+  function initPaginator(){
+    if (!paginator) {
+      paginator = new Paginator('A4','portrait', editor);
+      // Create and display pages navigation buttons
+      ui.appendNavigationButtons(paginator);
+    }
+    paginator.init();
+  }
+
   var display;
   var paginator;
 
-  // Create and display pages navigation buttons
-  ui.appendNavigationButtons();
 
+  editor.once('change',function(evt){
+    // Instantiate the paginator
+    initPaginator();
+  });
   editor.on('init',function(evt){
     // Instantiate the paginator
-    paginator = new Paginator('A4','portait', editor.getDoc());
+    initPaginator();
 
-    editor.once('change',function(evt){
-      console.log(editor.getContent());
-      console.info('content changed once');
-      alert('content changed once');
-      paginator.init();
-    });
     editor.on('SetContent',function(evt){
-      if (evt.content) {
-        paginator.init();
+      initPaginator();
+    });
+
+    editor.on('NodeChange',function(evt){
+      try {
+        paginator.gotoFocusedPage();
+      } catch (e) {
+        console.info('cant go to focused page now');
+        console.error(e);
+        console.error(e.stack);
       }
     });
 
-    // on first load, fill paginator with editor.getContent();
-    // editor.once('change',function(evt){
-    // });
-
-    editor.on('change',function(evt){
-      // console.info('editor change event fired');
-      paginator.watchPage();
-      // console.log(new Error().stack);
-      // paginator.watchPage(paginator.pages[0]);
-    });
-
-
-  });
-  editor.on('NodeChange',function(evt){
-    // console.info('editor NodeChange event fired',evt);
-    // console.log(new Error().stack);
-    // paginator.watchPage(paginator.pages[0]);
   });
 
 });
@@ -510,7 +622,7 @@ $.each(supportedFormats,function(label,format){
  * @function appendNavigationButtons
  * @return void
  */
-exports.appendNavigationButtons = function(){
+exports.appendNavigationButtons = function(paginator){
   var body = $('body');
   var selector = '<button></button>';
   var commonClasses = 'btn btn-default btn-large glyphicon';
@@ -524,12 +636,18 @@ exports.appendNavigationButtons = function(){
     .css($.extend( { 'top': (window.screen.height/2)+'px', }, commonCss ))
     .addClass(commonClasses + ' glyphicon-chevron-up')
     .appendTo(body)
+    .click(function(){
+      paginator.gotoPrevious();
+    })
   ;
   // navigate to next page
   $(selector)
-    .css($.extend( { 'top': (window.screen.height/2 + 30)+'px', }, commonCss ))
+    .css($.extend( { 'top': (window.screen.height/2 + 35)+'px', }, commonCss ))
     .addClass(commonClasses + ' glyphicon-chevron-down')
     .appendTo(body)
+    .click(function(){
+      paginator.gotoNext()
+    })
   ;
 };
 
