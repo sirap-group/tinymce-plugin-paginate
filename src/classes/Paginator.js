@@ -164,9 +164,10 @@ Paginator.prototype.gotoPage = function(toPage){
 /**
  * Get the currently focused page div
  * @method
+ * @private
  * @return {Element} The parent div element having an attribute data-paginator
  */
-Paginator.prototype.getFocusedPageDiv = function(){
+Paginator.prototype._getFocusedPageDiv = function(){
   var selectedElement = editor.selection.getRng().startContainer;
   var parents = editor.dom.getParents(selectedElement,'div',editor.getDoc().body);
   var ret;
@@ -185,7 +186,7 @@ Paginator.prototype.getFocusedPageDiv = function(){
  * @return void
  */
 Paginator.prototype.gotoFocusedPage = function(){
-  var focusedDiv = this.getFocusedPageDiv();
+  var focusedDiv = this._getFocusedPageDiv();
   var pageRank = $(focusedDiv).attr('data-paginator-page-rank');
   var focusedPage = this.getPage(pageRank);
   currentPage = focusedPage;
@@ -237,6 +238,7 @@ Paginator.prototype.watchPage = function(){
 /**
  * Get the current computed padding
  * @method
+ * @private
  * @return {object}
  */
 Paginator.prototype._getDocPadding = function(){
@@ -252,6 +254,7 @@ Paginator.prototype._getDocPadding = function(){
 /**
  * Compute the page inner height in pixels
  * @method
+ * @private
  * @return {Number} The resulted height in pixels
  */
 Paginator.prototype._getPageInnerHeight = function(){
