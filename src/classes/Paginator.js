@@ -229,6 +229,7 @@ Paginator.prototype.watchPage = function(){
     this._repage();
   }
 
+};
 
   // console.log('padding',padding);
 
