@@ -38,33 +38,20 @@ tinymce.PluginManager.add('paginate', function(editor) {
     // Instantiate the paginator
     initPaginator();
 
-    editor.once('change',function(evt){
-      console.log(editor.getContent());
-      console.info('content changed once');
-      alert('content changed once');
-      paginator.init();
-    });
     editor.on('SetContent',function(evt){
       initPaginator();
     });
 
-    // on first load, fill paginator with editor.getContent();
-    // editor.once('change',function(evt){
-    // });
-
-    editor.on('change',function(evt){
-      // console.info('editor change event fired');
-      paginator.watchPage();
-      // console.log(new Error().stack);
-      // paginator.watchPage(paginator.pages[0]);
+    editor.on('NodeChange',function(evt){
+      try {
+        paginator.gotoFocusedPage();
+      } catch (e) {
+        console.info('cant go to focused page now');
+        console.error(e);
+        console.error(e.stack);
+      }
     });
 
-
-  });
-  editor.on('NodeChange',function(evt){
-    // console.info('editor NodeChange event fired',evt);
-    // console.log(new Error().stack);
-    // paginator.watchPage(paginator.pages[0]);
   });
 
 });
