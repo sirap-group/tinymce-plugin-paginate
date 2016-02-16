@@ -52,6 +52,10 @@ tinymce.PluginManager.add('paginate', function(editor) {
       }
     });
 
+    editor.on('change',function(evt){
+      paginator.watchPage();
+    });
+
   });
 
 });
