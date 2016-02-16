@@ -222,8 +222,6 @@ Paginator.prototype.watchPage = function(){
 
   var maxHeight = Math.ceil(this._getPageInnerHeight());
   var currentHeight = Number($(currentPage.content()).css('height').split('px').join(''));
-  console.info('normal inner page height',maxHeight);
-  console.info('currentPage inner height',currentHeight);
 
   if (currentHeight > maxHeight) {
     alert('Dépassement de page !');
