@@ -31,20 +31,25 @@ function Paginator(pageFormatLabel, pageOrientation, ed){
   /**
    * The DOMDocument given in the constructor
    * @property {DOMDocument}
+   * @private
    */
   this._document = ed.getDoc();
   /**
    * The Display to manage screen and dimensions
    * @property {Display}
+   * @private
    */
   this._display = new Display(this._document);
   /**
    * The default abstract page from all real pages inherits
+   * @property {Page}
+   * @private
    */
   this._defaultPage = new Page(pageFormatLabel, pageOrientation);
   /**
    * The body element of the full document
    * @property {Element}
+   * @private
    */
   this._body = this._document.getElementsByTagName('body');
 
@@ -66,7 +71,7 @@ var pages = [];
 
 /**
  * Current editor
- * @property
+ * @property {Editor}
  * @private
  */
 var editor;
@@ -158,6 +163,7 @@ Paginator.prototype.gotoPage = function(toPage){
 
 /**
  * Get the currently focused page div
+ * @method
  * @return {Element} The parent div element having an attribute data-paginator
  */
 Paginator.prototype.getFocusedPageDiv = function(){
@@ -173,6 +179,11 @@ Paginator.prototype.getFocusedPageDiv = function(){
   else return ret;
 };
 
+/**
+ * Go to the page having the focus
+ * @method
+ * @return void
+ */
 Paginator.prototype.gotoFocusedPage = function(){
   var focusedDiv = this.getFocusedPageDiv();
   var pageRank = $(focusedDiv).attr('data-paginator-page-rank');
