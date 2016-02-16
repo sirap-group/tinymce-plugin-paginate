@@ -17,15 +17,26 @@ var ui = require('./utils/ui');
 
 tinymce.PluginManager.add('paginate', function(editor) {
 
+  function initPaginator(){
+    if (!paginator) {
+      paginator = new Paginator('A4','portrait', editor);
+      // Create and display pages navigation buttons
+      ui.appendNavigationButtons(paginator);
+    }
+    paginator.init();
+  }
+
   var display;
   var paginator;
 
-  // Create and display pages navigation buttons
-  ui.appendNavigationButtons();
 
+  editor.once('change',function(evt){
+    // Instantiate the paginator
+    initPaginator();
+  });
   editor.on('init',function(evt){
     // Instantiate the paginator
-    paginator = new Paginator('A4','portait', editor.getDoc());
+    initPaginator();
 
     editor.once('change',function(evt){
       console.log(editor.getContent());
@@ -34,9 +45,7 @@ tinymce.PluginManager.add('paginate', function(editor) {
       paginator.init();
     });
     editor.on('SetContent',function(evt){
-      if (evt.content) {
-        paginator.init();
-      }
+      initPaginator();
     });
 
     // on first load, fill paginator with editor.getContent();
