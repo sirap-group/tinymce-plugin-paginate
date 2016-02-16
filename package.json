@@ -14,7 +14,8 @@
   },
   "scripts": {
     "build": "grunt",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "jsdoc": "jsdoc -d jsdoc -c jsdoc.json -t ./node_modules/ink-docstrap/template  src/*"
   },
   "repository": {
     "type": "git",
