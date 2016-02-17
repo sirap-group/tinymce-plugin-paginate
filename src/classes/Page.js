@@ -55,6 +55,17 @@ Page.prototype.content = function(wrappedPageDiv){
 };
 
 /**
+ * Append the given node list to the page content.
+ * @method
+ * @param {Array}<Node> nodes The nodes to insert.
+ * @returns {Page} `this` page instance.
+ */
+Page.prototype.append = function(nodes){
+  $(nodes).appendTo(this.content());
+  return this;
+};
+
+/**
  * getter-setter of the orientation
  * @method
  * @param <string> orientation
