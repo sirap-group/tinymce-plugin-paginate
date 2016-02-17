@@ -77,6 +77,44 @@ var pages = [];
 var editor;
 
 /**
+ * Initialize the paginator. The editor and its content has to be loaded before initialize the paginator
+ * @method
+ * @return void
+ */
+Paginator.prototype.init = function(){
+  function findPageWrappers(){
+    return $('div[data-paginator-page-rank]',that._body);
+  }
+  var that = this;
+
+  // search the paginator page wrappers
+  var wrappedPages = findPageWrappers();
+  var wrapper = $('<div>');
+  wrapper.attr({
+    'data-paginator': true,
+    'data-paginator-page-rank': 1
+  }).css({
+    'page-break-after': 'always',
+    'height': _getPageInnerHeight.call(that),
+    // 'border': 'solid red 1px',
+    'background': 'linear-gradient(#FFF0F5,#FFFACD)',
+    'overflow': 'hidden'
+  });
+
+  // wrap unwrapped content
+  if (!wrappedPages.length){
+    $(this._body).wrapInner(wrapper);
+    wrappedPages = findPageWrappers();
+  }
+
+  pages = [];
+  $.each(wrappedPages,function(i,el){
+    pages.push(new Page(that._defaultPage.format().label, that._defaultPage.orientation, i+1, el));
+  });
+
+};
+
+/**
  * Get the current page
  * @method
  * @return {Page} the current page loaded in editor
@@ -162,25 +200,6 @@ Paginator.prototype.gotoPage = function(toPage){
 };
 
 /**
- * Get the currently focused page div
- * @method
- * @private
- * @return {Element} The parent div element having an attribute data-paginator
- */
-var _getFocusedPageDiv = function(){
-  var selectedElement = editor.selection.getRng().startContainer;
-  var parents = editor.dom.getParents(selectedElement,'div',editor.getDoc().body);
-  var ret;
-  $.each(parents,function(i,parent){
-    if ($(parent).attr('data-paginator')) {
-      ret = parent;
-    }
-  });
-  if (!ret) throw new Error('No parent page found ! You are out of a page.');
-  else return ret;
-};
-
-/**
  * Go to the page having the focus
  * @method
  * @return void
@@ -224,12 +243,50 @@ Paginator.prototype.watchPage = function(){
   var currentHeight = Number($(currentPage.content()).css('height').split('px').join(''));
 
   if (currentHeight > maxHeight) {
-    alert('Dépassement de page !');
+    console.info('Dépassement de page !');
     _repage.call();
   }
 
 };
 
+/**
+ * Get the currently focused page div
+ * @method
+ * @private
+ * @return {Element} The parent div element having an attribute data-paginator
+ */
+var _getFocusedPageDiv = function(){
+  var selectedElement = editor.selection.getRng().startContainer;
+  var parents = editor.dom.getParents(selectedElement,'div',editor.getDoc().body);
+  var ret;
+  $.each(parents,function(i,parent){
+    if ($(parent).attr('data-paginator')) {
+      ret = parent;
+    }
+  });
+  if (!ret) throw new Error('No parent page found ! You are out of a page.');
+  else return ret;
+};
+
+/**
+ * Move the overflowing content from the current page, to the next page.
+ * Must be called when the page's content overflows.
+ * @method
+ * @private
+ * @return void
+ *
+ * @todo If it overflows, put the content that overflows in the next page, then, check if
+ * the text on the next page can fill the current one without overflowing.
+ */
+var _repage = function(){
+  var currentRng = editor.selection.getRng();
+  console.log( $(currentPage.content()));
+  var children = $(currentPage.content()).childNodes;
+  var lastBlock = children[children.length - 1];
+  console.log(lastBlock);
+  if (lastBlock.nodeName === 'DIV') {
+    console.log('its a div');
+  }
 
 };
 
@@ -268,40 +325,12 @@ var _getPageInnerHeight = function(){
 };
 
 /**
- * Initialize the paginator. The editor and its content has to be loaded before initialize the paginator
+ * Compute the real height of the page's content. It must equals the page inner height, except the time where the content overflows it, juste before to be repaged by the `Paginator::_repage()` method that bring back the content height to the page inner one.
  * @method
- * @return void
+ * @private
+ * @return {Number} The resulted height in pixels.
  */
-Paginator.prototype.init = function(){
-  function findPageWrappers(){
-    return $('div[data-paginator-page-rank]',that._body);
-  }
-  var that = this;
-
-  // search the paginator page wrappers
-  var wrappedPages = findPageWrappers();
-  var wrapper = $('<div>');
-  wrapper.attr({
-    'data-paginator': true,
-    'data-paginator-page-rank': 1
-  }).css({
-    'page-break-after': 'always',
-    'height': _getPageInnerHeight.call(that),
-    // 'border': 'solid red 1px',
-    // 'background': 'yellow',
-    'overflow': 'hidden'
-  });
-
-  // wrap unwrapped content
-  if (!wrappedPages.length){
-    $(this._body).wrapInner(wrapper);
-    wrappedPages = findPageWrappers();
-  }
-
-  pages = [];
-  $.each(wrappedPages,function(i,el){
-    pages.push(new Page(that._defaultPage.format().label, that._defaultPage.orientation, i+1, el));
-  });
+var _getPageContentHeight = function(){
 
 };
 
