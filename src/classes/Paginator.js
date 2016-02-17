@@ -89,17 +89,7 @@ Paginator.prototype.init = function(){
 
   // search the paginator page wrappers
   var wrappedPages = findPageWrappers();
-  var wrapper = $('<div>');
-  wrapper.attr({
-    'data-paginator': true,
-    'data-paginator-page-rank': 1
-  }).css({
-    'page-break-after': 'always',
-    'height': _getPageInnerHeight.call(that),
-    // 'border': 'solid red 1px',
-    'background': 'linear-gradient(#FFF0F5,#FFFACD)',
-    'overflow': 'hidden'
-  });
+  var wrapper = _createEmptyDivWrapper.call(this);
 
   // wrap unwrapped content
   if (!wrappedPages.length){
@@ -237,14 +227,16 @@ Paginator.prototype.gotoNext = function(){
  * @method
  * @return void
  */
-Paginator.prototype.watchPage = function(){
+Paginator.prototype.watchPage = function(){ console.info('wathing page ...');
 
-  var maxHeight = Math.ceil(_getPageInnerHeight.call(this));
-  var currentHeight = Number($(currentPage.content()).css('height').split('px').join(''));
+  var maxHeight = _getPageInnerHeight.call(this);
+  var currentHeight = _getPageContentHeight.call(this);
+
+  console.log('maxHeight',maxHeight,'currentHeight',currentHeight);
 
   if (currentHeight > maxHeight) {
     console.info('Dépassement de page !');
-    _repage.call();
+    _repage.call(this);
   }
 
 };
@@ -278,14 +270,32 @@ var _getFocusedPageDiv = function(){
  * @todo If it overflows, put the content that overflows in the next page, then, check if
  * the text on the next page can fill the current one without overflowing.
  */
-var _repage = function(){
+var _repage = function(){ console.info('repaging...');
   var currentRng = editor.selection.getRng();
-  console.log( $(currentPage.content()));
-  var children = $(currentPage.content()).childNodes;
+  var children = $(currentPage.content()).children();
   var lastBlock = children[children.length - 1];
-  console.log(lastBlock);
-  if (lastBlock.nodeName === 'DIV') {
-    console.log('its a div');
+
+  console.log(lastBlock); //TODO remove for production
+
+  var nextPage = this.getNext() || _createNextPage.call(this);
+  
+  switch (lastBlock.nodeName) {
+    case 'DIV':
+    case 'P':
+      //TODO cloner le block dans divClone
+      //  - vider divClone
+      //  - déplacer le dernier block du div original dans le nouveau div
+      $(lastBlock).prependTo($(nextPage.content()))
+    break;
+
+    default:
+      alert('Une erreur est survenue dans le plugin de pagination. Merci de visionner l\'erreur dans la console et de déclarer cette erreur au support «support@sirap.fr»');
+      throw new Error('Unsupported block type for repaging: '+lastBlock.nodeName);
+
+  }
+
+
+
   }
 
 };
@@ -311,6 +321,8 @@ var _getDocPadding = function(){
  * @method
  * @private
  * @return {Number} The resulted height in pixels.
+ *
+ * @todo Understand why the dirtyfix of the bug in border-bottom pdf rendering.
  */
 var _getPageInnerHeight = function(){
 
@@ -321,7 +333,7 @@ var _getPageInnerHeight = function(){
 
   var innerHeight = outerHeight - paddingTop - paddingBottom;
 
-  return innerHeight-1 // -1 because of a bug in border-bottom pdf rendering
+  return Math.ceil(innerHeight-1); // -1 is the dirty fix mentionned in the todo tag
 };
 
 /**
@@ -331,7 +343,48 @@ var _getPageInnerHeight = function(){
  * @return {Number} The resulted height in pixels.
  */
 var _getPageContentHeight = function(){
+  return Number($(currentPage.content()).css('height').split('px').join(''));
+};
 
+/**
+ * Create an empty HTML div element to wrap the futur content to fill a new page.
+ * @param {number} pageRank The page rank to put in the attribute `data-paginator-page-rank`.
+ * @returns {HTMLDivElement} The ready to fill div element.
+ *
+ * @todo Replace inline CSS style rules by adding an inner page CSS class. This CSS class has to be created and versionned carefully.
+ */
+var _createEmptyDivWrapper = function(pageRank){
+  var that = this;
+  return $('<div>').attr({
+    'data-paginator': true,
+    'data-paginator-page-rank': pageRank
+  }).css({
+    'page-break-after': 'always',
+    'height': _getPageInnerHeight.call(that),
+    'background': 'linear-gradient(#FFF0F5,#FFFACD)' // @TODO remove for production
+  });
+};
+
+/**
+ * Create the next page with or without a content to put in, and append it to the paginator available pages.
+ * @method
+ * @private
+ * @param {NodeList} contentNodeList The optional node list to put in the new next page.
+ * @returns {Page} The just created page
+ *
+ * @todo finish to implement the method.
+ */
+var _createNextPage = function(contentNodeList){
+  var newPage;
+  var nextRank = (currentPage) ? (currentPage.rank+1) : 1 ;
+  var divWrapper = _createEmptyDivWrapper.call(this,nextRank);
+  if (contentNodeList) {
+    $(contentNodeList).appendTo(divWrapper);
+  }
+  newPage = new Page(_defaultPage.format().label, _defaultPage.orientation, nextRank, divWrapper);
+  pages.push(newPage);
+
+  return newPage;
 };
 
 /**
