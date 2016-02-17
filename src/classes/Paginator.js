@@ -167,7 +167,7 @@ Paginator.prototype.gotoPage = function(toPage){
  * @private
  * @return {Element} The parent div element having an attribute data-paginator
  */
-Paginator.prototype._getFocusedPageDiv = function(){
+var _getFocusedPageDiv = function(){
   var selectedElement = editor.selection.getRng().startContainer;
   var parents = editor.dom.getParents(selectedElement,'div',editor.getDoc().body);
   var ret;
@@ -186,7 +186,7 @@ Paginator.prototype._getFocusedPageDiv = function(){
  * @return void
  */
 Paginator.prototype.gotoFocusedPage = function(){
-  var focusedDiv = this._getFocusedPageDiv();
+  var focusedDiv = _getFocusedPageDiv.call(this);
   var pageRank = $(focusedDiv).attr('data-paginator-page-rank');
   var focusedPage = this.getPage(pageRank);
   currentPage = focusedPage;
@@ -220,12 +220,12 @@ Paginator.prototype.gotoNext = function(){
  */
 Paginator.prototype.watchPage = function(){
 
-  var maxHeight = Math.ceil(this._getPageInnerHeight());
+  var maxHeight = Math.ceil(_getPageInnerHeight.call(this));
   var currentHeight = Number($(currentPage.content()).css('height').split('px').join(''));
 
   if (currentHeight > maxHeight) {
     alert('Dépassement de page !');
-    this._repage();
+    _repage.call();
   }
 
 };
@@ -239,7 +239,7 @@ Paginator.prototype.watchPage = function(){
  * @private
  * @return {object}
  */
-Paginator.prototype._getDocPadding = function(){
+var _getDocPadding = function(){
   var that = this;
   return {
     top: $(that._body).css('padding-top'),
@@ -255,10 +255,10 @@ Paginator.prototype._getDocPadding = function(){
  * @private
  * @return {Number} The resulted height in pixels
  */
-Paginator.prototype._getPageInnerHeight = function(){
+var _getPageInnerHeight = function(){
 
   var outerHeight = Number(this._display.mm2px(this._defaultPage.height)*10); // @TODO (*10) is a bug fix
-  var docPadding = this._getDocPadding();
+  var docPadding = _getDocPadding.call(this);
   var paddingTop = Number(docPadding.top.split('px').join(''));
   var paddingBottom = Number(docPadding.bottom.split('px').join(''));
 
@@ -286,7 +286,7 @@ Paginator.prototype.init = function(){
     'data-paginator-page-rank': 1
   }).css({
     'page-break-after': 'always',
-    'height': that._getPageInnerHeight(),
+    'height': _getPageInnerHeight.call(that),
     // 'border': 'solid red 1px',
     // 'background': 'yellow',
     'overflow': 'hidden'
