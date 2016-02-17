@@ -19,10 +19,10 @@ var InvalidOrientationLabelError = (function(){
 
 /**
  * @constructor
- * @param {String} formatLabel
- * @param {Sring} orientation
- * @param {Number} rank
- * @param {DOMElement} wrappedPageDiv
+ * @param {String} formatLabel A supported format mabel. For example: `A4`.
+ * @param {Sring} orientation An orientation in `('portrait','landscape')`.
+ * @param {Number} rank The page rank `(1..n)`
+ * @param {HTMLDivElement} wrappedPageDiv The `div[data-paginator]` HTMLDivElement
  */
 function Page(formatLabel, orientation, rank, wrappedPageDiv){
   this._content = null;
