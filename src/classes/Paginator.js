@@ -247,13 +247,13 @@ var _getDocPadding = function(){
     bottom: $(that._body).css('padding-bottom'),
     left: $(that._body).css('padding-left')
   };
-}
+};
 
 /**
- * Compute the page inner height in pixels
+ * Compute the page inner height in pixels. It must maches the height of the `div[data-paginator]` block.
  * @method
  * @private
- * @return {Number} The resulted height in pixels
+ * @return {Number} The resulted height in pixels.
  */
 var _getPageInnerHeight = function(){
 
@@ -268,7 +268,7 @@ var _getPageInnerHeight = function(){
 };
 
 /**
- * Initialize the paginator
+ * Initialize the paginator. The editor and its content has to be loaded before initialize the paginator
  * @method
  * @return void
  */
