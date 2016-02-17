@@ -19,10 +19,10 @@ var InvalidOrientationLabelError = (function(){
 
 /**
  * @constructor
- * @param {String} formatLabel
- * @param {Sring} orientation
- * @param {Number} rank
- * @param {DOMElement} wrappedPageDiv
+ * @param {String} formatLabel A supported format mabel. For example: `A4`.
+ * @param {Sring} orientation An orientation in `('portrait','landscape')`.
+ * @param {Number} rank The page rank `(1..n)`
+ * @param {HTMLDivElement} wrappedPageDiv The `div[data-paginator]` HTMLDivElement
  */
 function Page(formatLabel, orientation, rank, wrappedPageDiv){
   this._content = null;
@@ -52,6 +52,28 @@ Page.prototype.content = function(wrappedPageDiv){
   } else {
     this._content = wrappedPageDiv;
   }
+};
+
+/**
+ * Append the given node list to the page content.
+ * @method
+ * @param {Array}<Node> nodes The nodes to insert.
+ * @returns {Page} `this` page instance.
+ */
+Page.prototype.append = function(nodes){
+  $(nodes).appendTo(this.content());
+  return this;
+};
+
+/**
+ * Prepend the given node list to the page content.
+ * @method
+ * @param {Array}<Node> nodes The nodes to insert.
+ * @returns {Page} `this` page instance.
+ */
+Page.prototype.prepend = function(nodes){
+  $(nodes).prependTo(this.content());
+  return this;
 };
 
 /**

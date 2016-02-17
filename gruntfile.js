@@ -1,3 +1,4 @@
+var shell = require("shelljs");
 
 module.exports = function (grunt) {
     require('load-grunt-tasks')(grunt);
@@ -39,5 +40,8 @@ module.exports = function (grunt) {
       },
     });
 
-    grunt.registerTask('default', ['browserify','jshint','uglify']);
+    grunt.registerTask('jsdoc', function(){
+      shell.exec('npm run jsdoc');
+    });
+    grunt.registerTask('default', ['browserify','jshint','uglify','jsdoc']);
 };
