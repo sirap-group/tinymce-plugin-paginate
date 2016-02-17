@@ -35,7 +35,7 @@ function Display(_document){
 }
 
 /**
- * @property
+ * @property {Element}
  * @private
  */
 var testDPIElement;
@@ -130,10 +130,10 @@ var InvalidOrientationLabelError = (function(){
 
 /**
  * @constructor
- * @param {String} formatLabel
- * @param {Sring} orientation
- * @param {Number} rank
- * @param {DOMElement} wrappedPageDiv
+ * @param {String} formatLabel A supported format mabel. For example: `A4`.
+ * @param {Sring} orientation An orientation in `('portrait','landscape')`.
+ * @param {Number} rank The page rank `(1..n)`
+ * @param {HTMLDivElement} wrappedPageDiv The `div[data-paginator]` HTMLDivElement
  */
 function Page(formatLabel, orientation, rank, wrappedPageDiv){
   this._content = null;
@@ -163,6 +163,28 @@ Page.prototype.content = function(wrappedPageDiv){
   } else {
     this._content = wrappedPageDiv;
   }
+};
+
+/**
+ * Append the given node list to the page content.
+ * @method
+ * @param {Array}<Node> nodes The nodes to insert.
+ * @returns {Page} `this` page instance.
+ */
+Page.prototype.append = function(nodes){
+  $(nodes).appendTo(this.content());
+  return this;
+};
+
+/**
+ * Prepend the given node list to the page content.
+ * @method
+ * @param {Array}<Node> nodes The nodes to insert.
+ * @returns {Page} `this` page instance.
+ */
+Page.prototype.prepend = function(nodes){
+  $(nodes).prependTo(this.content());
+  return this;
 };
 
 /**
@@ -245,20 +267,25 @@ function Paginator(pageFormatLabel, pageOrientation, ed){
   /**
    * The DOMDocument given in the constructor
    * @property {DOMDocument}
+   * @private
    */
   this._document = ed.getDoc();
   /**
    * The Display to manage screen and dimensions
    * @property {Display}
+   * @private
    */
   this._display = new Display(this._document);
   /**
    * The default abstract page from all real pages inherits
+   * @property {Page}
+   * @private
    */
   this._defaultPage = new Page(pageFormatLabel, pageOrientation);
   /**
    * The body element of the full document
    * @property {Element}
+   * @private
    */
   this._body = this._document.getElementsByTagName('body');
 
@@ -280,10 +307,38 @@ var pages = [];
 
 /**
  * Current editor
- * @property
+ * @property {Editor}
  * @private
  */
 var editor;
+
+/**
+ * Initialize the paginator. The editor and its content has to be loaded before initialize the paginator
+ * @method
+ * @return void
+ */
+Paginator.prototype.init = function(){
+  function findPageWrappers(){
+    return $('div[data-paginator-page-rank]',that._body);
+  }
+  var that = this;
+
+  // search the paginator page wrappers
+  var wrappedPages = findPageWrappers();
+  var wrapper = _createEmptyDivWrapper.call(this);
+
+  // wrap unwrapped content
+  if (!wrappedPages.length){
+    $(this._body).wrapInner(wrapper);
+    wrappedPages = findPageWrappers();
+  }
+
+  pages = [];
+  $.each(wrappedPages,function(i,el){
+    pages.push(new Page(that._defaultPage.format().label, that._defaultPage.orientation, i+1, el));
+  });
+
+};
 
 /**
  * Get the current page
@@ -371,24 +426,12 @@ Paginator.prototype.gotoPage = function(toPage){
 };
 
 /**
- * Get the currently focused page div
- * @return {Element} The parent div element having an attribute data-paginator
+ * Go to the page having the focus
+ * @method
+ * @return void
  */
-Paginator.prototype.getFocusedPageDiv = function(){
-  var selectedElement = editor.selection.getRng().startContainer;
-  var parents = editor.dom.getParents(selectedElement,'div',editor.getDoc().body);
-  var ret;
-  $.each(parents,function(i,parent){
-    if ($(parent).attr('data-paginator')) {
-      ret = parent;
-    }
-  });
-  if (!ret) throw new Error('No parent page found ! You are out of a page.');
-  else return ret;
-};
-
 Paginator.prototype.gotoFocusedPage = function(){
-  var focusedDiv = this.getFocusedPageDiv();
+  var focusedDiv = _getFocusedPageDiv.call(this);
   var pageRank = $(focusedDiv).attr('data-paginator-page-rank');
   var focusedPage = this.getPage(pageRank);
   currentPage = focusedPage;
@@ -419,28 +462,83 @@ Paginator.prototype.gotoNext = function(){
  * Watch the current page, to check if content overflows the page's max-height.
  * @method
  * @return void
- * @todo If it overflows, put the content that overflows in the next page, else, check if
+ */
+Paginator.prototype.watchPage = function(){ console.info('wathing page ...');
+
+  var maxHeight = _getPageInnerHeight.call(this);
+  var currentHeight = _getPageContentHeight.call(this);
+
+  console.log('maxHeight',maxHeight,'currentHeight',currentHeight);
+
+  if (currentHeight > maxHeight) {
+    console.info('Dépassement de page !');
+    _repage.call(this);
+  }
+
+};
+
+/**
+ * Get the currently focused page div
+ * @method
+ * @private
+ * @return {Element} The parent div element having an attribute data-paginator
+ */
+var _getFocusedPageDiv = function(){
+  var selectedElement = editor.selection.getRng().startContainer;
+  var parents = editor.dom.getParents(selectedElement,'div',editor.getDoc().body);
+  var ret;
+  $.each(parents,function(i,parent){
+    if ($(parent).attr('data-paginator')) {
+      ret = parent;
+    }
+  });
+  if (!ret) throw new Error('No parent page found ! You are out of a page.');
+  else return ret;
+};
+
+/**
+ * Move the overflowing content from the current page, to the next page.
+ * Must be called when the page's content overflows.
+ * @method
+ * @private
+ * @return void
+ *
+ * @todo If it overflows, put the content that overflows in the next page, then, check if
  * the text on the next page can fill the current one without overflowing.
  */
-Paginator.prototype.watchPage = function(){
+var _repage = function(){ console.info('repaging...');
+  var currentRng = editor.selection.getRng();
+  var children = $(currentPage.content()).children();
+  var lastBlock = children[children.length - 1];
 
-  // console.log('body clientHeight', this._body.clientHeight,'body scrollHeight', this._body.scrollHeight);
+  console.log(lastBlock); //TODO remove for production
 
+  var nextPage = this.getNext() || _createNextPage.call(this);
 
-  // console.log('padding',padding);
+  switch (lastBlock.nodeName) {
+    case 'DIV':
+    case 'P':
+      //TODO cloner le block dans divClone
+      //  - vider divClone
+      //  - déplacer le dernier block du div original dans le nouveau div
+      $(lastBlock).prependTo($(nextPage.content()))
+    break;
 
-  // console.log('default height:', this._defaultPage.height);
-  // console.log('page (Display) height (px): ', this._display.height('px') + ' px');
-  // console.log('page (Display) height (mm): ', this._display.height('mm') + ' mm');
-  // console.log('page content', page.content());
+    default:
+      alert('Une erreur est survenue dans le plugin de pagination. Merci de visionner l\'erreur dans la console et de déclarer cette erreur au support «support@sirap.fr»');
+      throw new Error('Unsupported block type for repaging: '+lastBlock.nodeName);
+
+  }
+
 };
 
 /**
  * Get the current computed padding
  * @method
+ * @private
  * @return {object}
  */
-Paginator.prototype._getDocPadding = function(){
+var _getDocPadding = function(){
   var that = this;
   return {
     top: $(that._body).css('padding-top'),
@@ -448,64 +546,77 @@ Paginator.prototype._getDocPadding = function(){
     bottom: $(that._body).css('padding-bottom'),
     left: $(that._body).css('padding-left')
   };
-}
+};
 
 /**
- * Compute the page inner height in pixels
+ * Compute the page inner height in pixels. It must maches the height of the `div[data-paginator]` block.
  * @method
- * @return {Number} The resulted height in pixels
+ * @private
+ * @return {Number} The resulted height in pixels.
+ *
+ * @todo Understand why the dirtyfix of the bug in border-bottom pdf rendering.
  */
-Paginator.prototype._getPageInnerHeight = function(){
+var _getPageInnerHeight = function(){
 
   var outerHeight = Number(this._display.mm2px(this._defaultPage.height)*10); // @TODO (*10) is a bug fix
-  var docPadding = this._getDocPadding();
+  var docPadding = _getDocPadding.call(this);
   var paddingTop = Number(docPadding.top.split('px').join(''));
   var paddingBottom = Number(docPadding.bottom.split('px').join(''));
 
   var innerHeight = outerHeight - paddingTop - paddingBottom;
 
-  return innerHeight-1 // -1 because of a bug in border-bottom pdf rendering
+  return Math.ceil(innerHeight-1); // -1 is the dirty fix mentionned in the todo tag
 };
 
 /**
- * Initialize the paginator
+ * Compute the real height of the page's content. It must equals the page inner height, except the time where the content overflows it, juste before to be repaged by the `Paginator::_repage()` method that bring back the content height to the page inner one.
  * @method
- * @return void
+ * @private
+ * @return {Number} The resulted height in pixels.
  */
-Paginator.prototype.init = function(){
-  function findPageWrappers(){
-    return $('div[data-paginator-page-rank]',that._body);
-  }
-  var that = this;
+var _getPageContentHeight = function(){
+  return Number($(currentPage.content()).css('height').split('px').join(''));
+};
 
-  // search the paginator page wrappers
-  var wrappedPages = findPageWrappers();
-  var wrapper = $('<div>');
-  wrapper.attr({
+/**
+ * Create an empty HTML div element to wrap the futur content to fill a new page.
+ * @param {number} pageRank The page rank to put in the attribute `data-paginator-page-rank`.
+ * @returns {HTMLDivElement} The ready to fill div element.
+ *
+ * @todo Replace inline CSS style rules by adding an inner page CSS class. This CSS class has to be created and versionned carefully.
+ */
+var _createEmptyDivWrapper = function(pageRank){
+  var that = this;
+  return $('<div>').attr({
     'data-paginator': true,
-    'data-paginator-page-rank': 1
+    'data-paginator-page-rank': pageRank
   }).css({
     'page-break-after': 'always',
-    'height': that._getPageInnerHeight(),
-    // 'border': 'solid red 1px',
-    // 'background': 'yellow',
-    'overflow': 'hidden'
+    'height': _getPageInnerHeight.call(that),
+    'background': 'linear-gradient(#FFF0F5,#FFFACD)' // @TODO remove for production
   });
+};
 
-  // wrap unwrapped content
-  if (!wrappedPages.length){
-    $(this._body).wrapInner(wrapper);
-    wrappedPages = findPageWrappers();
+/**
+ * Create the next page with or without a content to put in, and append it to the paginator available pages.
+ * @method
+ * @private
+ * @param {NodeList} contentNodeList The optional node list to put in the new next page.
+ * @returns {Page} The just created page
+ *
+ * @todo finish to implement the method.
+ */
+var _createNextPage = function(contentNodeList){
+  var newPage;
+  var nextRank = (currentPage) ? (currentPage.rank+1) : 1 ;
+  var divWrapper = _createEmptyDivWrapper.call(this,nextRank);
+  if (contentNodeList) {
+    $(contentNodeList).appendTo(divWrapper);
   }
+  newPage = new Page(_defaultPage.format().label, _defaultPage.orientation, nextRank, divWrapper);
+  pages.push(newPage);
 
-  pages = [];
-  $.each(wrappedPages,function(i,el){
-    pages.push(new Page(that._defaultPage.format().label, that._defaultPage.orientation, i+1, el));
-  });
-
-
-  console.log(pages);
-
+  return newPage;
 };
 
 /**
@@ -589,6 +700,10 @@ tinymce.PluginManager.add('paginate', function(editor) {
         console.error(e);
         console.error(e.stack);
       }
+    });
+
+    editor.on('change',function(evt){
+      paginator.watchPage();
     });
 
   });

@@ -278,7 +278,7 @@ var _repage = function(){ console.info('repaging...');
   console.log(lastBlock); //TODO remove for production
 
   var nextPage = this.getNext() || _createNextPage.call(this);
-  
+
   switch (lastBlock.nodeName) {
     case 'DIV':
     case 'P':
@@ -291,10 +291,6 @@ var _repage = function(){ console.info('repaging...');
     default:
       alert('Une erreur est survenue dans le plugin de pagination. Merci de visionner l\'erreur dans la console et de déclarer cette erreur au support «support@sirap.fr»');
       throw new Error('Unsupported block type for repaging: '+lastBlock.nodeName);
-
-  }
-
-
 
   }
 
