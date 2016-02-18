@@ -174,18 +174,63 @@ Paginator.prototype.getNext = function(){
  * @return void
  */
 Paginator.prototype.gotoPage = function(toPage){
-
-  // Show the destination page
-  $(toPage._content).css({ 'display': 'block' });
-
-  // Hide all other pages
-  $.each(pages,function(i, loopPage){
-    if (toPage.rank !== loopPage.rank) {
-      $(loopPage._content).css({ 'display': 'none' });
+  /**
+   * Set cursor location to the bottom of the destination page
+   * @function
+   * @inner
+   * @return void
+   */
+  function focusToBottom(){
+    /**
+     * Get all text nodes from a given node
+     * @function
+     * @inner
+     * @param {Node} node The parent, given node
+     * @param {number} nodeType The number matching the searched node type
+     * @param {array} result The result passed for recursive iteration
+     */
+    function getTextNodes(node, nodeType, result){
+      var children = node.childNodes;
+      nodeType = nodeType ? nodeType : 3;
+      result = !result ? [] : result;
+      if (node.nodeType === nodeType) {
+          result.push(node);
+      }
+      for (var i=0; i<children.length; i++) {
+          result = getTextNodes(children[i], nodeType, result);
+      }
+      return result;
     }
-  });
+    // get all Textnodes from lastchild, calc length
+    var content = toPage.content();
+    var lastChild = content.lastChild;
+    var textNodes = getTextNodes((lastChild) ? lastChild : content) ;
+    var lastNodeIndex = textNodes.length-1;
+    var locationOffset = textNodes[lastNodeIndex].textContent.length;
+    // set Cursor to last position
+    editor.selection.setCursorLocation(textNodes[lastNodeIndex], locationOffset);
+  }
 
-  currentPage = toPage;
+  if (!toPage) throw new Error('Cant navigate to undefined page');
+
+  if (toPage !== currentPage) {
+
+    // Show the destination page
+    $(toPage.content()).css({ 'display': 'block' });
+
+    // Hide all other pages
+    $.each(pages,function(i, loopPage){
+      if (toPage.rank !== loopPage.rank) {
+        $(loopPage.content()).css({ 'display': 'none' });
+      }
+    });
+
+    // Move cursor to the end of the destination page
+    focusToBottom();
+
+    // set the page as current page
+    currentPage = toPage;
+  }
 
 };
 
