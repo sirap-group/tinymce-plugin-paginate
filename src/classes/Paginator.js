@@ -240,9 +240,11 @@ Paginator.prototype.gotoPage = function(toPage){
     editor.selection.setCursorLocation(lastNode, locationOffset);
   }
 
+  var fromPage = currentPage;
+
   if (!toPage) throw new Error('Cant navigate to undefined page');
 
-  if (toPage !== currentPage) {
+  if (toPage !== fromPage) {
 
     // Show the destination page
     $(toPage.content()).css({ 'display': 'block' });
@@ -259,6 +261,12 @@ Paginator.prototype.gotoPage = function(toPage){
 
     // set the page as current page
     currentPage = toPage;
+
+    editor.dom.fire(editor.getDoc(),'PageChange',{
+      fromPage: fromPage,
+      toPage: toPage
+    });
+
   }
 
 };
