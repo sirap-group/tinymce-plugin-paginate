@@ -118,16 +118,29 @@ Paginator.prototype.getCurrentPage = function(){
  * @method
  * @param {Number} rank The requested page rank
  * @return {Page} The requested page
+ * @throws {Error}
+ * @throws {InvalidPageRankError}
  */
 Paginator.prototype.getPage = function(rank){
+  try{
+    rank = Number(rank);
+  } catch(err){
+    throw new InvalidPageRankError(rank);
+  }
   if (!pages.length)
     throw new Error('Paginator pages length in null. Can\'t iterate on it.');
 
+  var ret;
   var isLower = rank-1 < 0;
   var isGreater = rank-1 > pages.length;
 
   if (isLower || isGreater) throw new InvalidPageRankError(rank);
-  else return pages[rank-1];
+  else {
+    $.each(pages,function(i,page){
+      if (page.rank === rank) ret = page;
+    });
+    return ret;
+  }
 };
 
 /**
