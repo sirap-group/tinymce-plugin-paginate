@@ -159,10 +159,8 @@ Paginator.prototype.getPages = function(){
  */
 Paginator.prototype.getPrevious = function(){
   try {
-    console.log('this.getCurrentPage()',currentPage);
     return this.getPage(this.getCurrentPage().rank-1);
   } catch(err) {
-    console.error(err.stck);
     return null;
   }
 };
