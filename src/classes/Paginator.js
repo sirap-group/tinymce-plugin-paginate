@@ -340,18 +340,17 @@ var _repage = function(){ console.info('repaging...');
   var currentRng = editor.selection.getRng();
   var children = $(currentPage.content()).children();
   var lastBlock = children[children.length - 1];
-
-  console.log(lastBlock); //TODO remove for production
-
   var nextPage = this.getNext() || _createNextPage.call(this);
 
   switch (lastBlock.nodeName) {
     case 'DIV':
     case 'P':
-      //TODO cloner le block dans divClone
-      //  - vider divClone
-      //  - déplacer le dernier block du div original dans le nouveau div
-      $(lastBlock).prependTo($(nextPage.content()))
+      // Prepend element to page
+      $(lastBlock).prependTo($(nextPage.content()));
+      // Append page to document
+      $(nextPage.content()).appendTo(this._body);
+      // Goto nextPage
+      this.gotoNext();
     break;
 
     default:
