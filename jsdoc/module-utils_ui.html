@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
-	<title>tinymce-plugin-paginate Module: classes/Paginator</title>
+	<title>tinymce-plugin-paginate Module: utils/ui</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -77,7 +77,7 @@
 		<div id="main">
 			
 
-	<h1 class="page-title">Module: classes/Paginator</h1>
+	<h1 class="page-title">Module: utils/ui</h1>
 <section>
 
 <header>
@@ -89,7 +89,7 @@
     <div class="container-overview">
     
         
-            <div class="description">Paginator class module</div>
+            <div class="description">ui module provide ui functions</div>
         
 
         
@@ -127,8 +127,8 @@
 	<dd class="tag-source">
 		<ul class="dummy">
 			<li>
-				<a href="classes_Paginator.js.html">classes/Paginator.js</a>,
-				 <a href="classes_Paginator.js.html#sunlight-1-line-1">line 1</a>
+				<a href="utils_ui.js.html">utils/ui.js</a>,
+				 <a href="utils_ui.js.html#sunlight-1-line-1">line 1</a>
 			</li>
 		</ul>
 	</dd>
@@ -151,13 +151,6 @@
     
 
     
-        <h3 class="subsection-title">Classes</h3>
-
-        <dl>
-            <dt><a href="module-classes_Paginator-Paginator.html">Paginator</a></dt>
-            <dd></dd>
-        </dl>
-    
 
     
 
@@ -172,7 +165,7 @@
             
 <hr>
 <dt>
-    <h4 class="name" id="~_createEmptyDivWrapper"><span class="type-signature">&lt;inner> </span>_createEmptyDivWrapper(pageRank)</h4>
+    <h4 class="name" id=".appendNavigationButtons"><span class="type-signature">&lt;static> </span>appendNavigationButtons(paginator)</h4>
     
     
 </dt>
@@ -180,7 +173,7 @@
 
     
     <div class="description">
-        Create an empty HTML div element to wrap the futur content to fill a new page.
+        Append "previous page" and "next page" navigation buttons
     </div>
     
 
@@ -215,13 +208,13 @@
 
         <tr>
             
-                <td class="name"><code>pageRank</code></td>
+                <td class="name"><code>paginator</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">number</span>
+<span class="param-type"><a href="global.html#Paginator">Paginator</a></span>
 
 
 
@@ -232,7 +225,7 @@
 
             
 
-            <td class="description last">The page rank to put in the attribute `data-paginator-page-rank`.</td>
+            <td class="description last">The instancied paginator binded to the matched editor.</td>
         </tr>
 
     
@@ -276,8 +269,8 @@
 	<dd class="tag-source">
 		<ul class="dummy">
 			<li>
-				<a href="classes_Paginator.js.html">classes/Paginator.js</a>,
-				 <a href="classes_Paginator.js.html#sunlight-1-line-417">line 417</a>
+				<a href="utils_ui.js.html">utils/ui.js</a>,
+				 <a href="utils_ui.js.html#sunlight-1-line-8">line 8</a>
 			</li>
 		</ul>
 	</dd>
@@ -287,13 +280,6 @@
 
 	
 
-	
-	<dt class="tag-todo method-doc-label method-doc-details-label">To Do:</dt>
-	<dd class="tag-todo">
-		<ul>
-			<li>Replace inline CSS style rules by adding an inner page CSS class. This CSS class has to be created and versionned carefully.</li>
-			</ul>
-	</dd>
 	
 </dl>
 
@@ -313,23 +299,10 @@
     
             
 <div class="param-desc">
-    The ready to fill div element.
+    void
 </div>
 
 
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">HTMLDivElement</span>
-
-
-
-    </dd>
-</dl>
 
 
         

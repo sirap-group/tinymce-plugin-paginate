@@ -410,18 +410,81 @@ Paginator.prototype.getNext = function(){
  * @return void
  */
 Paginator.prototype.gotoPage = function(toPage){
-
-  // Show the destination page
-  $(toPage._content).css({ 'display': 'block' });
-
-  // Hide all other pages
-  $.each(pages,function(i, loopPage){
-    if (toPage.rank !== loopPage.rank) {
-      $(loopPage._content).css({ 'display': 'none' });
+  /**
+   * Set cursor location to the bottom of the destination page
+   * @function
+   * @inner
+   * @return void
+   */
+  function focusToBottom(){
+    /**
+     * Get all text nodes from a given node
+     * @function
+     * @inner
+     * @param {Node} node The parent, given node
+     * @param {number} nodeType The number matching the searched node type
+     * @param {array} result The result passed for recursive iteration
+     */
+    function getTextNodes(node, nodeType, result){
+      var children = node.childNodes;
+      nodeType = nodeType ? nodeType : 3;
+      result = !result ? [] : result;
+      if (node.nodeType === nodeType) {
+          result.push(node);
+      }
+      if (children) {
+        for (var i=0; i<children.length; i++) {
+          result = getTextNodes(children[i], nodeType, result);
+        }
+      }
+      return result;
     }
-  });
+    // get all Textnodes from lastchild, calc length
+    var content, lastChild, textNodes, lastNode, locationOffset, cursorLocation;
+    content = toPage.content();
+    if (content.length) {
+      lastChild = content[0].lastChild;
+    } else {
+      lastChild = content.lastChild;
+    }
+    if (lastChild) {
+      textNodes = getTextNodes(lastChild) ;
 
-  currentPage = toPage;
+      if (textNodes.length) {
+        lastNode = textNodes[textNodes.length-1];
+        locationOffset = lastNode.textContent.length;
+      } else {
+        lastNode = lastChild;
+        locationOffset = 0;
+      }
+    } else {
+      lastNode = content;
+      locationOffset = 0;
+    }
+    // set Cursor to last position
+    editor.selection.setCursorLocation(lastNode, locationOffset);
+  }
+
+  if (!toPage) throw new Error('Cant navigate to undefined page');
+
+  if (toPage !== currentPage) {
+
+    // Show the destination page
+    $(toPage.content()).css({ 'display': 'block' });
+
+    // Hide all other pages
+    $.each(pages,function(i, loopPage){
+      if (toPage.rank !== loopPage.rank) {
+        $(loopPage.content()).css({ 'display': 'none' });
+      }
+    });
+
+    // Move cursor to the end of the destination page
+    focusToBottom();
+
+    // set the page as current page
+    currentPage = toPage;
+  }
 
 };
 
@@ -441,21 +504,23 @@ Paginator.prototype.gotoFocusedPage = function(){
 /**
  * Navigate to the previous page
  * @method
- * @return {Page} The previous page after navigation is done
+ * @return {Page|null} The previous page after navigation is done, null if previous page doesn'nt exist.
  */
 Paginator.prototype.gotoPrevious = function(){
-  console.info('goto previous page');
-  return this.gotoPage(this.getPrevious());
+  var prevPage = this.getPrevious();
+  if (prevPage) return this.gotoPage(prevPage);
+  else return null;
 };
 
 /**
  * Navigate to the next page
  * @method
- * @return {Page} The next page after navigation is done
+ * @return {Page|null} The next page after navigation is done, null if next page doesn'nt exist.
  */
 Paginator.prototype.gotoNext = function(){
-  console.info('goto next page');
-  return this.gotoPage(this.getNext());
+  var nextPage = this.getNext();
+  if (nextPage) return this.gotoPage(nextPage);
+  else return null;
 };
 
 /**
@@ -463,18 +528,12 @@ Paginator.prototype.gotoNext = function(){
  * @method
  * @return void
  */
-Paginator.prototype.watchPage = function(){ console.info('wathing page ...');
-
+Paginator.prototype.watchPage = function(){
   var maxHeight = _getPageInnerHeight.call(this);
   var currentHeight = _getPageContentHeight.call(this);
-
-  console.log('maxHeight',maxHeight,'currentHeight',currentHeight);
-
   if (currentHeight > maxHeight) {
-    console.info('Dépassement de page !');
     _repage.call(this);
   }
-
 };
 
 /**
@@ -484,16 +543,23 @@ Paginator.prototype.watchPage = function(){ console.info('wathing page ...');
  * @return {Element} The parent div element having an attribute data-paginator
  */
 var _getFocusedPageDiv = function(){
-  var selectedElement = editor.selection.getRng().startContainer;
-  var parents = editor.dom.getParents(selectedElement,'div',editor.getDoc().body);
-  var ret;
+  var ret, selectedElement, parents;
+  var currentRng = editor.selection.getRng();
+
+  selectedElement = currentRng.startContainer;
+  parents = editor.dom.getParents(selectedElement,'div',editor.getDoc().body);
   $.each(parents,function(i,parent){
     if ($(parent).attr('data-paginator')) {
       ret = parent;
     }
   });
-  if (!ret) throw new Error('No parent page found ! You are out of a page.');
-  else return ret;
+
+  if (!ret) {
+    console.error('No parent page found ! You are out of a page.');
+    return null;
+  } else {
+    return ret;
+  }
 };
 
 /**
@@ -510,18 +576,17 @@ var _repage = function(){ console.info('repaging...');
   var currentRng = editor.selection.getRng();
   var children = $(currentPage.content()).children();
   var lastBlock = children[children.length - 1];
-
-  console.log(lastBlock); //TODO remove for production
-
   var nextPage = this.getNext() || _createNextPage.call(this);
 
   switch (lastBlock.nodeName) {
     case 'DIV':
     case 'P':
-      //TODO cloner le block dans divClone
-      //  - vider divClone
-      //  - déplacer le dernier block du div original dans le nouveau div
-      $(lastBlock).prependTo($(nextPage.content()))
+      // Prepend element to page
+      $(lastBlock).prependTo($(nextPage.content()));
+      // Append page to document
+      $(nextPage.content()).appendTo(this._body);
+      // Goto nextPage
+      this.gotoNext();
     break;
 
     default:
@@ -592,7 +657,7 @@ var _createEmptyDivWrapper = function(pageRank){
     'data-paginator-page-rank': pageRank
   }).css({
     'page-break-after': 'always',
-    'height': _getPageInnerHeight.call(that),
+    'min-height': _getPageInnerHeight.call(that),
     'background': 'linear-gradient(#FFF0F5,#FFFACD)' // @TODO remove for production
   });
 };
@@ -613,9 +678,8 @@ var _createNextPage = function(contentNodeList){
   if (contentNodeList) {
     $(contentNodeList).appendTo(divWrapper);
   }
-  newPage = new Page(_defaultPage.format().label, _defaultPage.orientation, nextRank, divWrapper);
+  newPage = new Page(this._defaultPage.format().label, this._defaultPage.orientation, nextRank, divWrapper[0]);
   pages.push(newPage);
-
   return newPage;
 };
 
@@ -667,58 +731,124 @@ var ui = require('./utils/ui');
 
 tinymce.PluginManager.add('paginate', function(editor) {
 
-  function initPaginator(){
-    if (!paginator) {
-      paginator = new Paginator('A4','portrait', editor);
-      // Create and display pages navigation buttons
-      ui.appendNavigationButtons(paginator);
-    }
-    paginator.init();
-  }
+  /**
+   * Debug all useful editor events to see the order of their happen
+   * @function
+   * @private
+   */
+  function _debugEditorEvents(){
+    var myevents = [];
+    var mycount = {
+      init: 0,
+      change: 0,
+      nodechange: 0,
+      setcontent: 0
+    };
 
-  var display;
-  var paginator;
-
-
-  editor.once('change',function(evt){
-    // Instantiate the paginator
-    initPaginator();
-  });
-  editor.on('init',function(evt){
-    // Instantiate the paginator
-    initPaginator();
-
+    editor.on('init',function(evt){
+      console.log(editor);
+      myevents.push({'init':evt});
+      mycount.init ++;
+      console.log(myevents,mycount);
+    });
+    editor.on('change',function(evt){
+      myevents.push({'change':evt});
+      mycount.change ++;
+      console.log(myevents,mycount);
+    });
+    editor.on('NodeChange',function(evt){
+      myevents.push({'NodeChange':evt});
+      mycount.nodechange ++;
+      console.log(myevents,mycount);
+    });
     editor.on('SetContent',function(evt){
-      initPaginator();
+      myevents.push({'SetContent':evt});
+      mycount.setcontent ++;
+      console.log(myevents,mycount);
     });
 
-    editor.on('NodeChange',function(evt){
+    window.logEvents = myevents;
+    window.logCount = mycount;
+  }
+
+  /**
+  * A 'Paginator' object to handle all paginating behaviors.
+  * @var {Paginator} paginator
+  * @global
+  */
+  var paginator;
+
+  /**
+   * A 'Display' object to handle graphics behaviors for the paginator needs.
+   * @var {Display} display
+   * @private
+   */
+  var display;
+
+  /**
+   * Is set to true when paginator is initialized.
+   * @var {Boolean} paginatorStartListening
+   * @private
+   */
+  var paginatorStartListening = false;
+
+  editor.once('init',function(){
+    paginator = new Paginator('A4','portrait', editor);
+    !paginatorStartListening && paginator.init();
+    paginatorStartListening = true;
+    ui.appendNavigationButtons(paginator);
+  });
+  editor.once('change',function(){
+    paginatorStartListening = !!paginator;
+    paginatorStartListening && paginator.init();
+  });
+  editor.on('change',function(){
+    paginatorStartListening && paginator.watchPage();
+  });
+  editor.on('SetContent',function(){
+    // paginatorStartListening && paginator.init();
+  });
+  editor.on('NodeChange',function(){
+    if (paginatorStartListening) {
       try {
         paginator.gotoFocusedPage();
       } catch (e) {
-        console.info('cant go to focused page now');
-        console.error(e);
+        console.info('Can\'t go to focused page now.');
         console.error(e.stack);
       }
-    });
-
-    editor.on('change',function(evt){
-      paginator.watchPage();
-    });
-
+    }
   });
 
 });
 
 },{"./classes/Paginator":4,"./utils/ui":9}],8:[function(require,module,exports){
+/**
+ * page-formats module
+ * @module utils/page-formats
+ */
+
 'use strict';
 
+/**
+ * Define a page format
+ * @constructor
+ * @param {string} label The format's label
+ * @param {number} long The format's long dimension in milimeters
+ * @param {number} short The format's short dimension in milimeters
+ */
 function Format(label,long,short){
   this.label = label;
   this.long = long;
   this.short = short;
 }
 
+/**
+ * Register the only formats supported now by the application
+ * @var supportedFormats
+ * @global
+ *
+ * @todo this should be a plugin parameter defined in the setup function of the editor
+ */
 var supportedFormats = {
   'A4': {
     long: '297',
@@ -726,16 +856,27 @@ var supportedFormats = {
   }
 };
 
+/**
+ * @exports each supported format as instances of Format
+ */
 $.each(supportedFormats,function(label,format){
   exports[label] = new Format(label, format.long, format.short);
 });
 
 },{}],9:[function(require,module,exports){
+/**
+ * ui module provide ui functions
+ * @module utils/ui
+ */
+
 'use strict';
 
 /**
+ * Append "previous page" and "next page" navigation buttons
  * @function appendNavigationButtons
- * @return void
+ * @static
+ * @param {Paginator} paginator The instancied paginator binded to the matched editor.
+ * @returns void
  */
 exports.appendNavigationButtons = function(paginator){
   var body = $('body');

@@ -33,21 +33,21 @@
 			<li class="dropdown">
 				<a href="modules.list.html" class="dropdown-toggle" data-toggle="dropdown">Modules<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="module-classes_Paginator.html">classes/Paginator</a></li>
+					<li><a href="module-classes_Paginator.html">classes/Paginator</a></li><li><a href="module-utils_page-formats.html">utils/page-formats</a></li><li><a href="module-utils_ui.html">utils/ui</a></li>
 				</ul>
 			</li>
 			
 			<li class="dropdown">
 				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="Display.html">Display</a></li><li><a href="InvalidOrientationLabelError%2520Must%2520be%2520thrown%2520when%2520trying%2520to%2520orientate%2520a%2520page%2520with%2520an%2520invalid%2520orientation%2520label.html">InvalidOrientationLabelError Must be thrown when trying to orientate a page with an invalid orientation label</a></li><li><a href="module-classes_Paginator-Paginator.html">classes/Paginator~Paginator</a></li><li><a href="Page.html">Page</a></li>
+					<li><a href="Display.html">Display</a></li><li><a href="InvalidOrientationLabelError%2520Must%2520be%2520thrown%2520when%2520trying%2520to%2520orientate%2520a%2520page%2520with%2520an%2520invalid%2520orientation%2520label.html">InvalidOrientationLabelError Must be thrown when trying to orientate a page with an invalid orientation label</a></li><li><a href="module-classes_Paginator-Paginator.html">classes/Paginator~Paginator</a></li><li><a href="module-utils_page-formats-Format.html">utils/page-formats~Format</a></li><li><a href="Page.html">Page</a></li>
 				</ul>
 			</li>
 			
 			<li class="dropdown">
 				<a href="global.html" class="dropdown-toggle" data-toggle="dropdown">Global<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="global.html#appendNavigationButtons">appendNavigationButtons</a></li><li><a href="global.html#createTestDPIElement">createTestDPIElement</a></li><li><a href="global.html#getter-setterforthepageformat">getter-setter for the page format</a></li><li><a href="global.html#Paginator">Paginator</a></li>
+					<li><a href="global.html#createTestDPIElement">createTestDPIElement</a></li><li><a href="global.html#getter-setterforthepageformat">getter-setter for the page format</a></li><li><a href="global.html#Paginator">Paginator</a></li><li><a href="global.html#paginator">paginator</a></li><li><a href="global.html#supportedFormats">supportedFormats</a></li>
 				</ul>
 			</li>
 			
@@ -101,45 +101,92 @@ var ui = require('./utils/ui');
 
 tinymce.PluginManager.add('paginate', function(editor) {
 
-  function initPaginator(){
-    if (!paginator) {
-      paginator = new Paginator('A4','portrait', editor);
-      // Create and display pages navigation buttons
-      ui.appendNavigationButtons(paginator);
-    }
-    paginator.init();
-  }
+  /**
+   * Debug all useful editor events to see the order of their happen
+   * @function
+   * @private
+   */
+  function _debugEditorEvents(){
+    var myevents = [];
+    var mycount = {
+      init: 0,
+      change: 0,
+      nodechange: 0,
+      setcontent: 0
+    };
 
-  var display;
-  var paginator;
-
-
-  editor.once('change',function(evt){
-    // Instantiate the paginator
-    initPaginator();
-  });
-  editor.on('init',function(evt){
-    // Instantiate the paginator
-    initPaginator();
-
+    editor.on('init',function(evt){
+      console.log(editor);
+      myevents.push({'init':evt});
+      mycount.init ++;
+      console.log(myevents,mycount);
+    });
+    editor.on('change',function(evt){
+      myevents.push({'change':evt});
+      mycount.change ++;
+      console.log(myevents,mycount);
+    });
+    editor.on('NodeChange',function(evt){
+      myevents.push({'NodeChange':evt});
+      mycount.nodechange ++;
+      console.log(myevents,mycount);
+    });
     editor.on('SetContent',function(evt){
-      initPaginator();
+      myevents.push({'SetContent':evt});
+      mycount.setcontent ++;
+      console.log(myevents,mycount);
     });
 
-    editor.on('NodeChange',function(evt){
+    window.logEvents = myevents;
+    window.logCount = mycount;
+  }
+
+  /**
+  * A 'Paginator' object to handle all paginating behaviors.
+  * @var {Paginator} paginator
+  * @global
+  */
+  var paginator;
+
+  /**
+   * A 'Display' object to handle graphics behaviors for the paginator needs.
+   * @var {Display} display
+   * @private
+   */
+  var display;
+
+  /**
+   * Is set to true when paginator is initialized.
+   * @var {Boolean} paginatorStartListening
+   * @private
+   */
+  var paginatorStartListening = false;
+
+  editor.once('init',function(){
+    paginator = new Paginator('A4','portrait', editor);
+    !paginatorStartListening &amp;&amp; paginator.init();
+    paginatorStartListening = true;
+    ui.appendNavigationButtons(paginator);
+  });
+  editor.once('change',function(){
+    paginatorStartListening = !!paginator;
+    paginatorStartListening &amp;&amp; paginator.init();
+  });
+  editor.on('change',function(){
+    paginatorStartListening &amp;&amp; paginator.watchPage();
+  });
+  editor.on('SetContent',function(){
+    // paginatorStartListening &amp;&amp; paginator.init();
+  });
+  editor.on('NodeChange',function(){
+    if (paginatorStartListening) {
       try {
         paginator.gotoFocusedPage();
       } catch (e) {
-        console.info('cant go to focused page now');
-        console.error(e);
+        console.info('Can\'t go to focused page now.');
         console.error(e.stack);
       }
-    });
-
-    editor.on('change',function(evt){
-      paginator.watchPage();
-    });
-
+    }
   });
 
 });
@@ -188,7 +235,7 @@ tinymce.PluginManager.add('paginate', function(editor) {
 <span class="jsdoc-message">
 	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a>
 	
-		on 17/02/2016
+		on 18/02/2016
 	
 	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
 </span>

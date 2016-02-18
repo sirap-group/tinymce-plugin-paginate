@@ -33,21 +33,21 @@
 			<li class="dropdown">
 				<a href="modules.list.html" class="dropdown-toggle" data-toggle="dropdown">Modules<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="module-classes_Paginator.html">classes/Paginator</a></li>
+					<li><a href="module-classes_Paginator.html">classes/Paginator</a></li><li><a href="module-utils_page-formats.html">utils/page-formats</a></li><li><a href="module-utils_ui.html">utils/ui</a></li>
 				</ul>
 			</li>
 			
 			<li class="dropdown">
 				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="Display.html">Display</a></li><li><a href="InvalidOrientationLabelError%2520Must%2520be%2520thrown%2520when%2520trying%2520to%2520orientate%2520a%2520page%2520with%2520an%2520invalid%2520orientation%2520label.html">InvalidOrientationLabelError Must be thrown when trying to orientate a page with an invalid orientation label</a></li><li><a href="module-classes_Paginator-Paginator.html">classes/Paginator~Paginator</a></li><li><a href="Page.html">Page</a></li>
+					<li><a href="Display.html">Display</a></li><li><a href="InvalidOrientationLabelError%2520Must%2520be%2520thrown%2520when%2520trying%2520to%2520orientate%2520a%2520page%2520with%2520an%2520invalid%2520orientation%2520label.html">InvalidOrientationLabelError Must be thrown when trying to orientate a page with an invalid orientation label</a></li><li><a href="module-classes_Paginator-Paginator.html">classes/Paginator~Paginator</a></li><li><a href="module-utils_page-formats-Format.html">utils/page-formats~Format</a></li><li><a href="Page.html">Page</a></li>
 				</ul>
 			</li>
 			
 			<li class="dropdown">
 				<a href="global.html" class="dropdown-toggle" data-toggle="dropdown">Global<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="global.html#appendNavigationButtons">appendNavigationButtons</a></li><li><a href="global.html#createTestDPIElement">createTestDPIElement</a></li><li><a href="global.html#getter-setterforthepageformat">getter-setter for the page format</a></li><li><a href="global.html#Paginator">Paginator</a></li>
+					<li><a href="global.html#createTestDPIElement">createTestDPIElement</a></li><li><a href="global.html#getter-setterforthepageformat">getter-setter for the page format</a></li><li><a href="global.html#Paginator">Paginator</a></li><li><a href="global.html#paginator">paginator</a></li><li><a href="global.html#supportedFormats">supportedFormats</a></li>
 				</ul>
 			</li>
 			
@@ -205,7 +205,7 @@
 		<ul class="dummy">
 			<li>
 				<a href="classes_Paginator.js.html">classes/Paginator.js</a>,
-				 <a href="classes_Paginator.js.html#sunlight-1-line-389">line 389</a>
+				 <a href="classes_Paginator.js.html#sunlight-1-line-453">line 453</a>
 			</li>
 		</ul>
 	</dd>
@@ -298,29 +298,32 @@ Contributing: http://www.tinymce.com/contributing
     
 </dd>
 
-        </dl>
-    
-
-    
-        <h3 class="subsection-title">Methods</h3>
-
-        <dl>
+        
             
 <hr>
-<dt>
-    <h4 class="name" id="appendNavigationButtons"><span class="type-signature"></span>appendNavigationButtons()</h4>
-    
+<dt class="name" id="paginator">
+    <h4><span class="type-signature"></span>paginator<span class="type-signature"> :<a href="global.html#Paginator">Paginator</a></span></h4>
+
     
 </dt>
 <dd>
-
+    
+    <div class="description">
+        A 'Paginator' object to handle all paginating behaviors.
+    </div>
     
 
     
+        <h5>Type:</h5>
+        <ul>
+            <li>
+                
+<span class="param-type"><a href="global.html#Paginator">Paginator</a></span>
 
-    
 
-    
+
+            </li>
+        </ul>
     
 
     
@@ -358,8 +361,8 @@ Contributing: http://www.tinymce.com/contributing
 	<dd class="tag-source">
 		<ul class="dummy">
 			<li>
-				<a href="utils_ui.js.html">utils/ui.js</a>,
-				 <a href="utils_ui.js.html#sunlight-1-line-3">line 3</a>
+				<a href="main.js.html">main.js</a>,
+				 <a href="main.js.html#sunlight-1-line-60">line 60</a>
 			</li>
 		</ul>
 	</dd>
@@ -374,32 +377,92 @@ Contributing: http://www.tinymce.com/contributing
 
 
     
-
-    
-
-    
-
-    
-
-    
-
-    
-    <h5>Returns:</h5>
-    
-            
-<div class="param-desc">
-    void
-</div>
-
-
-
+</dd>
 
         
+            
+<hr>
+<dt class="name" id="supportedFormats">
+    <h4><span class="type-signature"></span>supportedFormats<span class="type-signature"></span></h4>
+
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        Register the only formats supported now by the application
+    </div>
+    
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
+	<dd class="tag-source">
+		<ul class="dummy">
+			<li>
+				<a href="utils_page-formats.js.html">utils/page-formats.js</a>,
+				 <a href="utils_page-formats.js.html#sunlight-1-line-21">line 21</a>
+			</li>
+		</ul>
+	</dd>
+	
+
+	
+
+	
+
+	
+	<dt class="tag-todo method-doc-label method-doc-details-label">To Do:</dt>
+	<dd class="tag-todo">
+		<ul>
+			<li>this should be a plugin parameter defined in the setup function of the editor</li>
+			</ul>
+	</dd>
+	
+</dl>
+
 
     
 </dd>
 
-        
+        </dl>
+    
+
+    
+        <h3 class="subsection-title">Methods</h3>
+
+        <dl>
             
 <hr>
 <dt>
@@ -703,7 +766,7 @@ Contributing: http://www.tinymce.com/contributing
 <span class="jsdoc-message">
 	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a>
 	
-		on 17/02/2016
+		on 18/02/2016
 	
 	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
 </span>
