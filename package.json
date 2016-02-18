@@ -1,6 +1,6 @@
 {
   "name": "tinymce-plugin-paginate",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "A tinymce plugin that provides pagination",
   "main": "plugin.js",
   "devDependencies": {
@@ -9,11 +9,14 @@
     "grunt-bump": "^0.6.0",
     "grunt-contrib-jshint": "^0.11.3",
     "grunt-contrib-uglify": "^0.10.0",
-    "load-grunt-tasks": "^3.3.0"
+    "ink-docstrap": "^1.1.2",
+    "load-grunt-tasks": "^3.3.0",
+    "shelljs": "^0.6.0"
   },
   "scripts": {
     "build": "grunt",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "jsdoc": "jsdoc -d jsdoc -c jsdoc.json -t ./node_modules/ink-docstrap/template  src/*"
   },
   "repository": {
     "type": "git",
