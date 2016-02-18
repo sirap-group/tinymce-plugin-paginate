@@ -295,16 +295,23 @@ Paginator.prototype.watchPage = function(){ console.info('wathing page ...');
  * @return {Element} The parent div element having an attribute data-paginator
  */
 var _getFocusedPageDiv = function(){
-  var selectedElement = editor.selection.getRng().startContainer;
-  var parents = editor.dom.getParents(selectedElement,'div',editor.getDoc().body);
-  var ret;
+  var ret, selectedElement, parents;
+  var currentRng = editor.selection.getRng();
+
+  selectedElement = currentRng.startContainer;
+  parents = editor.dom.getParents(selectedElement,'div',editor.getDoc().body);
   $.each(parents,function(i,parent){
     if ($(parent).attr('data-paginator')) {
       ret = parent;
     }
   });
-  if (!ret) throw new Error('No parent page found ! You are out of a page.');
-  else return ret;
+
+  if (!ret) {
+    console.error('No parent page found ! You are out of a page.');
+    return null;
+  } else {
+    return ret;
+  }
 };
 
 /**
