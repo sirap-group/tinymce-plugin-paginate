@@ -421,7 +421,7 @@ var _createEmptyDivWrapper = function(pageRank){
     'data-paginator-page-rank': pageRank
   }).css({
     'page-break-after': 'always',
-    'height': _getPageInnerHeight.call(that),
+    'min-height': _getPageInnerHeight.call(that),
     'background': 'linear-gradient(#FFF0F5,#FFFACD)' // @TODO remove for production
   });
 };
