@@ -57,6 +57,10 @@ tinymce.PluginManager.add('paginate', function(editor) {
     window.logCount = mycount;
   }
 
+  function onPageChange(evt){
+    ui.updatePageRankInput(evt.toPage.rank);
+  }
+
   /**
   * A 'Paginator' object to handle all paginating behaviors.
   * @var {Paginator} paginator
@@ -83,6 +87,7 @@ tinymce.PluginManager.add('paginate', function(editor) {
     !paginatorStartListening && paginator.init();
     paginatorStartListening = true;
     ui.appendNavigationButtons(paginator);
+    editor.dom.bind(editor.getDoc(),'PageChange',onPageChange);
   });
   editor.once('change',function(){
     paginatorStartListening = !!paginator;
