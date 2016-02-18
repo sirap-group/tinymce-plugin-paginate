@@ -292,18 +292,12 @@ Paginator.prototype.gotoNext = function(){
  * @method
  * @return void
  */
-Paginator.prototype.watchPage = function(){ console.info('wathing page ...');
-
+Paginator.prototype.watchPage = function(){
   var maxHeight = _getPageInnerHeight.call(this);
   var currentHeight = _getPageContentHeight.call(this);
-
-  console.log('maxHeight',maxHeight,'currentHeight',currentHeight);
-
   if (currentHeight > maxHeight) {
-    console.info('Dépassement de page !');
     _repage.call(this);
   }
-
 };
 
 /**
