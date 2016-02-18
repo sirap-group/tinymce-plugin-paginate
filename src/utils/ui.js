@@ -1,8 +1,16 @@
+/**
+ * ui module provide ui functions
+ * @module utils/ui
+ */
+
 'use strict';
 
 /**
+ * Append "previous page" and "next page" navigation buttons
  * @function appendNavigationButtons
- * @return void
+ * @static
+ * @param {Paginator} paginator The instancied paginator binded to the matched editor.
+ * @returns void
  */
 exports.appendNavigationButtons = function(paginator){
   var body = $('body');
