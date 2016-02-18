@@ -47,7 +47,7 @@
 			<li class="dropdown">
 				<a href="global.html" class="dropdown-toggle" data-toggle="dropdown">Global<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="global.html#createTestDPIElement">createTestDPIElement</a></li><li><a href="global.html#getter-setterforthepageformat">getter-setter for the page format</a></li><li><a href="global.html#Paginator">Paginator</a></li><li><a href="global.html#paginator">paginator</a></li><li><a href="global.html#supportedFormats">supportedFormats</a></li>
+					<li><a href="global.html#createTestDPIElement">createTestDPIElement</a></li><li><a href="global.html#getter-setterforthepageformat">getter-setter for the page format</a></li><li><a href="global.html#paginator">paginator</a></li><li><a href="global.html#Paginator">Paginator</a></li><li><a href="global.html#supportedFormats">supportedFormats</a></li>
 				</ul>
 			</li>
 			
@@ -141,6 +141,10 @@ tinymce.PluginManager.add('paginate', function(editor) {
     window.logCount = mycount;
   }
 
+  function onPageChange(evt){
+    ui.updatePageRankInput(evt.toPage.rank);
+  }
+
   /**
   * A 'Paginator' object to handle all paginating behaviors.
   * @var {Paginator} paginator
@@ -167,6 +171,7 @@ tinymce.PluginManager.add('paginate', function(editor) {
     !paginatorStartListening &amp;&amp; paginator.init();
     paginatorStartListening = true;
     ui.appendNavigationButtons(paginator);
+    editor.dom.bind(editor.getDoc(),'PageChange',onPageChange);
   });
   editor.once('change',function(){
     paginatorStartListening = !!paginator;
