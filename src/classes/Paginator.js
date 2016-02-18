@@ -196,19 +196,37 @@ Paginator.prototype.gotoPage = function(toPage){
       if (node.nodeType === nodeType) {
           result.push(node);
       }
-      for (var i=0; i<children.length; i++) {
+      if (children) {
+        for (var i=0; i<children.length; i++) {
           result = getTextNodes(children[i], nodeType, result);
+        }
       }
       return result;
     }
     // get all Textnodes from lastchild, calc length
-    var content = toPage.content();
-    var lastChild = content.lastChild;
-    var textNodes = getTextNodes((lastChild) ? lastChild : content) ;
-    var lastNodeIndex = textNodes.length-1;
-    var locationOffset = textNodes[lastNodeIndex].textContent.length;
+    var content, lastChild, textNodes, lastNode, locationOffset, cursorLocation;
+    content = toPage.content();
+    if (content.length) {
+      lastChild = content[0].lastChild;
+    } else {
+      lastChild = content.lastChild;
+    }
+    if (lastChild) {
+      textNodes = getTextNodes(lastChild) ;
+
+      if (textNodes.length) {
+        lastNode = textNodes[textNodes.length-1];
+        locationOffset = lastNode.textContent.length;
+      } else {
+        lastNode = lastChild;
+        locationOffset = 0;
+      }
+    } else {
+      lastNode = content;
+      locationOffset = 0;
+    }
     // set Cursor to last position
-    editor.selection.setCursorLocation(textNodes[lastNodeIndex], locationOffset);
+    editor.selection.setCursorLocation(lastNode, locationOffset);
   }
 
   if (!toPage) throw new Error('Cant navigate to undefined page');
