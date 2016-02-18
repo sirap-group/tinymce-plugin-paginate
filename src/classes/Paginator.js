@@ -442,9 +442,8 @@ var _createNextPage = function(contentNodeList){
   if (contentNodeList) {
     $(contentNodeList).appendTo(divWrapper);
   }
-  newPage = new Page(this._defaultPage.format().label, this._defaultPage.orientation, nextRank, divWrapper);
+  newPage = new Page(this._defaultPage.format().label, this._defaultPage.orientation, nextRank, divWrapper[0]);
   pages.push(newPage);
-
   return newPage;
 };
 
