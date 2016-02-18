@@ -250,21 +250,23 @@ Paginator.prototype.gotoFocusedPage = function(){
 /**
  * Navigate to the previous page
  * @method
- * @return {Page} The previous page after navigation is done
+ * @return {Page|null} The previous page after navigation is done, null if previous page doesn'nt exist.
  */
 Paginator.prototype.gotoPrevious = function(){
-  console.info('goto previous page');
-  return this.gotoPage(this.getPrevious());
+  var prevPage = this.getPrevious();
+  if (prevPage) return this.gotoPage(prevPage);
+  else return null;
 };
 
 /**
  * Navigate to the next page
  * @method
- * @return {Page} The next page after navigation is done
+ * @return {Page|null} The next page after navigation is done, null if next page doesn'nt exist.
  */
 Paginator.prototype.gotoNext = function(){
-  console.info('goto next page');
-  return this.gotoPage(this.getNext());
+  var nextPage = this.getNext();
+  if (nextPage) return this.gotoPage(nextPage);
+  else return null;
 };
 
 /**
