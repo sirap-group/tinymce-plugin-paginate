@@ -118,16 +118,29 @@ Paginator.prototype.getCurrentPage = function(){
  * @method
  * @param {Number} rank The requested page rank
  * @return {Page} The requested page
+ * @throws {Error}
+ * @throws {InvalidPageRankError}
  */
 Paginator.prototype.getPage = function(rank){
+  try{
+    rank = Number(rank);
+  } catch(err){
+    throw new InvalidPageRankError(rank);
+  }
   if (!pages.length)
     throw new Error('Paginator pages length in null. Can\'t iterate on it.');
 
+  var ret;
   var isLower = rank-1 < 0;
   var isGreater = rank-1 > pages.length;
 
   if (isLower || isGreater) throw new InvalidPageRankError(rank);
-  else return pages[rank-1];
+  else {
+    $.each(pages,function(i,page){
+      if (page.rank === rank) ret = page;
+    });
+    return ret;
+  }
 };
 
 /**
@@ -146,10 +159,8 @@ Paginator.prototype.getPages = function(){
  */
 Paginator.prototype.getPrevious = function(){
   try {
-    console.log('this.getCurrentPage()',currentPage);
     return this.getPage(this.getCurrentPage().rank-1);
   } catch(err) {
-    console.error(err.stck);
     return null;
   }
 };
@@ -229,9 +240,11 @@ Paginator.prototype.gotoPage = function(toPage){
     editor.selection.setCursorLocation(lastNode, locationOffset);
   }
 
+  var fromPage = currentPage;
+
   if (!toPage) throw new Error('Cant navigate to undefined page');
 
-  if (toPage !== currentPage) {
+  if (toPage !== fromPage) {
 
     // Show the destination page
     $(toPage.content()).css({ 'display': 'block' });
@@ -248,6 +261,12 @@ Paginator.prototype.gotoPage = function(toPage){
 
     // set the page as current page
     currentPage = toPage;
+
+    editor.dom.fire(editor.getDoc(),'PageChange',{
+      fromPage: fromPage,
+      toPage: toPage
+    });
+
   }
 
 };

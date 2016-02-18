@@ -354,16 +354,29 @@ Paginator.prototype.getCurrentPage = function(){
  * @method
  * @param {Number} rank The requested page rank
  * @return {Page} The requested page
+ * @throws {Error}
+ * @throws {InvalidPageRankError}
  */
 Paginator.prototype.getPage = function(rank){
+  try{
+    rank = Number(rank);
+  } catch(err){
+    throw new InvalidPageRankError(rank);
+  }
   if (!pages.length)
     throw new Error('Paginator pages length in null. Can\'t iterate on it.');
 
+  var ret;
   var isLower = rank-1 < 0;
   var isGreater = rank-1 > pages.length;
 
   if (isLower || isGreater) throw new InvalidPageRankError(rank);
-  else return pages[rank-1];
+  else {
+    $.each(pages,function(i,page){
+      if (page.rank === rank) ret = page;
+    });
+    return ret;
+  }
 };
 
 /**
@@ -382,10 +395,8 @@ Paginator.prototype.getPages = function(){
  */
 Paginator.prototype.getPrevious = function(){
   try {
-    console.log('this.getCurrentPage()',currentPage);
     return this.getPage(this.getCurrentPage().rank-1);
   } catch(err) {
-    console.error(err.stck);
     return null;
   }
 };
@@ -465,9 +476,11 @@ Paginator.prototype.gotoPage = function(toPage){
     editor.selection.setCursorLocation(lastNode, locationOffset);
   }
 
+  var fromPage = currentPage;
+
   if (!toPage) throw new Error('Cant navigate to undefined page');
 
-  if (toPage !== currentPage) {
+  if (toPage !== fromPage) {
 
     // Show the destination page
     $(toPage.content()).css({ 'display': 'block' });
@@ -484,6 +497,12 @@ Paginator.prototype.gotoPage = function(toPage){
 
     // set the page as current page
     currentPage = toPage;
+
+    editor.dom.fire(editor.getDoc(),'PageChange',{
+      fromPage: fromPage,
+      toPage: toPage
+    });
+
   }
 
 };
@@ -771,6 +790,10 @@ tinymce.PluginManager.add('paginate', function(editor) {
     window.logCount = mycount;
   }
 
+  function onPageChange(evt){
+    ui.updatePageRankInput(evt.toPage.rank);
+  }
+
   /**
   * A 'Paginator' object to handle all paginating behaviors.
   * @var {Paginator} paginator
@@ -797,6 +820,7 @@ tinymce.PluginManager.add('paginate', function(editor) {
     !paginatorStartListening && paginator.init();
     paginatorStartListening = true;
     ui.appendNavigationButtons(paginator);
+    editor.dom.bind(editor.getDoc(),'PageChange',onPageChange);
   });
   editor.once('change',function(){
     paginatorStartListening = !!paginator;
@@ -879,32 +903,95 @@ $.each(supportedFormats,function(label,format){
  * @returns void
  */
 exports.appendNavigationButtons = function(paginator){
+
+  /**
+   * Validate input page rank and request a page change if input is valid
+   * @callback
+   * @param {Event} evt The change callback event
+   * @returns void
+   */
+  function onInputRankChanges(evt){
+    var toPage;
+    var rank = evt.target.valueAsNumber;
+    var actualRank = paginator.getCurrentPage().rank;
+    if (rank !== actualRank) {
+      try {
+        toPage = paginator.getPage(rank);
+        paginator.gotoPage(toPage);
+      } catch (e) {
+        if (e instanceof require('../classes/paginator/errors').InvalidPageRankError) {
+          alert('Il n\'y a pas de page #'+rank);
+          console.log($(this));
+          $(this).val(actualRank);
+        } else throw e;
+      }
+    }
+  }
+
+  var navbar;
+  var navbarElements = {};
+
   var body = $('body');
-  var selector = '<button></button>';
-  var commonClasses = 'btn btn-default btn-large glyphicon';
-  var commonCss = {
+  var btnSelector = '<a></a>';
+  var btnCommonClasses = 'btn glyphicon';
+  var btnCommonStyles = {'background': 'white', 'width':'100%', 'top':'0'};
+
+  // Create a div vertical wrapper to append nav elements into
+  navbar = $('<div></div>').css({
+    'width': '60px',
     'position': 'absolute',
-    'right': '25px',
+    '-moz-box-shadow': '0px 0px 10px 10px #000000',
+    '-webkit-box-shadow': '0px 0px 10px 10px #000000',
+    '-o-box-shadow': '0px 0px 10px 10px #000000',
+    'box-shadow': '0px 0px 10px 10px #000000',
+    'filter':'progid:DXImageTransform.Microsoft.Shadow(color=#000000, Direction=NaN, Strength=10)',
+    '-moz-border-radius': '50%',
+    '-webkit-border-radius': '50%',
+    'border-radius': '50%',
+    'top': (window.screen.height/2 -35)+'px',
+    'right': '40px',
     'z-index': '999'
-  };
+  }).appendTo(body);
+
   // navigate to previous page
-  $(selector)
-    .css($.extend( { 'top': (window.screen.height/2)+'px', }, commonCss ))
-    .addClass(commonClasses + ' glyphicon-chevron-up')
-    .appendTo(body)
-    .click(function(){
-      paginator.gotoPrevious();
-    })
+  navbarElements.btnPrevious = $(btnSelector)
+    .attr('href','javascript:void(0)')
+    .css($.extend(btnCommonStyles,{
+      'border-top-left-radius': '50%',
+      'border-top-right-radius': '50%',
+      'border-bottom-left-radius': '0',
+      'border-bottom-right-radius': '0'
+    }))
+    .addClass(btnCommonClasses + ' glyphicon-chevron-up')
+    .click(function(){ paginator.gotoPrevious(); })
+    .appendTo(navbar)
   ;
+
+  // input to show and control current page
+  navbarElements.inputRank = $('<input></input>')
+    .attr('type','number').attr('id','input-rank')
+    .css({ 'width': '100%', 'line-height': '30px', 'text-align': 'center' })
+    .change(onInputRankChanges).appendTo(navbar)
+  ;
+
   // navigate to next page
-  $(selector)
-    .css($.extend( { 'top': (window.screen.height/2 + 35)+'px', }, commonCss ))
-    .addClass(commonClasses + ' glyphicon-chevron-down')
-    .appendTo(body)
-    .click(function(){
-      paginator.gotoNext()
-    })
+  navbarElements.btnNext = $(btnSelector)
+    .attr('href','javascript:void(0)')
+    .css($.extend(btnCommonStyles,{
+      'width': '100%',
+      'border-top-left-radius': '0',
+      'border-top-right-radius': '0',
+      'border-bottom-left-radius': '50%',
+      'border-bottom-right-radius': '50%'
+    }))
+    .addClass(btnCommonClasses + ' glyphicon-chevron-down')
+    .click(function(){ paginator.gotoNext() })
+    .appendTo(navbar)
   ;
 };
 
-},{}]},{},[1]);
+exports.updatePageRankInput = function(rank){
+  $('#input-rank').val(rank);
+};
+
+},{"../classes/paginator/errors":5}]},{},[1]);
