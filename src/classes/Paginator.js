@@ -89,7 +89,7 @@ Paginator.prototype.init = function(){
 
   // search the paginator page wrappers
   var wrappedPages = findPageWrappers();
-  var wrapper = _createEmptyDivWrapper.call(this);
+  var wrapper = _createEmptyDivWrapper.call(this,1);
 
   // wrap unwrapped content
   if (!wrappedPages.length){
