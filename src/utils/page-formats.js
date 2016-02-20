@@ -34,9 +34,10 @@ var supportedFormats = {
   }
 };
 
-/**
- * @exports each supported format as instances of Format
- */
+var exp = [];
 $.each(supportedFormats,function(label,format){
-  exports[label] = new Format(label, format.long, format.short);
+  exp[label] = new Format(label, format.long, format.short);
 });
+
+
+module.exports = exp;
