@@ -421,6 +421,8 @@ var _getPageContentHeight = function(){
 
 /**
  * Create an empty HTML div element to wrap the futur content to fill a new page.
+ * @method
+ * @private
  * @param {number} pageRank The page rank to put in the attribute `data-paginator-page-rank`.
  * @returns {HTMLDivElement} The ready to fill div element.
  *
@@ -444,8 +446,6 @@ var _createEmptyDivWrapper = function(pageRank){
  * @private
  * @param {NodeList} contentNodeList The optional node list to put in the new next page.
  * @returns {Page} The just created page
- *
- * @todo finish to implement the method.
  */
 var _createNextPage = function(contentNodeList){
   var newPage;
