@@ -324,25 +324,18 @@ Paginator.prototype.watchPage = function(){
  * @method
  * @private
  * @return {Element} The parent div element having an attribute data-paginator
+ * @throws InvalidFocusedRangeError
  */
 var _getFocusedPageDiv = function(){
   var ret, selectedElement, parents;
   var currentRng = editor.selection.getRng();
 
   selectedElement = currentRng.startContainer;
-  parents = editor.dom.getParents(selectedElement,'div',editor.getDoc().body);
-  $.each(parents,function(i,parent){
-    if ($(parent).attr('data-paginator')) {
-      ret = parent;
-    }
-  });
+  ret = $(selectedElement).closest('div[data-paginator=true]');
 
-  if (!ret) {
-    console.error('No parent page found ! You are out of a page.');
-    return null;
-  } else {
-    return ret;
-  }
+  if (!ret) throw new InvalidFocusedRangeError();
+
+  return ret;
 };
 
 /**
