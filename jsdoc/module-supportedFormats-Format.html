@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
-	<title>tinymce-plugin-paginate Modules</title>
+	<title>tinymce-plugin-paginate Class: Format</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -33,21 +33,21 @@
 			<li class="dropdown">
 				<a href="modules.list.html" class="dropdown-toggle" data-toggle="dropdown">Modules<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="module-classes_Paginator.html">classes/Paginator</a></li><li><a href="module-tinycmce-plugin-paginate.html">tinycmce-plugin-paginate</a></li><li><a href="module-utils_page-formats.html">utils/page-formats</a></li><li><a href="module-utils_ui.html">utils/ui</a></li>
+					<li><a href="module-classes_Paginator.html">classes/Paginator</a></li><li><a href="module-supportedFormats.html">supportedFormats</a></li><li><a href="module-tinycmce-plugin-paginate.html">tinycmce-plugin-paginate</a></li><li><a href="module-utils_ui.html">utils/ui</a></li>
 				</ul>
 			</li>
 			
 			<li class="dropdown">
 				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="Display.html">Display</a></li><li><a href="InvalidOrientationLabelError%2520Must%2520be%2520thrown%2520when%2520trying%2520to%2520orientate%2520a%2520page%2520with%2520an%2520invalid%2520orientation%2520label.html">InvalidOrientationLabelError Must be thrown when trying to orientate a page with an invalid orientation label</a></li><li><a href="module-classes_Paginator-Paginator.html">classes/Paginator~Paginator</a></li><li><a href="module-utils_page-formats-Format.html">utils/page-formats~Format</a></li><li><a href="Page.html">Page</a></li>
+					<li><a href="Display.html">Display</a></li><li><a href="InvalidOrientationLabelError%2520Must%2520be%2520thrown%2520when%2520trying%2520to%2520orientate%2520a%2520page%2520with%2520an%2520invalid%2520orientation%2520label.html">InvalidOrientationLabelError Must be thrown when trying to orientate a page with an invalid orientation label</a></li><li><a href="module-classes_Paginator-Paginator.html">classes/Paginator~Paginator</a></li><li><a href="module-supportedFormats-Format.html">supportedFormats~Format</a></li><li><a href="Page.html">Page</a></li>
 				</ul>
 			</li>
 			
 			<li class="dropdown">
 				<a href="global.html" class="dropdown-toggle" data-toggle="dropdown">Global<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="global.html#createTestDPIElement">createTestDPIElement</a></li><li><a href="global.html#getter-setterforthepageformat">getter-setter for the page format</a></li><li><a href="global.html#paginator">paginator</a></li><li><a href="global.html#supportedFormats">supportedFormats</a></li><li><a href="global.html#testDPIElement">testDPIElement</a></li>
+					<li><a href="global.html#createTestDPIElement">createTestDPIElement</a></li><li><a href="global.html#getter-setterforthepageformat">getter-setter for the page format</a></li><li><a href="global.html#paginator">paginator</a></li><li><a href="global.html#supportedFormats">supportedFormats</a></li>
 				</ul>
 			</li>
 			
@@ -77,13 +77,15 @@
 		<div id="main">
 			
 
-	<h1 class="page-title">Modules</h1>
+	<h1 class="page-title">Class: Format</h1>
 <section>
 
 <header>
     
         <h2>
+            <span class="ancestors"><a href="module-supportedFormats.html">supportedFormats</a>~</span>
         
+        Format
         </h2>
         
     
@@ -94,8 +96,126 @@
     <div class="container-overview">
     
         
+<hr>
+<dt>
+    <h4 class="name" id="Format"><span class="type-signature"></span>new Format(label, long, short)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        Define a page format
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
 
         
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>label</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The format's label</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>long</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The format's long dimension in milimeters</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>short</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The format's short dimension in milimeters</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
 <dl class="details">
     
 
@@ -126,6 +246,16 @@
 
 
 	
+	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
+	<dd class="tag-source">
+		<ul class="dummy">
+			<li>
+				<a href="utils_page-formats.js.html">utils/page-formats.js</a>,
+				 <a href="utils_page-formats.js.html#sunlight-1-line-19">line 19</a>
+			</li>
+		</ul>
+	</dd>
+	
 
 	
 
@@ -135,7 +265,21 @@
 </dl>
 
 
-        
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
     
     </div>
 
@@ -143,25 +287,6 @@
 
     
 
-    
-        <h3 class="subsection-title">Classes</h3>
-
-        <dl>
-            <dt><a href="Display.html">Display</a></dt>
-            <dd></dd>
-        
-            <dt><a href="InvalidOrientationLabelError%2520Must%2520be%2520thrown%2520when%2520trying%2520to%2520orientate%2520a%2520page%2520with%2520an%2520invalid%2520orientation%2520label.html">InvalidOrientationLabelError Must be thrown when trying to orientate a page with an invalid orientation label</a></dt>
-            <dd></dd>
-        
-            <dt><a href="module-classes_Paginator-Paginator.html">Paginator</a></dt>
-            <dd></dd>
-        
-            <dt><a href="module-utils_page-formats-Format.html">Format</a></dt>
-            <dd></dd>
-        
-            <dt><a href="Page.html">Page</a></dt>
-            <dd></dd>
-        </dl>
     
 
     

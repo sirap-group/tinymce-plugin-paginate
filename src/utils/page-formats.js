@@ -1,6 +1,8 @@
 /**
  * page-formats module
  * @module utils/page-formats
+ * @type array<Format>
+ * @description When required, this module exports an array of formats supported by the application
  */
 
 'use strict';
@@ -32,9 +34,10 @@ var supportedFormats = {
   }
 };
 
-/**
- * @exports each supported format as instances of Format
- */
+var exp = [];
 $.each(supportedFormats,function(label,format){
-  exports[label] = new Format(label, format.long, format.short);
+  exp[label] = new Format(label, format.long, format.short);
 });
+
+
+module.exports = exp;

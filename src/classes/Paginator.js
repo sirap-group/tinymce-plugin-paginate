@@ -89,7 +89,7 @@ Paginator.prototype.init = function(){
 
   // search the paginator page wrappers
   var wrappedPages = findPageWrappers();
-  var wrapper = _createEmptyDivWrapper.call(this);
+  var wrapper = _createEmptyDivWrapper.call(this,1);
 
   // wrap unwrapped content
   if (!wrappedPages.length){
@@ -324,25 +324,18 @@ Paginator.prototype.watchPage = function(){
  * @method
  * @private
  * @return {Element} The parent div element having an attribute data-paginator
+ * @throws InvalidFocusedRangeError
  */
 var _getFocusedPageDiv = function(){
   var ret, selectedElement, parents;
   var currentRng = editor.selection.getRng();
 
   selectedElement = currentRng.startContainer;
-  parents = editor.dom.getParents(selectedElement,'div',editor.getDoc().body);
-  $.each(parents,function(i,parent){
-    if ($(parent).attr('data-paginator')) {
-      ret = parent;
-    }
-  });
+  ret = $(selectedElement).closest('div[data-paginator=true]');
 
-  if (!ret) {
-    console.error('No parent page found ! You are out of a page.');
-    return null;
-  } else {
-    return ret;
-  }
+  if (!ret) throw new InvalidFocusedRangeError();
+
+  return ret;
 };
 
 /**
@@ -428,6 +421,8 @@ var _getPageContentHeight = function(){
 
 /**
  * Create an empty HTML div element to wrap the futur content to fill a new page.
+ * @method
+ * @private
  * @param {number} pageRank The page rank to put in the attribute `data-paginator-page-rank`.
  * @returns {HTMLDivElement} The ready to fill div element.
  *
@@ -451,8 +446,6 @@ var _createEmptyDivWrapper = function(pageRank){
  * @private
  * @param {NodeList} contentNodeList The optional node list to put in the new next page.
  * @returns {Page} The just created page
- *
- * @todo finish to implement the method.
  */
 var _createNextPage = function(contentNodeList){
   var newPage;
