@@ -1,3 +1,8 @@
+/**
+ * Paginator errors module
+ * @module classes/paginator/errors
+ * @namespace Pagiantor.errors
+ */
 'use strict';
 
 
