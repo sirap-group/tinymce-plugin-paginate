@@ -1,6 +1,8 @@
 /**
  * page-formats module
  * @module utils/page-formats
+ * @type array<Format>
+ * @description When required, this module exports an array of formats supported by the application
  */
 
 'use strict';
