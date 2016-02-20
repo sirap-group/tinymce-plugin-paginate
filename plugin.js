@@ -325,7 +325,7 @@ Paginator.prototype.init = function(){
 
   // search the paginator page wrappers
   var wrappedPages = findPageWrappers();
-  var wrapper = _createEmptyDivWrapper.call(this);
+  var wrapper = _createEmptyDivWrapper.call(this,1);
 
   // wrap unwrapped content
   if (!wrappedPages.length){
@@ -560,25 +560,18 @@ Paginator.prototype.watchPage = function(){
  * @method
  * @private
  * @return {Element} The parent div element having an attribute data-paginator
+ * @throws InvalidFocusedRangeError
  */
 var _getFocusedPageDiv = function(){
   var ret, selectedElement, parents;
   var currentRng = editor.selection.getRng();
 
   selectedElement = currentRng.startContainer;
-  parents = editor.dom.getParents(selectedElement,'div',editor.getDoc().body);
-  $.each(parents,function(i,parent){
-    if ($(parent).attr('data-paginator')) {
-      ret = parent;
-    }
-  });
+  ret = $(selectedElement).closest('div[data-paginator=true]');
 
-  if (!ret) {
-    console.error('No parent page found ! You are out of a page.');
-    return null;
-  } else {
-    return ret;
-  }
+  if (!ret) throw new InvalidFocusedRangeError();
+
+  return ret;
 };
 
 /**
@@ -664,6 +657,8 @@ var _getPageContentHeight = function(){
 
 /**
  * Create an empty HTML div element to wrap the futur content to fill a new page.
+ * @method
+ * @private
  * @param {number} pageRank The page rank to put in the attribute `data-paginator-page-rank`.
  * @returns {HTMLDivElement} The ready to fill div element.
  *
@@ -687,8 +682,6 @@ var _createEmptyDivWrapper = function(pageRank){
  * @private
  * @param {NodeList} contentNodeList The optional node list to put in the new next page.
  * @returns {Page} The just created page
- *
- * @todo finish to implement the method.
  */
 var _createNextPage = function(contentNodeList){
   var newPage;
@@ -708,22 +701,46 @@ var _createNextPage = function(contentNodeList){
 module.exports = Paginator;
 
 },{"./Display":2,"./Page":3,"./paginator/errors":5,"./paginator/parser":6}],5:[function(require,module,exports){
+/**
+ * Paginator errors module
+ * @module classes/paginator/errors
+ * @namespace Pagiantor.errors
+ */
 'use strict';
 
+/**
+ * Must be thrown when trying to access a page with an invalid rank
+ * @class
+ * @memberof  Paginator.errors
+ * @extends Error
+ * @param {Number} rank The invalid page rank
+ */
+function InvalidPageRankError(rank){
+  this.name = 'InvalidPageRankError';
+  this.message = rank + ' is an invalid page rank';
+  this.stack = (new Error()).stack;
+}
+InvalidPageRankError.prototype = new Error;
 
-exports.InvalidPageRankError = (function(){
-  /**
-   * @constructor InvalidPageRankError Must be thrown when trying to access a page with an invalid rank
-   * @param {Number} rank The invalid page rank
-   */
-  function InvalidPageRankError(rank){
-    this.name = 'InvalidPageRankError';
-    this.message = rank + ' is an invalid page rank';
-    this.stack = (new Error()).stack;
-  }
-  InvalidPageRankError.prototype = new Error;
-  return InvalidPageRankError;
-})();
+/**
+ * Must be thrown when the DOM range of the text cursor is out of a paginated DOM tree.
+ * @class
+ * @memberof  Paginator.errors
+ * @extends Error
+ */
+function InvalidFocusedRangeError(){
+  this.name = 'InvalidFocusedRangeError';
+  this.message = 'The text cursor if out of any page.';
+  this.stack = (new Error()).stack;
+}
+InvalidFocusedRangeError.prototype = new Error;
+
+
+//
+// export namespace
+//
+exports.InvalidPageRankError = InvalidPageRankError;
+exports.InvalidFocusedRangeError = InvalidFocusedRangeError;
 
 },{}],6:[function(require,module,exports){
 'use strict';
@@ -742,6 +759,25 @@ module.exports = {};
  * License: http://www.tinymce.com/license
  * Contributing: http://www.tinymce.com/contributing
  */
+
+/**
+ * plugin.js Tinymce plugin paginate
+ * @file plugin.js
+ * @module
+ * @name tinycmce-plugin-paginate
+ * @description Plugin for tinymce wysiwyg HTML editor that provide pagination in the editor.
+ * @link https://github.com/sirap-group/tinymce-plugin-paginate
+ * @author Rémi Becheras
+ * @author Groupe SIRAP
+ * @license GNU GPL-v2 http://www.tinymce.com/license
+ * @listens tinymce.editor~event:init
+ * @listens tinymce.editor~event:change
+ * @listens tinymce.editor~event:SetContent
+ * @listens tinymce.editor~event:NodeChange
+ * @listens tinymce.editor.document~event:PageChange
+ * @version 1.0.0
+ */
+
 
 /*global tinymce:true */
 
@@ -849,6 +885,8 @@ tinymce.PluginManager.add('paginate', function(editor) {
 /**
  * page-formats module
  * @module utils/page-formats
+ * @type array<Format>
+ * @description When required, this module exports an array of formats supported by the application
  */
 
 'use strict';
@@ -880,12 +918,13 @@ var supportedFormats = {
   }
 };
 
-/**
- * @exports each supported format as instances of Format
- */
+var exp = [];
 $.each(supportedFormats,function(label,format){
-  exports[label] = new Format(label, format.long, format.short);
+  exp[label] = new Format(label, format.long, format.short);
 });
+
+
+module.exports = exp;
 
 },{}],9:[function(require,module,exports){
 /**
