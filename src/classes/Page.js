@@ -1,3 +1,8 @@
+/**
+ * Page class module
+ * @module class/Page
+ */
+
 'use strict';
 
 var supportedFormats = require('../utils/page-formats');
