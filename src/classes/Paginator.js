@@ -328,9 +328,12 @@ var _getFocusedPageDiv = function(){
   var currentRng = editor.selection.getRng();
 
   selectedElement = currentRng.startContainer;
-  ret = $(selectedElement).closest('div[data-paginator=true]');
-
-  if (!ret) throw new InvalidFocusedRangeError();
+  parents = $(selectedElement).closest('div[data-paginator="true"]');
+  if (!parents.length) {
+    throw new InvalidFocusedRangeError();
+  } else {
+    ret = parents[0];
+  }
 
   return ret;
 };
