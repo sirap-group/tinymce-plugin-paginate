@@ -394,12 +394,10 @@ var _getDocPadding = function(){
  * @method
  * @private
  * @return {Number} The resulted height in pixels.
- *
- * @todo Understand why the dirtyfix of the bug in border-bottom pdf rendering.
  */
 var _getPageInnerHeight = function(){
 
-  var outerHeight = Number(this._display.mm2px(this._defaultPage.height)*10); // @TODO (*10) is a bug fix
+  var outerHeight = Number(this._display.mm2px(this._defaultPage.height));
   var docPadding = _getDocPadding.call(this);
   var paddingTop = Number(docPadding.top.split('px').join(''));
   var paddingBottom = Number(docPadding.bottom.split('px').join(''));
