@@ -1,3 +1,8 @@
+/**
+ * Display class module
+ * @module class/Display
+ */
+
 'use strict';
 
 /**
@@ -67,8 +72,8 @@ Display.prototype.height = function(unit){
  *
  * Calculus rule
  * 1 dpi := pixel / inch
- * 1 in = 254 mm
- * size in mm = pixels * 254 / DPI
+ * 1 in = 25.4 mm
+ * size in mm = pixels * 25.4 / DPI
  *
  * @method
  * @param {Number} px   The amount of pixels to Converts
@@ -77,7 +82,7 @@ Display.prototype.height = function(unit){
 Display.prototype.px2mm = function(px){
   if (!this.screenDPI)
     throw new Error('Screen DPI is not defined. Is Display object instantied ?');
-  return px * 254 / this.screenDPI;
+  return px * 25.4 / this.screenDPI;
 };
 
 /**
@@ -85,8 +90,8 @@ Display.prototype.px2mm = function(px){
  *
  * Calculus rule
  * 1 dpi := pixel / inch
- * 1 in = 254 mm
- * size in px = mm * DPI / 254
+ * 1 in = 25.4 mm
+ * size in px = mm * DPI / 25.4
  *
  * @method
  * @param {Number} mm   The amount of milimeters to converts
@@ -95,7 +100,7 @@ Display.prototype.px2mm = function(px){
 Display.prototype.mm2px = function(mm){
   if (!this.screenDPI)
     throw new Error('Screen DPI is not defined. Is Display object instantied ?');
-  return mm * this.screenDPI / 254;
+  return mm * this.screenDPI / 25.4;
 };
 
 module.exports = Display;

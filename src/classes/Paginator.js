@@ -240,20 +240,17 @@ Paginator.prototype.gotoPage = function(toPage){
     editor.selection.setCursorLocation(lastNode, locationOffset);
   }
 
+  var that = this;
   var fromPage = currentPage;
+  var fromPageContent = this.getPage(fromPage.rank).content();
+  var toPageContent = this.getPage(toPage.rank).content();
 
   if (!toPage) throw new Error('Cant navigate to undefined page');
 
   if (toPage !== fromPage) {
 
-    // Show the destination page
-    $(toPage.content()).css({ 'display': 'block' });
-
-    // Hide all other pages
-    $.each(pages,function(i, loopPage){
-      if (toPage.rank !== loopPage.rank) {
-        $(loopPage.content()).css({ 'display': 'none' });
-      }
+    $(fromPageContent).hide('slide', { direction: 'up' }, 200, function(){
+      $(toPageContent).show('slide', { direction: 'down' }, 200);
     });
 
     // Move cursor to the end of the destination page
@@ -331,9 +328,12 @@ var _getFocusedPageDiv = function(){
   var currentRng = editor.selection.getRng();
 
   selectedElement = currentRng.startContainer;
-  ret = $(selectedElement).closest('div[data-paginator=true]');
-
-  if (!ret) throw new InvalidFocusedRangeError();
+  parents = $(selectedElement).closest('div[data-paginator="true"]');
+  if (!parents.length) {
+    throw new InvalidFocusedRangeError();
+  } else {
+    ret = parents[0];
+  }
 
   return ret;
 };
@@ -394,12 +394,10 @@ var _getDocPadding = function(){
  * @method
  * @private
  * @return {Number} The resulted height in pixels.
- *
- * @todo Understand why the dirtyfix of the bug in border-bottom pdf rendering.
  */
 var _getPageInnerHeight = function(){
 
-  var outerHeight = Number(this._display.mm2px(this._defaultPage.height)*10); // @TODO (*10) is a bug fix
+  var outerHeight = Number(this._display.mm2px(this._defaultPage.height));
   var docPadding = _getDocPadding.call(this);
   var paddingTop = Number(docPadding.top.split('px').join(''));
   var paddingBottom = Number(docPadding.bottom.split('px').join(''));
