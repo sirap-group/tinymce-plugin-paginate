@@ -240,20 +240,17 @@ Paginator.prototype.gotoPage = function(toPage){
     editor.selection.setCursorLocation(lastNode, locationOffset);
   }
 
+  var that = this;
   var fromPage = currentPage;
+  var fromPageContent = this.getPage(fromPage.rank).content();
+  var toPageContent = this.getPage(toPage.rank).content();
 
   if (!toPage) throw new Error('Cant navigate to undefined page');
 
   if (toPage !== fromPage) {
 
-    // Show the destination page
-    $(toPage.content()).css({ 'display': 'block' });
-
-    // Hide all other pages
-    $.each(pages,function(i, loopPage){
-      if (toPage.rank !== loopPage.rank) {
-        $(loopPage.content()).css({ 'display': 'none' });
-      }
+    $(fromPageContent).hide('slide', { direction: 'up' }, 200, function(){
+      $(toPageContent).show('slide', { direction: 'down' }, 200);
     });
 
     // Move cursor to the end of the destination page
