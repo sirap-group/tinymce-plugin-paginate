@@ -10,6 +10,25 @@
  * Contributing: http://www.tinymce.com/contributing
  */
 
+/**
+ * plugin.js Tinymce plugin paginate
+ * @file plugin.js
+ * @module
+ * @name tinycmce-plugin-paginate
+ * @description Plugin for tinymce wysiwyg HTML editor that provide pagination in the editor.
+ * @link https://github.com/sirap-group/tinymce-plugin-paginate
+ * @author Rémi Becheras
+ * @author Groupe SIRAP
+ * @license GNU GPL-v2 http://www.tinymce.com/license
+ * @listens tinymce.editor~event:init
+ * @listens tinymce.editor~event:change
+ * @listens tinymce.editor~event:SetContent
+ * @listens tinymce.editor~event:NodeChange
+ * @listens tinymce.editor.document~event:PageChange
+ * @version 1.0.0
+ */
+
+
 /*global tinymce:true */
 
 var Paginator = require('./classes/Paginator');

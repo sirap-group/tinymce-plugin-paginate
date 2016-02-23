@@ -89,7 +89,7 @@ Paginator.prototype.init = function(){
 
   // search the paginator page wrappers
   var wrappedPages = findPageWrappers();
-  var wrapper = _createEmptyDivWrapper.call(this);
+  var wrapper = _createEmptyDivWrapper.call(this,1);
 
   // wrap unwrapped content
   if (!wrappedPages.length){
@@ -240,20 +240,17 @@ Paginator.prototype.gotoPage = function(toPage){
     editor.selection.setCursorLocation(lastNode, locationOffset);
   }
 
+  var that = this;
   var fromPage = currentPage;
+  var fromPageContent = this.getPage(fromPage.rank).content();
+  var toPageContent = this.getPage(toPage.rank).content();
 
   if (!toPage) throw new Error('Cant navigate to undefined page');
 
   if (toPage !== fromPage) {
 
-    // Show the destination page
-    $(toPage.content()).css({ 'display': 'block' });
-
-    // Hide all other pages
-    $.each(pages,function(i, loopPage){
-      if (toPage.rank !== loopPage.rank) {
-        $(loopPage.content()).css({ 'display': 'none' });
-      }
+    $(fromPageContent).hide('slide', { direction: 'up' }, 200, function(){
+      $(toPageContent).show('slide', { direction: 'down' }, 200);
     });
 
     // Move cursor to the end of the destination page
@@ -324,25 +321,21 @@ Paginator.prototype.watchPage = function(){
  * @method
  * @private
  * @return {Element} The parent div element having an attribute data-paginator
+ * @throws InvalidFocusedRangeError
  */
 var _getFocusedPageDiv = function(){
   var ret, selectedElement, parents;
   var currentRng = editor.selection.getRng();
 
   selectedElement = currentRng.startContainer;
-  parents = editor.dom.getParents(selectedElement,'div',editor.getDoc().body);
-  $.each(parents,function(i,parent){
-    if ($(parent).attr('data-paginator')) {
-      ret = parent;
-    }
-  });
-
-  if (!ret) {
-    console.error('No parent page found ! You are out of a page.');
-    return null;
+  parents = $(selectedElement).closest('div[data-paginator="true"]');
+  if (!parents.length) {
+    throw new InvalidFocusedRangeError();
   } else {
-    return ret;
+    ret = parents[0];
   }
+
+  return ret;
 };
 
 /**
@@ -401,12 +394,10 @@ var _getDocPadding = function(){
  * @method
  * @private
  * @return {Number} The resulted height in pixels.
- *
- * @todo Understand why the dirtyfix of the bug in border-bottom pdf rendering.
  */
 var _getPageInnerHeight = function(){
 
-  var outerHeight = Number(this._display.mm2px(this._defaultPage.height)*10); // @TODO (*10) is a bug fix
+  var outerHeight = Number(this._display.mm2px(this._defaultPage.height));
   var docPadding = _getDocPadding.call(this);
   var paddingTop = Number(docPadding.top.split('px').join(''));
   var paddingBottom = Number(docPadding.bottom.split('px').join(''));
@@ -428,6 +419,8 @@ var _getPageContentHeight = function(){
 
 /**
  * Create an empty HTML div element to wrap the futur content to fill a new page.
+ * @method
+ * @private
  * @param {number} pageRank The page rank to put in the attribute `data-paginator-page-rank`.
  * @returns {HTMLDivElement} The ready to fill div element.
  *
@@ -451,8 +444,6 @@ var _createEmptyDivWrapper = function(pageRank){
  * @private
  * @param {NodeList} contentNodeList The optional node list to put in the new next page.
  * @returns {Page} The just created page
- *
- * @todo finish to implement the method.
  */
 var _createNextPage = function(contentNodeList){
   var newPage;
