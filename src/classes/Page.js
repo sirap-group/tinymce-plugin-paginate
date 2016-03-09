@@ -10,7 +10,8 @@ var supportedFormats = require('../utils/page-formats');
 
 var InvalidOrientationLabelError = (function(){
   /**
-   * @constructor InvalidOrientationLabelError Must be thrown when trying to orientate a page with an invalid orientation label
+   * Must be thrown when trying to orientate a page with an invalid orientation label
+   * @constructor
    * @param {string} label The invalid orientation label
    */
   function InvalidOrientationLabelError(label){
