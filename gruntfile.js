@@ -5,7 +5,22 @@ module.exports = function (grunt) {
 
     grunt.initConfig({
       jshint: {
-        all: [ 'gruntfile.js', 'index.js' ]
+        gruntfile: ['gruntfile.js'],
+        js: {
+          options: {
+            node: true,
+            browser: true,
+            browserify: true,
+            globals: {
+              '$': true,
+              'jQuery': true,
+              'tinymce': true
+            }
+          },
+          files: {
+            src: ['src/**/*.js']
+          }
+        }
       },
       browserify: {
         dist: {
@@ -18,6 +33,16 @@ module.exports = function (grunt) {
           files: {
             'plugin.min.js': ['plugin.js']
           }
+        }
+      },
+      watch: {
+        gruntfile: {
+          files: 'Gruntfile.js',
+          tasks: ['jshint:gruntfile'],
+        },
+        js: {
+          files: ['src/**/*.js'],
+          tasks: ['jshint:js'],
         }
       },
       bump: {
@@ -43,5 +68,5 @@ module.exports = function (grunt) {
     grunt.registerTask('jsdoc', function(){
       shell.exec('npm run jsdoc');
     });
-    grunt.registerTask('default', ['browserify','jshint','uglify','jsdoc']);
+    grunt.registerTask('default', ['browserify','jshint:js','uglify','jsdoc','watch']);
 };
