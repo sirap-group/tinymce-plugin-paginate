@@ -103,20 +103,20 @@ tinymce.PluginManager.add('paginate', function(editor) {
 
   editor.once('init',function(){
     paginator = new Paginator('A4','portrait', editor);
-    !paginatorStartListening && paginator.init();
+    if(!paginatorStartListening) paginator.init();
     paginatorStartListening = true;
     ui.appendNavigationButtons(paginator);
     editor.dom.bind(editor.getDoc(),'PageChange',onPageChange);
   });
   editor.once('change',function(){
     paginatorStartListening = !!paginator;
-    paginatorStartListening && paginator.init();
+    if(paginatorStartListening) paginator.init();
   });
   editor.on('change',function(){
-    paginatorStartListening && paginator.watchPage();
+    if(paginatorStartListening) paginator.watchPage();
   });
   editor.on('SetContent',function(){
-    // paginatorStartListening && paginator.init();
+    //if(paginatorStartListening) paginator.init();
   });
   editor.on('NodeChange',function(){
     if (paginatorStartListening) {
