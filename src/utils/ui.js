@@ -30,7 +30,7 @@ exports.appendNavigationButtons = function(paginator){
         paginator.gotoPage(toPage);
       } catch (e) {
         if (e instanceof require('../classes/paginator/errors').InvalidPageRankError) {
-          alert('Il n\'y a pas de page #'+rank);
+          window.alert('Il n\'y a pas de page #'+rank);
           console.log($(this));
           $(this).val(actualRank);
         } else throw e;
