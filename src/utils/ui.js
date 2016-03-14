@@ -65,7 +65,7 @@ exports.appendNavigationButtons = function(paginator){
 
   // navigate to previous page
   navbarElements.btnPrevious = $(btnSelector)
-    .attr('href','javascript:void(0)')
+    .attr('href','#')
     .css($.extend(btnCommonStyles,{
       'border-top-left-radius': '50%',
       'border-top-right-radius': '50%',
@@ -73,7 +73,10 @@ exports.appendNavigationButtons = function(paginator){
       'border-bottom-right-radius': '0'
     }))
     .addClass(btnCommonClasses + ' glyphicon-chevron-up')
-    .click(function(){ paginator.gotoPrevious(); })
+    .click(function(){
+      paginator.gotoPrevious();
+      return false;
+    })
     .appendTo(navbar)
   ;
 
@@ -86,7 +89,7 @@ exports.appendNavigationButtons = function(paginator){
 
   // navigate to next page
   navbarElements.btnNext = $(btnSelector)
-    .attr('href','javascript:void(0)')
+    .attr('href','#')
     .css($.extend(btnCommonStyles,{
       'width': '100%',
       'border-top-left-radius': '0',
@@ -95,7 +98,10 @@ exports.appendNavigationButtons = function(paginator){
       'border-bottom-right-radius': '50%'
     }))
     .addClass(btnCommonClasses + ' glyphicon-chevron-down')
-    .click(function(){ paginator.gotoNext() })
+    .click(function(){
+      paginator.gotoNext();
+      return false;
+    })
     .appendTo(navbar)
   ;
 };
