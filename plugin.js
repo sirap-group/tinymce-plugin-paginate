@@ -134,7 +134,7 @@ var InvalidOrientationLabelError = (function(){
     this.message = label + ' is an invalid orientation label !';
     this.stack = (new Error()).stack;
   }
-  InvalidOrientationLabelError.prototype = new Error;
+  InvalidOrientationLabelError.prototype = Error.prototype;
   return InvalidOrientationLabelError;
 })();
 
@@ -256,8 +256,9 @@ var Display = require('./Display');
 var Page = require('./Page');
 var parser = require('./paginator/parser');
 
-var errors = require('./paginator/errors'),
-  InvalidPageRankError = errors.InvalidPageRankError;
+var errors = require('./paginator/errors');
+var InvalidFocusedRangeError = errors.InvalidFocusedRangeError;
+var InvalidPageRankError = errors.InvalidPageRankError;
 
 /**
  * Paginator is the page manager
@@ -612,7 +613,7 @@ var _repage = function(){ console.info('repaging...');
     break;
 
     default:
-      alert('Une erreur est survenue dans le plugin de pagination. Merci de visionner l\'erreur dans la console et de déclarer cette erreur au support «support@sirap.fr»');
+      window.alert('Une erreur est survenue dans le plugin de pagination. Merci de visionner l\'erreur dans la console et de déclarer cette erreur au support «support@sirap.fr»');
       throw new Error('Unsupported block type for repaging: '+lastBlock.nodeName);
 
   }
@@ -728,7 +729,7 @@ function InvalidPageRankError(rank){
   this.message = rank + ' is an invalid page rank';
   this.stack = (new Error()).stack;
 }
-InvalidPageRankError.prototype = new Error;
+InvalidPageRankError.prototype = Error.prototype;
 
 /**
  * Must be thrown when the DOM range of the text cursor is out of a paginated DOM tree.
@@ -741,7 +742,7 @@ function InvalidFocusedRangeError(){
   this.message = 'The text cursor if out of any page.';
   this.stack = (new Error()).stack;
 }
-InvalidFocusedRangeError.prototype = new Error;
+InvalidFocusedRangeError.prototype = Error.prototype;
 
 
 //
@@ -861,20 +862,20 @@ tinymce.PluginManager.add('paginate', function(editor) {
 
   editor.once('init',function(){
     paginator = new Paginator('A4','portrait', editor);
-    !paginatorStartListening && paginator.init();
+    if(!paginatorStartListening) paginator.init();
     paginatorStartListening = true;
     ui.appendNavigationButtons(paginator);
     editor.dom.bind(editor.getDoc(),'PageChange',onPageChange);
   });
   editor.once('change',function(){
     paginatorStartListening = !!paginator;
-    paginatorStartListening && paginator.init();
+    if(paginatorStartListening) paginator.init();
   });
   editor.on('change',function(){
-    paginatorStartListening && paginator.watchPage();
+    if(paginatorStartListening) paginator.watchPage();
   });
   editor.on('SetContent',function(){
-    // paginatorStartListening && paginator.init();
+    //if(paginatorStartListening) paginator.init();
   });
   editor.on('NodeChange',function(){
     if (paginatorStartListening) {
@@ -967,7 +968,7 @@ exports.appendNavigationButtons = function(paginator){
         paginator.gotoPage(toPage);
       } catch (e) {
         if (e instanceof require('../classes/paginator/errors').InvalidPageRankError) {
-          alert('Il n\'y a pas de page #'+rank);
+          window.alert('Il n\'y a pas de page #'+rank);
           console.log($(this));
           $(this).val(actualRank);
         } else throw e;
@@ -1002,7 +1003,7 @@ exports.appendNavigationButtons = function(paginator){
 
   // navigate to previous page
   navbarElements.btnPrevious = $(btnSelector)
-    .attr('href','javascript:void(0)')
+    .attr('href','#')
     .css($.extend(btnCommonStyles,{
       'border-top-left-radius': '50%',
       'border-top-right-radius': '50%',
@@ -1010,7 +1011,10 @@ exports.appendNavigationButtons = function(paginator){
       'border-bottom-right-radius': '0'
     }))
     .addClass(btnCommonClasses + ' glyphicon-chevron-up')
-    .click(function(){ paginator.gotoPrevious(); })
+    .click(function(){
+      paginator.gotoPrevious();
+      return false;
+    })
     .appendTo(navbar)
   ;
 
@@ -1023,7 +1027,7 @@ exports.appendNavigationButtons = function(paginator){
 
   // navigate to next page
   navbarElements.btnNext = $(btnSelector)
-    .attr('href','javascript:void(0)')
+    .attr('href','#')
     .css($.extend(btnCommonStyles,{
       'width': '100%',
       'border-top-left-radius': '0',
@@ -1032,7 +1036,10 @@ exports.appendNavigationButtons = function(paginator){
       'border-bottom-right-radius': '50%'
     }))
     .addClass(btnCommonClasses + ' glyphicon-chevron-down')
-    .click(function(){ paginator.gotoNext() })
+    .click(function(){
+      paginator.gotoNext();
+      return false;
+    })
     .appendTo(navbar)
   ;
 };
