@@ -4,6 +4,7 @@
   "description": "A tinymce plugin that provides pagination",
   "main": "plugin.js",
   "devDependencies": {
+    "deasync": "^0.1.4",
     "grunt": "^0.4.5",
     "grunt-browserify": "^4.0.1",
     "grunt-bump": "^0.6.0",
@@ -12,6 +13,7 @@
     "grunt-contrib-watch": "^1.0.0",
     "grunt-git": "^0.3.7",
     "ink-docstrap": "^1.1.2",
+    "inquirer": "^0.12.0",
     "load-grunt-tasks": "^3.3.0",
     "shelljs": "^0.6.0"
   },
