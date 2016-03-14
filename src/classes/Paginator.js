@@ -367,7 +367,7 @@ var _repage = function(){ console.info('repaging...');
     break;
 
     default:
-      alert('Une erreur est survenue dans le plugin de pagination. Merci de visionner l\'erreur dans la console et de déclarer cette erreur au support «support@sirap.fr»');
+      window.alert('Une erreur est survenue dans le plugin de pagination. Merci de visionner l\'erreur dans la console et de déclarer cette erreur au support «support@sirap.fr»');
       throw new Error('Unsupported block type for repaging: '+lastBlock.nodeName);
 
   }
