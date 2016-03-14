@@ -10,8 +10,9 @@ var Display = require('./Display');
 var Page = require('./Page');
 var parser = require('./paginator/parser');
 
-var errors = require('./paginator/errors'),
-  InvalidPageRankError = errors.InvalidPageRankError;
+var errors = require('./paginator/errors');
+var InvalidFocusedRangeError = errors.InvalidFocusedRangeError;
+var InvalidPageRankError = errors.InvalidPageRankError;
 
 /**
  * Paginator is the page manager
