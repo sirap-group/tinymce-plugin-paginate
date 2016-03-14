@@ -71,5 +71,7 @@ module.exports = function (grunt) {
 
     grunt.registerTask('build', ['jshint', 'browserify', 'uglify', 'jsdoc']);
 
-    grunt.registerTask('default', ['browserify','jshint:js','uglify','jsdoc','watch']);
+    grunt.registerTask('dev', ['jshint', 'browserify', 'watch']);
+
+    grunt.registerTask('default', ['dev']);
 };
