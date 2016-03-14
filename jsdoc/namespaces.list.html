@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
-	<title>tinymce-plugin-paginate Source: classes/Page.js</title>
+	<title>tinymce-plugin-paginate Namespaces</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -31,6 +31,13 @@
 		<ul class="nav navbar-nav">
 			
 			<li class="dropdown">
+				<a href="namespaces.list.html" class="dropdown-toggle" data-toggle="dropdown">Namespaces<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="tinymce.html">tinymce</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
 				<a href="modules.list.html" class="dropdown-toggle" data-toggle="dropdown">Modules<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
 					<li><a href="module-class_Display.html">class/Display</a></li><li><a href="module-class_Page.html">class/Page</a></li><li><a href="module-classes_Paginator.html">classes/Paginator</a></li><li><a href="module-tinycmce-plugin-paginate.html">tinycmce-plugin-paginate</a></li><li><a href="module-utils_page-formats.html">utils/page-formats</a></li><li><a href="module-utils_ui.html">utils/ui</a></li>
@@ -40,14 +47,14 @@
 			<li class="dropdown">
 				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="module-class_Display-Display.html">class/Display~Display</a></li><li><a href="module-class_Page-InvalidOrientationLabelError%2520Must%2520be%2520thrown%2520when%2520trying%2520to%2520orientate%2520a%2520page%2520with%2520an%2520invalid%2520orientation%2520label.html">class/Page~InvalidOrientationLabelError Must be thrown when trying to orientate a page with an invalid orientation label</a></li><li><a href="module-class_Page-Page.html">class/Page~Page</a></li><li><a href="module-classes_Paginator-Paginator.html">classes/Paginator~Paginator</a></li><li><a href="module-utils_page-formats-Format.html">utils/page-formats~Format</a></li>
+					<li><a href="module-class_Display-Display.html">class/Display~Display</a></li><li><a href="module-class_Page-Page.html">class/Page~Page</a></li><li><a href="module-classes_Paginator-Paginator.html">classes/Paginator~Paginator</a></li><li><a href="module-utils_page-formats-Format.html">utils/page-formats~Format</a></li>
 				</ul>
 			</li>
 			
 			<li class="dropdown">
 				<a href="global.html" class="dropdown-toggle" data-toggle="dropdown">Global<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="global.html#paginator">paginator</a></li><li><a href="global.html#supportedFormats">supportedFormats</a></li>
+					<li><a href="global.html#display">display</a></li><li><a href="global.html#InvalidPageHeightError">InvalidPageHeightError</a></li><li><a href="global.html#paginator">paginator</a></li><li><a href="global.html#Paginator">Paginator</a></li><li><a href="global.html#paginatorListens">paginatorListens</a></li><li><a href="global.html#supportedFormats">supportedFormats</a></li><li><a href="global.html#tinymcePluginPaginate">tinymcePluginPaginate</a></li><li><a href="global.html#ui">ui</a></li><li><a href="global.html#watchPageIterationsCount">watchPageIterationsCount</a></li>
 				</ul>
 			</li>
 			
@@ -72,148 +79,116 @@
 <div class="row">
 
 	
-	<div class="col-md-12">
+	<div class="col-md-8">
 	
 		<div id="main">
 			
 
-		<h1 class="page-title">Source: classes/Page.js</h1>
-    
+	<h1 class="page-title">Namespaces</h1>
 <section>
-    <article>
-        <pre
-            class="sunlight-highlight-javascript linenums">/**
- * Page class module
- * @module class/Page
- */
 
-'use strict';
+<header>
+    
+        <h2>
+        
+        </h2>
+        
+    
+</header>
 
-var supportedFormats = require('../utils/page-formats');
+
+<article>
+    <div class="container-overview">
+    
+        
+
+        
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
 
 
-var InvalidOrientationLabelError = (function(){
-  /**
-   * @constructor InvalidOrientationLabelError Must be thrown when trying to orientate a page with an invalid orientation label
-   * @param {string} label The invalid orientation label
-   */
-  function InvalidOrientationLabelError(label){
-    this.name = 'InvalidOrientationLabelError';
-    this.message = label + ' is an invalid orientation label !';
-    this.stack = (new Error()).stack;
-  }
-  InvalidOrientationLabelError.prototype = new Error;
-  return InvalidOrientationLabelError;
-})();
 
-/**
- * @constructor
- * @param {String} formatLabel A supported format mabel. For example: `A4`.
- * @param {Sring} orientation An orientation in `('portrait','landscape')`.
- * @param {Number} rank The page rank `(1..n)`
- * @param {HTMLDivElement} wrappedPageDiv The `div[data-paginator]` HTMLDivElement
- */
-function Page(formatLabel, orientation, rank, wrappedPageDiv){
-  this._content = null;
-  this.rank = null;
+	
 
-  this.format(formatLabel);
-  this.orientate(orientation);
+	
 
-  if (rank !== undefined) {
-    this.rank = rank;
-  }
+	
 
-  if (wrappedPageDiv !== undefined || wrappedPageDiv !== null) {
-    this.content(wrappedPageDiv);
-  }
-}
+	
+</dl>
 
-/**
- * Getter-setter for page div content Element
- * @method
- * @param {DOMElement} The content to fill the page
- * @return {DOMElement|void} The page div Element to return in getter usage
- */
-Page.prototype.content = function(wrappedPageDiv){
-  if (wrappedPageDiv === undefined) {
-    return this._content;
-  } else {
-    this._content = wrappedPageDiv;
-  }
-};
 
-/**
- * Append the given node list to the page content.
- * @method
- * @param {Array}&lt;Node> nodes The nodes to insert.
- * @returns {Page} `this` page instance.
- */
-Page.prototype.append = function(nodes){
-  $(nodes).appendTo(this.content());
-  return this;
-};
+        
+    
+    </div>
 
-/**
- * Prepend the given node list to the page content.
- * @method
- * @param {Array}&lt;Node> nodes The nodes to insert.
- * @returns {Page} `this` page instance.
- */
-Page.prototype.prepend = function(nodes){
-  $(nodes).prependTo(this.content());
-  return this;
-};
+    
 
-/**
- * getter-setter of the orientation
- * @method
- * @param &lt;string> orientation
- * @return void
- */
-Page.prototype.orientate = function(orientation){
-  var inValidType = (typeof(orientation) !== 'string');
-  var inValidLabel = (orientation.toLowerCase() !== 'portrait' &amp;&amp; orientation.toLowerCase() !== 'paysage') ;
+    
 
-  if (inValidType || inValidLabel)
-    throw new InvalidOrientationLabelError(orientation);
+    
+        <h3 class="subsection-title">Classes</h3>
 
-  this.orientation = orientation;
+        <dl>
+            <dt><a href="module-class_Display-Display.html">Display</a></dt>
+            <dd></dd>
+        
+            <dt><a href="module-class_Page-Page.html">Page</a></dt>
+            <dd></dd>
+        
+            <dt><a href="module-classes_Paginator-Paginator.html">Paginator</a></dt>
+            <dd></dd>
+        
+            <dt><a href="module-utils_page-formats-Format.html">Format</a></dt>
+            <dd></dd>
+        </dl>
+    
 
-  if (orientation === 'portrait') {
-    this.width = this.format().short;
-    this.height = this.format().long;
-  } else {
-    this.width = this.format().long;
-    this.height = this.format().short;
-  }
+    
 
-};
+    
+        <h3 class="subsection-title">Namespaces</h3>
 
-/**
- * @method getter-setter for the page format
- * @param {String} label The format's label to set if used as setter, undefined to use it as getter
- * @return {Format | Page}
- * - the defined format for the page if used as getter,
- * - or the page instance if used as setter (to permit chaining)
- */
-Page.prototype.format = function(label){
-  if (label !== undefined) {
-    if (!supportedFormats[label])
-    throw new Error('Format '+ label +' is not supported yet.');
+        <dl>
+            <dt><a href="namespaces.html#tinymce"><a href="tinymce.html">tinymce</a></a></dt>
+            <dd></dd>
+        </dl>
+    
 
-    this._format = supportedFormats[label];
-    return this;
-  }
+    
 
-  else return this._format;
-};
+    
 
-module.exports = Page;
-</pre>
-    </article>
+    
+
+    
+</article>
+
 </section>
-
 
 
 
@@ -223,6 +198,10 @@ module.exports = Page;
 
 	<div class="clearfix"></div>
 
+	
+		<div class="col-md-3">
+			<div id="toc" class="col-md-3 hidden-xs hidden-sm hidden-md"></div>
+		</div>
 	
 
 </div>
@@ -255,7 +234,7 @@ module.exports = Page;
 <span class="jsdoc-message">
 	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a>
 	
-		on 14/03/2016
+		on 29/02/2016
 	
 	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
 </span>
