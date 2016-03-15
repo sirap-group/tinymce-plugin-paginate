@@ -16,7 +16,7 @@
     "ink-docstrap": "^1.1.2",
     "inquirer": "^0.12.0",
     "load-grunt-tasks": "^3.3.0",
-    "nodegit": "^0.11.9",
+    "q": "^1.4.1",
     "shelljs": "^0.6.0"
   },
   "scripts": {
