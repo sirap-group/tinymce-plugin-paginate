@@ -289,6 +289,7 @@ Paginator.prototype.gotoPage = function(toPage,cursorPosition){
         break;
         case fromPage.rank:
           $(fromPageContent).css({ display:'hidden' });
+        break;
         default:
           $(that.getPage(page.rank).content()).css({ display:'hidden' });
         break;
