@@ -339,11 +339,22 @@ Paginator.prototype.gotoPage = function(toPage,cursorPosition){
  * @return void
  */
 Paginator.prototype.gotoFocusedPage = function(){
-  var focusedDiv = _getFocusedPageDiv.call(this);
-  var pageRank = $(focusedDiv).attr('data-paginator-page-rank');
-  var focusedPage = this.getPage(pageRank);
-  currentPage = focusedPage;
-  this.gotoPage(focusedPage);
+  var focusedPage, focusedDiv;
+
+  try {
+    var pageRank;
+    focusedDiv = _getFocusedPageDiv.call(this);
+    pageRank = $(focusedDiv).attr('data-paginator-page-rank');
+    focusedPage = this.getPage(pageRank);
+  } catch (e) {
+    // if there is no focused page div, focus to the first page
+    focusedPage = this.getPage(1);
+    focusedDiv = focusedPage.content();
+    editor.selection.select(focusedDiv, true);
+  } finally {
+    currentPage = focusedPage;
+    this.gotoPage(focusedPage);
+  }
 };
 
 /**
