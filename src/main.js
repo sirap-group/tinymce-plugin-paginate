@@ -29,12 +29,49 @@
  */
 
 
+/**
+ * Tinymce library - injected by the plugin loader.
+ * @external tinymce
+ * @see {@link https://www.tinymce.com/docs/api/class/tinymce/|Tinymce API Reference}
+ */
 /*global tinymce:true */
 
+/**
+ * The jQuery plugin namespace - plugin dependency.
+ * @external "jQuery.fn"
+ * @see {@link http://learn.jquery.com/plugins/|jQuery Plugins}
+ */
+/*global jquery:true */
+
+/**
+ * Paginator class
+ * @type {Paginator}
+ * @global
+ */
 var Paginator = require('./classes/Paginator');
+
+/**
+ * Paginator ui module
+ * @type {object}
+ * @global
+ */
 var ui = require('./utils/ui');
 
-tinymce.PluginManager.add('paginate', function(editor) {
+/**
+ * InvalidPageHeightError
+ * @type {InvalidPageHeightError}
+ * @global
+ */
+var InvalidPageHeightError = Paginator.errors.InvalidPageHeightError;
+
+/**
+ * Tinymce plugin paginate
+ * @function
+ * @global
+ * @param {tinymce.Editor} editor - The injected tinymce editor.
+ * @returns void
+ */
+function tinymcePluginPaginate(editor) {
 
   /**
    * Debug all useful editor events to see the order of their happen
@@ -76,8 +113,38 @@ tinymce.PluginManager.add('paginate', function(editor) {
     window.logCount = mycount;
   }
 
+  /**
+   * On 'PageChange' event listener. Update page rank input on paginator's navigation buttons.
+   * @function
+   * @private
+   */
   function onPageChange(evt){
     ui.updatePageRankInput(evt.toPage.rank);
+  }
+
+  /**
+   * Wrap Paginator#watchPage() in try catch statements and private function to allow watch recursively on error
+   * @function
+   * @private
+   * @returns void
+   * @throws {Error} if error thrown is not instance of InvalidPageHeightError
+   */
+  function watchPage(){
+    try {
+      paginator.watchPage();
+    } catch (e) {
+      watchPageIterationsCount++;
+      // Due to a suspecte bug in tinymce that break the binding of DOM elements with the paginator.
+      if (e instanceof InvalidPageHeightError) {
+        console.error(e.message+'... re-init paginator then watch page again...');
+        paginator.init();
+        if (watchPageIterationsCount<10) {
+          watchPage();
+        } else {
+          watchPageIterationsCount = 0;
+        }
+      } else throw e;
+    }
   }
 
   /**
@@ -90,36 +157,43 @@ tinymce.PluginManager.add('paginate', function(editor) {
   /**
    * A 'Display' object to handle graphics behaviors for the paginator needs.
    * @var {Display} display
-   * @private
+   * @global
    */
   var display;
 
   /**
    * Is set to true when paginator is initialized.
-   * @var {Boolean} paginatorStartListening
-   * @private
+   * @var {Boolean} paginatorListens
+   * @global
    */
-  var paginatorStartListening = false;
+  var paginatorListens = false;
+
+  /**
+   * Count of the iterations of watchPage() calls triggered by thrown of `InvalidPageHeightError`. This is a temporary bugfix
+   * @var {integer}
+   * @global
+   */
+  var watchPageIterationsCount=0;
 
   editor.once('init',function(){
     paginator = new Paginator('A4','portrait', editor);
-    if(!paginatorStartListening) paginator.init();
-    paginatorStartListening = true;
+    if(!paginatorListens) paginator.init();
+    paginatorListens = true;
     ui.appendNavigationButtons(paginator);
     editor.dom.bind(editor.getDoc(),'PageChange',onPageChange);
   });
   editor.once('change',function(){
-    paginatorStartListening = !!paginator;
-    if(paginatorStartListening) paginator.init();
+    paginatorListens = !!paginator;
+    if(paginatorListens) paginator.init();
   });
   editor.on('change',function(){
-    if(paginatorStartListening) paginator.watchPage();
+    if(paginatorListens) paginator.watchPage();
   });
   editor.on('SetContent',function(){
     //if(paginatorStartListening) paginator.init();
   });
   editor.on('NodeChange',function(){
-    if (paginatorStartListening) {
+    if (paginatorListens) {
       try {
         paginator.gotoFocusedPage();
       } catch (e) {
@@ -129,4 +203,7 @@ tinymce.PluginManager.add('paginate', function(editor) {
     }
   });
 
-});
+}
+
+// Add the plugin to the tinymce PluginManager
+tinymce.PluginManager.add('paginate', tinymcePluginPaginate);

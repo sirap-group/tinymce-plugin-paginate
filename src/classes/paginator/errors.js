@@ -32,9 +32,38 @@ function InvalidFocusedRangeError(){
 }
 InvalidFocusedRangeError.prototype = Error.prototype;
 
+/**
+ * Must be thrown when the current page height doesn't match required values
+ * @class
+ * @memberof  Paginator.errors
+ * @extends Error
+ */
+function InvalidPageHeightError(height){
+  this.name = 'InvalidPageHeightError';
+  this.message = height + 'px is an invalid page height.';
+  this.stack = (new Error()).stack;
+}
+InvalidPageHeightError.prototype = Error.prototype;
+
+/**
+ * Must be thrown when the requested cursor position doesn't match required values.
+ * @class
+ * @memberof  Paginator.errors
+ * @extends Error
+ */
+function InvalidCursorPosition(requestedPosition){
+  this.name = 'InvalidCursorPosition';
+  this.message = requestedPosition + 'is an invalid cursor position.';
+  this.stack = (new Error()).stack;
+}
+InvalidCursorPosition.prototype = Error.prototype;
 
 //
-// export namespace
+// export Paginator.errors namespace
 //
-exports.InvalidPageRankError = InvalidPageRankError;
-exports.InvalidFocusedRangeError = InvalidFocusedRangeError;
+module.exports = {
+  InvalidPageRankError:InvalidPageRankError,
+  InvalidFocusedRangeError:InvalidFocusedRangeError,
+  InvalidPageHeightError:InvalidPageHeightError,
+  InvalidCursorPosition:InvalidCursorPosition
+};
