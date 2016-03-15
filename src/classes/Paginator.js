@@ -307,14 +307,14 @@ Paginator.prototype.gotoPage = function(toPage,cursorPosition){
 
     // @TODO ancien code fonctionnel
     // Show the destination page
-    // $(toPage.content()).css({ 'display': 'block' });
-    //
-    // // Hide all other pages
-    // $.each(pages,function(i, loopPage){
-    //   if (toPage.rank !== loopPage.rank) {
-    //     $(loopPage.content()).css({ 'display': 'none' });
-    //   }
-    // });
+    $(toPage.content()).css({ 'display': 'block' });
+
+    // Hide all other pages
+    $.each(pages,function(i, loopPage){
+      if (toPage.rank !== loopPage.rank) {
+        $(loopPage.content()).css({ 'display': 'none' });
+      }
+    });
 
     // cursorPosition may be `ORIGIN`, `END` or `undefined`
     if (cursorPosition === this.CURSOR_POSITION.ORIGIN) focusToTop();
