@@ -133,7 +133,7 @@ function tinymcePluginPaginate(editor) {
     try {
       paginator.watchPage();
     } catch (e) {
-      watchPageIterationsCount++
+      watchPageIterationsCount++;
       // Due to a suspecte bug in tinymce that break the binding of DOM elements with the paginator.
       if (e instanceof InvalidPageHeightError) {
         console.error(e.message+'... re-init paginator then watch page again...');
