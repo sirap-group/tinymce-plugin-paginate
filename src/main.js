@@ -177,17 +177,17 @@ function tinymcePluginPaginate(editor) {
 
   editor.once('init',function(){
     paginator = new Paginator('A4','portrait', editor);
-    if(!paginatorStartListening) paginator.init();
-    paginatorStartListening = true;
+    if(!paginatorListens) paginator.init();
+    paginatorListens = true;
     ui.appendNavigationButtons(paginator);
     editor.dom.bind(editor.getDoc(),'PageChange',onPageChange);
   });
   editor.once('change',function(){
-    paginatorStartListening = !!paginator;
-    if(paginatorStartListening) paginator.init();
+    paginatorListens = !!paginator;
+    if(paginatorListens) paginator.init();
   });
   editor.on('change',function(){
-    if(paginatorStartListening) paginator.watchPage();
+    if(paginatorListens) paginator.watchPage();
   });
   editor.on('SetContent',function(){
     //if(paginatorStartListening) paginator.init();
