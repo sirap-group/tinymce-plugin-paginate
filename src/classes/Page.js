@@ -20,6 +20,7 @@ var InvalidOrientationLabelError = (function(){
     this.stack = (new Error()).stack;
   }
   InvalidOrientationLabelError.prototype = Error.prototype;
+  InvalidOrientationLabelError.prototype.name = 'InvalidOrientationLabelError';
   return InvalidOrientationLabelError;
 })();
 
