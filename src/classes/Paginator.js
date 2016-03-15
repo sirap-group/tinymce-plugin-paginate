@@ -10,8 +10,9 @@ var Display = require('./Display');
 var Page = require('./Page');
 var parser = require('./paginator/parser');
 
-var errors = require('./paginator/errors'),
-  InvalidPageRankError = errors.InvalidPageRankError;
+var errors = require('./paginator/errors');
+var InvalidFocusedRangeError = errors.InvalidFocusedRangeError;
+var InvalidPageRankError = errors.InvalidPageRankError;
 
 /**
  * Paginator is the page manager
@@ -366,7 +367,7 @@ var _repage = function(){ console.info('repaging...');
     break;
 
     default:
-      alert('Une erreur est survenue dans le plugin de pagination. Merci de visionner l\'erreur dans la console et de déclarer cette erreur au support «support@sirap.fr»');
+      window.alert('Une erreur est survenue dans le plugin de pagination. Merci de visionner l\'erreur dans la console et de déclarer cette erreur au support «support@sirap.fr»');
       throw new Error('Unsupported block type for repaging: '+lastBlock.nodeName);
 
   }

@@ -5,7 +5,22 @@ module.exports = function (grunt) {
 
     grunt.initConfig({
       jshint: {
-        all: [ 'gruntfile.js', 'index.js' ]
+        gruntfile: ['gruntfile.js'],
+        js: {
+          options: {
+            node: true,
+            browser: true,
+            browserify: true,
+            globals: {
+              '$': true,
+              'jQuery': true,
+              'tinymce': true
+            }
+          },
+          files: {
+            src: ['src/**/*.js']
+          }
+        }
       },
       browserify: {
         dist: {
@@ -20,6 +35,16 @@ module.exports = function (grunt) {
           }
         }
       },
+      watch: {
+        gruntfile: {
+          files: 'Gruntfile.js',
+          tasks: ['jshint:gruntfile'],
+        },
+        js: {
+          files: ['src/**/*.js'],
+          tasks: ['jshint:js'],
+        }
+      },
       bump: {
         options: {
           files: ['package.json','bower.json'],
@@ -31,7 +56,7 @@ module.exports = function (grunt) {
           tagName: 'v%VERSION%',
           tagMessage: 'Version %VERSION%',
           push: true,
-          pushTo: 'origin',
+          pushTo: 'gh-sirap-group',
           gitDescribeOptions: '--tags --always --abbrev=1 --dirty=-d',
           globalReplace: false,
           prereleaseName: false,
@@ -43,5 +68,10 @@ module.exports = function (grunt) {
     grunt.registerTask('jsdoc', function(){
       shell.exec('npm run jsdoc');
     });
-    grunt.registerTask('default', ['browserify','jshint','uglify','jsdoc']);
+
+    grunt.registerTask('build', ['jshint', 'browserify', 'uglify', 'jsdoc']);
+
+    grunt.registerTask('dev', ['jshint', 'browserify', 'watch']);
+
+    grunt.registerTask('default', ['dev']);
 };

@@ -17,7 +17,7 @@ function InvalidPageRankError(rank){
   this.message = rank + ' is an invalid page rank';
   this.stack = (new Error()).stack;
 }
-InvalidPageRankError.prototype = new Error;
+InvalidPageRankError.prototype = Error.prototype;
 
 /**
  * Must be thrown when the DOM range of the text cursor is out of a paginated DOM tree.
@@ -30,7 +30,7 @@ function InvalidFocusedRangeError(){
   this.message = 'The text cursor if out of any page.';
   this.stack = (new Error()).stack;
 }
-InvalidFocusedRangeError.prototype = new Error;
+InvalidFocusedRangeError.prototype = Error.prototype;
 
 
 //
