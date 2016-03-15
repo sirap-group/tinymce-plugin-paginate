@@ -14,6 +14,7 @@ var errors = require('./paginator/errors');
 var InvalidPageRankError = errors.InvalidPageRankError;
 var InvalidFocusedRangeError = errors.InvalidFocusedRangeError;
 var InvalidPageHeightError = errors.InvalidPageHeightError;
+var InvalidCursorPosition = errors.InvalidCursorPosition;
 
 
 /**
