@@ -19,7 +19,7 @@ var InvalidOrientationLabelError = (function(){
     this.message = label + ' is an invalid orientation label !';
     this.stack = (new Error()).stack;
   }
-  InvalidOrientationLabelError.prototype = new Error;
+  InvalidOrientationLabelError.prototype = Error.prototype;
   return InvalidOrientationLabelError;
 })();
 

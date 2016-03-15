@@ -33,21 +33,21 @@
 			<li class="dropdown">
 				<a href="modules.list.html" class="dropdown-toggle" data-toggle="dropdown">Modules<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="module-classes_Paginator.html">classes/Paginator</a></li><li><a href="module-tinycmce-plugin-paginate.html">tinycmce-plugin-paginate</a></li><li><a href="module-utils_page-formats.html">utils/page-formats</a></li><li><a href="module-utils_ui.html">utils/ui</a></li>
+					<li><a href="module-class_Display.html">class/Display</a></li><li><a href="module-class_Page.html">class/Page</a></li><li><a href="module-classes_Paginator.html">classes/Paginator</a></li><li><a href="module-tinycmce-plugin-paginate.html">tinycmce-plugin-paginate</a></li><li><a href="module-utils_page-formats.html">utils/page-formats</a></li><li><a href="module-utils_ui.html">utils/ui</a></li>
 				</ul>
 			</li>
 			
 			<li class="dropdown">
 				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="Display.html">Display</a></li><li><a href="InvalidOrientationLabelError%2520Must%2520be%2520thrown%2520when%2520trying%2520to%2520orientate%2520a%2520page%2520with%2520an%2520invalid%2520orientation%2520label.html">InvalidOrientationLabelError Must be thrown when trying to orientate a page with an invalid orientation label</a></li><li><a href="module-classes_Paginator-Paginator.html">classes/Paginator~Paginator</a></li><li><a href="module-utils_page-formats-Format.html">utils/page-formats~Format</a></li><li><a href="Page.html">Page</a></li>
+					<li><a href="module-class_Display-Display.html">class/Display~Display</a></li><li><a href="module-class_Page-InvalidOrientationLabelError%2520Must%2520be%2520thrown%2520when%2520trying%2520to%2520orientate%2520a%2520page%2520with%2520an%2520invalid%2520orientation%2520label.html">class/Page~InvalidOrientationLabelError Must be thrown when trying to orientate a page with an invalid orientation label</a></li><li><a href="module-class_Page-Page.html">class/Page~Page</a></li><li><a href="module-classes_Paginator-Paginator.html">classes/Paginator~Paginator</a></li><li><a href="module-utils_page-formats-Format.html">utils/page-formats~Format</a></li>
 				</ul>
 			</li>
 			
 			<li class="dropdown">
 				<a href="global.html" class="dropdown-toggle" data-toggle="dropdown">Global<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="global.html#createTestDPIElement">createTestDPIElement</a></li><li><a href="global.html#getter-setterforthepageformat">getter-setter for the page format</a></li><li><a href="global.html#paginator">paginator</a></li><li><a href="global.html#supportedFormats">supportedFormats</a></li><li><a href="global.html#testDPIElement">testDPIElement</a></li>
+					<li><a href="global.html#paginator">paginator</a></li><li><a href="global.html#supportedFormats">supportedFormats</a></li>
 				</ul>
 			</li>
 			
@@ -94,8 +94,9 @@ var Display = require('./Display');
 var Page = require('./Page');
 var parser = require('./paginator/parser');
 
-var errors = require('./paginator/errors'),
-  InvalidPageRankError = errors.InvalidPageRankError;
+var errors = require('./paginator/errors');
+var InvalidFocusedRangeError = errors.InvalidFocusedRangeError;
+var InvalidPageRankError = errors.InvalidPageRankError;
 
 /**
  * Paginator is the page manager
@@ -324,20 +325,17 @@ Paginator.prototype.gotoPage = function(toPage){
     editor.selection.setCursorLocation(lastNode, locationOffset);
   }
 
+  var that = this;
   var fromPage = currentPage;
+  var fromPageContent = this.getPage(fromPage.rank).content();
+  var toPageContent = this.getPage(toPage.rank).content();
 
   if (!toPage) throw new Error('Cant navigate to undefined page');
 
   if (toPage !== fromPage) {
 
-    // Show the destination page
-    $(toPage.content()).css({ 'display': 'block' });
-
-    // Hide all other pages
-    $.each(pages,function(i, loopPage){
-      if (toPage.rank !== loopPage.rank) {
-        $(loopPage.content()).css({ 'display': 'none' });
-      }
+    $(fromPageContent).hide('slide', { direction: 'up' }, 200, function(){
+      $(toPageContent).show('slide', { direction: 'down' }, 200);
     });
 
     // Move cursor to the end of the destination page
@@ -415,9 +413,12 @@ var _getFocusedPageDiv = function(){
   var currentRng = editor.selection.getRng();
 
   selectedElement = currentRng.startContainer;
-  ret = $(selectedElement).closest('div[data-paginator=true]');
-
-  if (!ret) throw new InvalidFocusedRangeError();
+  parents = $(selectedElement).closest('div[data-paginator="true"]');
+  if (!parents.length) {
+    throw new InvalidFocusedRangeError();
+  } else {
+    ret = parents[0];
+  }
 
   return ret;
 };
@@ -450,7 +451,7 @@ var _repage = function(){ console.info('repaging...');
     break;
 
     default:
-      alert('Une erreur est survenue dans le plugin de pagination. Merci de visionner l\'erreur dans la console et de déclarer cette erreur au support «support@sirap.fr»');
+      window.alert('Une erreur est survenue dans le plugin de pagination. Merci de visionner l\'erreur dans la console et de déclarer cette erreur au support «support@sirap.fr»');
       throw new Error('Unsupported block type for repaging: '+lastBlock.nodeName);
 
   }
@@ -478,12 +479,10 @@ var _getDocPadding = function(){
  * @method
  * @private
  * @return {Number} The resulted height in pixels.
- *
- * @todo Understand why the dirtyfix of the bug in border-bottom pdf rendering.
  */
 var _getPageInnerHeight = function(){
 
-  var outerHeight = Number(this._display.mm2px(this._defaultPage.height)*10); // @TODO (*10) is a bug fix
+  var outerHeight = Number(this._display.mm2px(this._defaultPage.height));
   var docPadding = _getDocPadding.call(this);
   var paddingTop = Number(docPadding.top.split('px').join(''));
   var paddingBottom = Number(docPadding.bottom.split('px').join(''));
@@ -592,7 +591,7 @@ module.exports = Paginator;
 <span class="jsdoc-message">
 	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a>
 	
-		on 20/02/2016
+		on 14/03/2016
 	
 	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
 </span>
