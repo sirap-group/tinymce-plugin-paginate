@@ -43,7 +43,7 @@ function InvalidPageHeightError(height){
   this.message = height + 'px is an invalid page height.';
   this.stack = (new Error()).stack;
 }
-InvalidPageHeightError.prototype = new Error;
+InvalidPageHeightError.prototype = Error.prototype;
 
 /**
  * Must be thrown when the requested cursor position doesn't match required values.
@@ -56,7 +56,7 @@ function InvalidCursorPosition(requestedPosition){
   this.message = requestedPosition + 'is an invalid cursor position.';
   this.stack = (new Error()).stack;
 }
-InvalidCursorPosition.prototype = new Error;
+InvalidCursorPosition.prototype = Error.prototype;
 
 //
 // export Paginator.errors namespace
