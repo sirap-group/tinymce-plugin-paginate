@@ -6,6 +6,7 @@ module.exports = function (grunt) {
     grunt.initConfig({
       jshint: {
         gruntfile: ['gruntfile.js'],
+        scripts: ['scripts/**/*.js'],
         js: {
           options: {
             node: true,
