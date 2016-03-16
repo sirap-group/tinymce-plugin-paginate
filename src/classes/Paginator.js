@@ -297,8 +297,9 @@ Paginator.prototype.gotoPage = function(toPage,cursorPosition){
       }
     });
 
-    // cursorPosition may be `ORIGIN`, `END` or `undefined`
-    if (cursorPosition === this.CURSOR_POSITION.ORIGIN) focusToTop();
+    // cursorPosition may be a DOM Element, `ORIGIN`, `END` or undefined
+    if (typeof(cursorPosition) === 'object') focusToNode(cursorPosition);
+    else if (cursorPosition === this.CURSOR_POSITION.ORIGIN) focusToTop();
     else if (cursorPosition === this.CURSOR_POSITION.END) focusToBottom();
     else if (cursorPosition !== undefined) throw new InvalidCursorPosition(cursorPosition);
 
