@@ -11,14 +11,13 @@ var q = require('q');
  * @returns {function} the deferized function.
  */
 function deferizeExec(cmd){
-  return
   /**
    * The deferized function.
    * @function
    * @inner
    * @returns {Promise} the promise of the exec() call.
    */
-  function deferizedExec(){
+  return function deferizedExec(){
     var d = q.defer();
     exec(cmd,function(err,stdout,stderr){
       if (err) {
@@ -30,7 +29,7 @@ function deferizeExec(cmd){
       }
     });
     return d.promise;
-  }
+  };
 }
 
 function confirmPrompt(){
@@ -68,7 +67,7 @@ var gruntCommitBuild = function(semverLevel){ return deferizedExec('git commit -
 cli.option('-c --continue', 'Do not prompt for confirmation');
 
 cli.arguments('<semverLevel>').action(function(semverLevel){
-  
+
   console.log('Prepare to release a new tag...');
 
   confirmPrompt() // if -c or --continue is not defined in the command line.
