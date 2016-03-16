@@ -22,7 +22,10 @@
   "scripts": {
     "build": "grunt",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "jsdoc": "jsdoc -p -d jsdoc -c jsdoc.json -t ./node_modules/ink-docstrap/template  src/*"
+    "jsdoc": "jsdoc -p -d jsdoc -c jsdoc.json -t ./node_modules/ink-docstrap/template  src/*",
+    "release-patch": "node ./scripts/release.js patch",
+    "release-minor": "node ./scripts/release.js minor",
+    "release-major": "node ./scripts/release.js major"
   },
   "repository": {
     "type": "git",
