@@ -52,11 +52,6 @@ exports.appendNavigationButtons = function(paginator){
   .css({
     'width': '60px',
     'position': 'absolute',
-    '-moz-box-shadow': '0px 0px 10px 10px #000000',
-    '-webkit-box-shadow': '0px 0px 10px 10px #000000',
-    '-o-box-shadow': '0px 0px 10px 10px #000000',
-    'box-shadow': '0px 0px 10px 10px #000000',
-    'filter':'progid:DXImageTransform.Microsoft.Shadow(color=#000000, Direction=NaN, Strength=10)',
     '-moz-border-radius': '50%',
     '-webkit-border-radius': '50%',
     'border-radius': '50%',
