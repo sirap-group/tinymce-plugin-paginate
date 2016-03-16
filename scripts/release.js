@@ -61,7 +61,7 @@ var gruntBump = function(level){ return deferizedExec('grunt bump:'+level); };
 var gitPushRemote = function(remote){ return deferizedExec('git push '+remote+' master'); };
 var gitPushTags = function(remote){ return deferizedExec('git push --tags '+remote); };
 var gitStash = deferizedExec('git stash');
-
+var gruntAddBuildedFiles = deferizedExec('git add . --all');
 
 cli.option('-c --continue', 'Do not prompt for confirmation');
 
