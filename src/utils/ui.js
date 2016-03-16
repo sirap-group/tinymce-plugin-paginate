@@ -84,6 +84,10 @@ exports.appendNavigationButtons = function(paginator){
     .change(onInputRankChanges).appendTo(navbar)
   ;
 
+  setTimeout(function(){
+    navbarElements.inputRank.val(paginator.getCurrentPage().rank);
+  },500);
+
   // navigate to next page
   navbarElements.btnNext = $(btnSelector)
     .attr('href','#')
