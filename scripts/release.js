@@ -85,6 +85,7 @@ function gitPushTags(remote){
   };
 }
 
+cli.option('-c --continue', 'Do not prompt for confirmation');
 
 cli.arguments('<semverLevel>').action(function(semverLevel){
 
