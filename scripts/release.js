@@ -70,15 +70,18 @@ cli.option('-c --continue', 'Do not prompt for confirmation');
 cli.arguments('<semverLevel>').action(function(semverLevel){
 
   gruntCommitBuild = deferizedExec('git commit -m "build dist and docs to release '+semverLevel+'"');
-  
+
   console.log('Prepare to release a new tag...');
 
   confirmPrompt() // if -c or --continue is not defined in the command line.
   .then(function(confirmation){
     if (confirmation) {
-      return gitCheckoutMaster()
+      return gitStash()
+      .then(gitCheckoutMaster)
       .then(gitPullUpstream)
       .then(gruntBuild)
+      .then(gruntAddBuildedFiles)
+      .then(gruntCommitBuild)
       .then(gruntBump(semverLevel))
       .then(gitPushRemote('origin'))
       .then(gitPushRemote('gl-open-source'));
