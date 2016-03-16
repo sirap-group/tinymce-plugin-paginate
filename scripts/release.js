@@ -62,15 +62,13 @@ var gitPushRemote = function(remote){ return deferizedExec('git push '+remote+' 
 var gitPushTags = function(remote){ return deferizedExec('git push --tags '+remote); };
 var gitStash = deferizedExec('git stash');
 var gruntAddBuildedFiles = deferizedExec('git add . --all');
-var gruntCommitBuild;
+var gruntCommitBuild = function(semverLevel){ return deferizedExec('git commit -m "build dist and docs to release '+semverLevel+'"'); };
 
 
 cli.option('-c --continue', 'Do not prompt for confirmation');
 
 cli.arguments('<semverLevel>').action(function(semverLevel){
-
-  gruntCommitBuild = deferizedExec('git commit -m "build dist and docs to release '+semverLevel+'"');
-
+  
   console.log('Prepare to release a new tag...');
 
   confirmPrompt() // if -c or --continue is not defined in the command line.
@@ -79,7 +77,7 @@ cli.arguments('<semverLevel>').action(function(semverLevel){
       return gitStash()
       .then(gitCheckoutMaster)
       .then(gitPullUpstream)
-      .then(gruntBuild)
+      .then(gruntBuild(semverLevel))
       .then(gruntAddBuildedFiles)
       .then(gruntCommitBuild)
       .then(gruntBump(semverLevel))
