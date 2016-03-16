@@ -48,6 +48,18 @@ function gitPullUpstream(){
   return d.promise;
 }
 
+function gruntBuild(){
+  var d = q.defer();
+  exec('grunt build', function(err){
+    if (err) {
+      d.reject(err);
+    } else {
+      d.resolve();
+    }
+  });
+  return d.promise;
+}
+
 function gruntBump(level){
   return function(){
     var d = q.defer();
@@ -101,6 +113,7 @@ cli.arguments('<semverLevel>').action(function(semverLevel){
     if (confirmation) {
       return gitCheckoutMaster()
       .then(gitPullUpstream)
+      .then(gruntBuild)
       .then(gruntBump(semverLevel))
       .then(gitPushRemote('origin'))
       .then(gitPushRemote('gl-open-source'));
