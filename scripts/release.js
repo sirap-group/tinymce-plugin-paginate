@@ -6,7 +6,7 @@ var q = require('q');
 function confirmPrompt(){
   var d = q.defer();
   if (cli.continue) {
-    d.resolve();
+    d.resolve(true);
   } else {
     try {
       inquirer.prompt({
