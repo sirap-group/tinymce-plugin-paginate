@@ -54,83 +54,12 @@ function confirmPrompt(){
   return d.promise;
 }
 
-function gitCheckoutMaster(){
-  var d = q.defer();
-  exec('git checkout master',function(err){
-    if (err) {
-      d.reject(err);
-    } else {
-      d.resolve();
-    }
-  });
-  return d.promise;
-}
-
-function gitPullUpstream(){
-  var d = q.defer();
-  exec('git pull gh-sirap-group master',function(err){
-    if (err) {
-      d.reject(err);
-    } else {
-      d.resolve();
-    }
-  });
-  return d.promise;
-}
-
-function gruntBuild(){
-  var d = q.defer();
-  exec('grunt build', function(err){
-    if (err) {
-      d.reject(err);
-    } else {
-      d.resolve();
-    }
-  });
-  return d.promise;
-}
-
-function gruntBump(level){
-  return function(){
-    var d = q.defer();
-    exec('grunt bump:'+level, function(err){
-      if (err) {
-        d.reject(err);
-      } else {
-        d.resolve();
-      }
-    });
-    return d.promise;
-  }
-}
-
-function gitPushRemote(remote){
-  return function(){
-    var d = q.defer();
-    exec('git push '+remote+' master', function(err){
-      if (err) {
-        d.reject(err);
-      } else {
-        d.resolve();
-      }
-    });
-    return d.promise;
-  };
-}
-
-function gitPushTags(remote){
-  return function(){
-    var d = q.defer();
-    exec('git push --tags '+remote, function(err){
-      if (err) {
-        d.reject(err);
-      } else {
-        d.resolve();
-      }
-    });
-    return d.promise;
-  };
-}
+var gitCheckoutMaster = deferizedExec('git checkout master');
+var gitPullUpstream = deferizedExec('git pull gh-sirap-group master');
+var gruntBuild = deferizedExec('grunt build');
+var gruntBump = function(level){ return deferizedExec('grunt bump:'+level); };
+var gitPushRemote = function(remote){ return deferizedExec('git push '+remote+' master'); };
+var gitPushTags = function(remote){ return deferizedExec('git push --tags '+remote); };
 
 cli.option('-c --continue', 'Do not prompt for confirmation');
 
