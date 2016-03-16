@@ -372,19 +372,36 @@ Paginator.prototype.gotoNext = function(cursorPosition){
 Paginator.prototype.watchPage = function(){
   var maxHeight;
   var currentHeight;
-  var iteratee = -1;
+  var iteratee = -1; // pass to zero during the first loop
+  var cursorPositionAfterRepaging;
+  var lastBlock, savedLastBlock;
 
+  // check if the current page is overflown by its content
+  // if true, repage the content
   do {
-    iteratee++;
+    if (lastBlock) savedLastBlock = lastBlock;
+    iteratee++; lastBlock = null;
 
     maxHeight = _getPageInnerHeight.call(this);
     currentHeight = _getPageContentHeight.call(this);
 
     if (currentHeight===0) throw new InvalidPageHeightError(currentHeight);
 
-  } while ( (currentHeight > maxHeight) && _repage.call(this) );
+    if (currentHeight > maxHeight) {
+      lastBlock = _repage.call(this);
+    }
 
-  if (iteratee) this.gotoNext(this.CURSOR_POSITION.ORIGIN);
+  } while ( lastBlock );
+
+  // if more than one loop ocured, there was be repaging.
+  if (iteratee) {
+
+    var loc = editor.selection.getRng();
+    console.log(loc);
+
+    // pass the saved lastblock to the gotoNext() method for focusing on it after page change.
+    this.gotoNext(savedLastBlock);
+  }
 
 };
 
@@ -442,9 +459,7 @@ var _repage = function(){ console.info('repaging...');
 
   }
 
-  return true;
-  // Goto nextPage
-  // this.gotoNext();
+  return lastBlock;
 };
 
 /**
