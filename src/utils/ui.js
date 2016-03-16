@@ -107,6 +107,15 @@ exports.appendNavigationButtons = function(paginator){
   ;
 };
 
+/**
+ * Remove navigation buttons
+ * @function
+ * @static
+ */
+exports.removeNavigationButtons = function(){
+  $('#paginator-navbar').remove();
+};
+
 exports.updatePageRankInput = function(rank){
   $('#input-rank').val(rank);
 };
