@@ -283,12 +283,7 @@ Paginator.prototype.gotoPage = function(toPage,cursorPosition){
 
   if (toPage !== fromPage) {
 
-    // $(fromPageContent).hide('slide', { direction: 'up', ease: 'easeOutBack' }, 200, function(){
-    //   $(toPageContent).show('slide', { direction: 'down', ease: 'easeOutBack' }, 200);
-    // });
     $.each(this.getPages(),function(i,page){
-      // if (page.rank !== fromPage.rank && page.rank !== toPage.rank) {
-      // }
       switch (page.rank) {
         case toPage.rank:
           $(toPageContent).css({ display:'block' });
@@ -299,25 +294,6 @@ Paginator.prototype.gotoPage = function(toPage,cursorPosition){
         default:
           $(that.getPage(page.rank).content()).css({ display:'hidden' });
         break;
-      }
-    });
-
-    // $(fromPageContent).hide(function(){
-    //   $(this).css({ display: 'hidden' });
-    //   $(toPageContent).css({ display: 'block' });
-    //   $(toPageContent).show();
-    // });
-
-    // $('div.ui-effects-wrapper',this._body).remove();
-
-    // @TODO ancien code fonctionnel
-    // Show the destination page
-    $(toPage.content()).css({ 'display': 'block' });
-
-    // Hide all other pages
-    $.each(pages,function(i, loopPage){
-      if (toPage.rank !== loopPage.rank) {
-        $(loopPage.content()).css({ 'display': 'none' });
       }
     });
 
