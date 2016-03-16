@@ -95,6 +95,7 @@ cli.arguments('<semverLevel>').action(function(semverLevel){
   }).catch(function(err){
     console.error('Error');
     console.error(err);
+    console.error(err.stack);
   });
 
 
