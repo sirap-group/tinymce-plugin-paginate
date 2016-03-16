@@ -18,13 +18,16 @@ function deferizeExec(cmd){
    * @returns {Promise} the promise of the exec() call.
    */
   return function deferizedExec(){
+    console.log('>>> Running command «'+cmd+'» ...');
     var d = q.defer();
     exec(cmd,function(err,stdout,stderr){
       if (err) {
         console.error(stderr);
+        console.log('... FAIL ! <<<');
         d.reject();
       } else {
         console.log(stdout);
+        console.log('... SUCCES ! <<<');
         d.resolve();
       }
     });
