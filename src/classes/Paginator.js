@@ -269,6 +269,11 @@ Paginator.prototype.gotoPage = function(toPage,cursorPosition){
     editor.selection.setCursorLocation(firstNode, 0);
   }
 
+  function focusToNode(node){
+    console.log('focus to node',node);
+    editor.selection.setCursorLocation(node,0);
+  }
+
   var that = this;
   var fromPage = currentPage;
   var fromPageContent = this.getPage(fromPage.rank).content();
