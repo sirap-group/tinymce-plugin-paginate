@@ -78,7 +78,7 @@ cli.arguments('<semverLevel>').action(function(semverLevel){
       .then(gitPullUpstream)
       .then(gruntBuild(semverLevel))
       .then(gruntAddBuildedFiles)
-      .then(gruntCommitBuild)
+      .then(gruntCommitBuild(semverLevel))
       .then(gruntBump(semverLevel))
       .then(gitPushRemote('origin'))
       .then(gitPushRemote('gl-open-source'));
