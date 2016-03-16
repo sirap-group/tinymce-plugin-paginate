@@ -18,6 +18,7 @@ function InvalidPageRankError(rank){
   this.stack = (new Error()).stack;
 }
 InvalidPageRankError.prototype = Error.prototype;
+InvalidPageRankError.prototype.name = 'InvalidPageRankError';
 
 /**
  * Must be thrown when the DOM range of the text cursor is out of a paginated DOM tree.
@@ -31,6 +32,7 @@ function InvalidFocusedRangeError(){
   this.stack = (new Error()).stack;
 }
 InvalidFocusedRangeError.prototype = Error.prototype;
+InvalidFocusedRangeError.prototype.name = 'InvalidFocusedRangeError';
 
 /**
  * Must be thrown when the current page height doesn't match required values
@@ -44,6 +46,7 @@ function InvalidPageHeightError(height){
   this.stack = (new Error()).stack;
 }
 InvalidPageHeightError.prototype = Error.prototype;
+InvalidPageHeightError.prototype.name = 'InvalidPageHeightError';
 
 /**
  * Must be thrown when the requested cursor position doesn't match required values.
@@ -57,6 +60,7 @@ function InvalidCursorPosition(requestedPosition){
   this.stack = (new Error()).stack;
 }
 InvalidCursorPosition.prototype = Error.prototype;
+InvalidCursorPosition.prototype.name = 'InvalidCursorPosition';
 
 //
 // export Paginator.errors namespace

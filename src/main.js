@@ -182,6 +182,7 @@ function tinymcePluginPaginate(editor) {
     ui.appendNavigationButtons(paginator);
     editor.dom.bind(editor.getDoc(),'PageChange',onPageChange);
   });
+  editor.on('remove',ui.removeNavigationButtons);
   editor.once('change',function(){
     paginatorListens = !!paginator;
     if(paginatorListens) paginator.init();
