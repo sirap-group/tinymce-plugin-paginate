@@ -18,13 +18,16 @@ function deferizeExec(cmd){
    * @returns {Promise} the promise of the exec() call.
    */
   return function deferizedExec(){
+    console.log('>>> Running command «'+cmd+'» ...');
     var d = q.defer();
     exec(cmd,function(err,stdout,stderr){
       if (err) {
         console.error(stderr);
+        console.log('... FAIL ! <<<');
         d.reject();
       } else {
         console.log(stdout);
+        console.log('... SUCCES ! <<<');
         d.resolve();
       }
     });
@@ -53,16 +56,13 @@ function confirmPrompt(){
   return d.promise;
 }
 
-var gitCheckoutMaster = deferizeExec('git checkout master');
-var gitPullUpstream = deferizeExec('git pull gh-sirap-group master');
-var gruntBuild = deferizeExec('grunt build');
-var gruntBump = function(level){ return deferizeExec('grunt bump:'+level); };
-var gitPushRemote = function(remote){ return deferizeExec('git push '+remote+' master'); };
-var gitPushTags = function(remote){ return deferizeExec('git push --tags '+remote); };
-var gitStash = deferizeExec('git stash');
-var gruntAddBuildedFiles = deferizeExec('git add . --all');
-var gruntCommitBuild = function(semverLevel){ return deferizeExec('git commit -m "build dist and docs to release '+semverLevel+'"'); };
 
+function gitPushRemote(remote){
+  return deferizeExec('git push '+remote+' master');
+};
+function gitPushTags(remote){
+  return deferizeExec('git push --tags '+remote);
+}
 
 cli.option('-c --continue', 'Do not prompt for confirmation');
 
@@ -73,15 +73,22 @@ cli.arguments('<semverLevel>').action(function(semverLevel){
   confirmPrompt() // if -c or --continue is not defined in the command line.
   .then(function(confirmation){
     if (confirmation) {
-      return gitStash()
-      .then(gitCheckoutMaster)
-      .then(gitPullUpstream)
-      .then(gruntBuild(semverLevel))
-      .then(gruntAddBuildedFiles)
-      .then(gruntCommitBuild)
-      .then(gruntBump(semverLevel))
-      .then(gitPushRemote('origin'))
-      .then(gitPushRemote('gl-open-source'));
+      return deferizeExec('git stash')
+        .then(deferizeExec('git checkout master'))
+        .then(deferizeExec('git pull gh-sirap-group master'))
+        .then(deferizeExec('grunt build'))
+        .then(deferizeExec('git add . --all'))
+        .then((function(level){
+          return deferizeExec('git commit -m "build dist and docs to release '+level+'"');
+        })(semverLevel))
+        .then((function(level){
+          return deferizeExec('grunt bump:'+level); }
+        )(semverLevel))
+        .then(gitPushRemote('origin'))
+        .then(gitPushTags('origin'))
+        .then(gitPushRemote('gl-open-source'))
+        .then(gitPushTags('gl-open-source'))
+      ;
     } else {
       console.log('Aborted by user');
     }
