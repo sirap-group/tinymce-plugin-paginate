@@ -59,7 +59,7 @@ function confirmPrompt(){
 
 function gitPushRemote(remote){
   return deferizeExec('git push '+remote+' master');
-};
+}
 function gitPushTags(remote){
   return deferizeExec('git push --tags '+remote);
 }
@@ -82,8 +82,8 @@ cli.arguments('<semverLevel>').action(function(semverLevel){
           return deferizeExec('git commit -m "build dist and docs to release '+level+'"');
         })(semverLevel))
         .then((function(level){
-          return deferizeExec('grunt bump:'+level); }
-        )(semverLevel))
+          return deferizeExec('grunt bump:'+level);
+        })(semverLevel))
         .then(gitPushRemote('origin'))
         .then(gitPushTags('origin'))
         .then(gitPushRemote('gl-open-source'))
@@ -95,6 +95,7 @@ cli.arguments('<semverLevel>').action(function(semverLevel){
   }).catch(function(err){
     console.error('Error');
     console.error(err);
+    console.error(err.stack);
   });
 
 
