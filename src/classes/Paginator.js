@@ -14,6 +14,7 @@ var errors = require('./paginator/errors');
 var InvalidPageRankError = errors.InvalidPageRankError;
 var InvalidFocusedRangeError = errors.InvalidFocusedRangeError;
 var InvalidPageHeightError = errors.InvalidPageHeightError;
+var InvalidCursorPosition = errors.InvalidCursorPosition;
 
 
 /**
@@ -268,6 +269,11 @@ Paginator.prototype.gotoPage = function(toPage,cursorPosition){
     editor.selection.setCursorLocation(firstNode, 0);
   }
 
+  function focusToNode(node){
+    console.log('focus to node',node);
+    editor.selection.setCursorLocation(node,0);
+  }
+
   var that = this;
   var fromPage = currentPage;
   var fromPageContent = this.getPage(fromPage.rank).content();
@@ -277,45 +283,23 @@ Paginator.prototype.gotoPage = function(toPage,cursorPosition){
 
   if (toPage !== fromPage) {
 
-    // $(fromPageContent).hide('slide', { direction: 'up', ease: 'easeOutBack' }, 200, function(){
-    //   $(toPageContent).show('slide', { direction: 'down', ease: 'easeOutBack' }, 200);
-    // });
     $.each(this.getPages(),function(i,page){
-      // if (page.rank !== fromPage.rank && page.rank !== toPage.rank) {
-      // }
       switch (page.rank) {
         case toPage.rank:
           $(toPageContent).css({ display:'block' });
         break;
         case fromPage.rank:
-          $(fromPageContent).css({ display:'hidden' });
+          $(fromPageContent).css({ display:'none' });
+        break;
         default:
-          $(that.getPage(page.rank).content()).css({ display:'hidden' });
+          $(that.getPage(page.rank).content()).css({ display:'none' });
         break;
       }
     });
 
-    // $(fromPageContent).hide(function(){
-    //   $(this).css({ display: 'hidden' });
-    //   $(toPageContent).css({ display: 'block' });
-    //   $(toPageContent).show();
-    // });
-
-    // $('div.ui-effects-wrapper',this._body).remove();
-
-    // @TODO ancien code fonctionnel
-    // Show the destination page
-    // $(toPage.content()).css({ 'display': 'block' });
-    //
-    // // Hide all other pages
-    // $.each(pages,function(i, loopPage){
-    //   if (toPage.rank !== loopPage.rank) {
-    //     $(loopPage.content()).css({ 'display': 'none' });
-    //   }
-    // });
-
-    // cursorPosition may be `ORIGIN`, `END` or `undefined`
-    if (cursorPosition === this.CURSOR_POSITION.ORIGIN) focusToTop();
+    // cursorPosition may be a DOM Element, `ORIGIN`, `END` or undefined
+    if (typeof(cursorPosition) === 'object') focusToNode(cursorPosition);
+    else if (cursorPosition === this.CURSOR_POSITION.ORIGIN) focusToTop();
     else if (cursorPosition === this.CURSOR_POSITION.END) focusToBottom();
     else if (cursorPosition !== undefined) throw new InvalidCursorPosition(cursorPosition);
 
@@ -337,11 +321,22 @@ Paginator.prototype.gotoPage = function(toPage,cursorPosition){
  * @return void
  */
 Paginator.prototype.gotoFocusedPage = function(){
-  var focusedDiv = _getFocusedPageDiv.call(this);
-  var pageRank = $(focusedDiv).attr('data-paginator-page-rank');
-  var focusedPage = this.getPage(pageRank);
-  currentPage = focusedPage;
-  this.gotoPage(focusedPage);
+  var focusedPage, focusedDiv;
+
+  try {
+    var pageRank;
+    focusedDiv = _getFocusedPageDiv.call(this);
+    pageRank = $(focusedDiv).attr('data-paginator-page-rank');
+    focusedPage = this.getPage(pageRank);
+  } catch (e) {
+    // if there is no focused page div, focus to the first page
+    focusedPage = this.getPage(1);
+    focusedDiv = focusedPage.content();
+    editor.selection.select(focusedDiv, true);
+  } finally {
+    currentPage = focusedPage;
+    this.gotoPage(focusedPage);
+  }
 };
 
 /**
@@ -377,19 +372,36 @@ Paginator.prototype.gotoNext = function(cursorPosition){
 Paginator.prototype.watchPage = function(){
   var maxHeight;
   var currentHeight;
-  var iteratee = -1;
+  var iteratee = -1; // pass to zero during the first loop
+  var cursorPositionAfterRepaging;
+  var lastBlock, savedLastBlock;
 
+  // check if the current page is overflown by its content
+  // if true, repage the content
   do {
-    iteratee++;
+    if (lastBlock) savedLastBlock = lastBlock;
+    iteratee++; lastBlock = null;
 
     maxHeight = _getPageInnerHeight.call(this);
     currentHeight = _getPageContentHeight.call(this);
 
     if (currentHeight===0) throw new InvalidPageHeightError(currentHeight);
 
-  } while ( (currentHeight > maxHeight) && _repage.call(this) );
+    if (currentHeight > maxHeight) {
+      lastBlock = _repage.call(this);
+    }
 
-  if (iteratee) this.gotoNext(this.CURSOR_POSITION.ORIGIN);
+  } while ( lastBlock );
+
+  // if more than one loop ocured, there was be repaging.
+  if (iteratee) {
+
+    var loc = editor.selection.getRng();
+    console.log(loc);
+
+    // pass the saved lastblock to the gotoNext() method for focusing on it after page change.
+    this.gotoNext(savedLastBlock);
+  }
 
 };
 
@@ -447,9 +459,7 @@ var _repage = function(){ console.info('repaging...');
 
   }
 
-  return true;
-  // Goto nextPage
-  // this.gotoNext();
+  return lastBlock;
 };
 
 /**

@@ -5,16 +5,21 @@ var q = require('q');
 
 function confirmPrompt(){
   var d = q.defer();
-  try {
-    inquirer.prompt({
-      name: 'confirmRelease',
-      type: 'confirm',
-      message: 'Did you made a pull request of your last commits to upstream before building a new release ?'
-    },function(confirmation){
-      d.resolve(confirmation.confirmRelease);
-    });
-  } catch(err){
-    d.reject(err);
+  if (cli.continue) {
+    d.resolve(true);
+  } else {
+    try {
+      inquirer.prompt({
+        name: 'confirmRelease',
+        type: 'confirm',
+        message: 'Did you made a pull request of your last commits to upstream before building a new release ?',
+        'default': false
+      },function(confirmation){
+        d.resolve(confirmation.confirmRelease);
+      });
+    } catch(err){
+      d.reject(err);
+    }
   }
   return d.promise;
 }
@@ -34,6 +39,18 @@ function gitCheckoutMaster(){
 function gitPullUpstream(){
   var d = q.defer();
   exec('git pull gh-sirap-group master',function(err){
+    if (err) {
+      d.reject(err);
+    } else {
+      d.resolve();
+    }
+  });
+  return d.promise;
+}
+
+function gruntBuild(){
+  var d = q.defer();
+  exec('grunt build', function(err){
     if (err) {
       d.reject(err);
     } else {
@@ -85,16 +102,18 @@ function gitPushTags(remote){
   };
 }
 
+cli.option('-c --continue', 'Do not prompt for confirmation');
 
 cli.arguments('<semverLevel>').action(function(semverLevel){
 
   console.log('Prepare to release a new tag...');
 
-  confirmPrompt()
+  confirmPrompt() // if -c or --continue is not defined in the command line.
   .then(function(confirmation){
     if (confirmation) {
       return gitCheckoutMaster()
       .then(gitPullUpstream)
+      .then(gruntBuild)
       .then(gruntBump(semverLevel))
       .then(gitPushRemote('origin'))
       .then(gitPushRemote('gl-open-source'));

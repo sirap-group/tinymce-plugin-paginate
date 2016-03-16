@@ -133,7 +133,7 @@ function tinymcePluginPaginate(editor) {
     try {
       paginator.watchPage();
     } catch (e) {
-      watchPageIterationsCount++
+      watchPageIterationsCount++;
       // Due to a suspecte bug in tinymce that break the binding of DOM elements with the paginator.
       if (e instanceof InvalidPageHeightError) {
         console.error(e.message+'... re-init paginator then watch page again...');
@@ -177,17 +177,18 @@ function tinymcePluginPaginate(editor) {
 
   editor.once('init',function(){
     paginator = new Paginator('A4','portrait', editor);
-    if(!paginatorStartListening) paginator.init();
-    paginatorStartListening = true;
+    if(!paginatorListens) paginator.init();
+    paginatorListens = true;
     ui.appendNavigationButtons(paginator);
     editor.dom.bind(editor.getDoc(),'PageChange',onPageChange);
   });
+  editor.on('remove',ui.removeNavigationButtons);
   editor.once('change',function(){
-    paginatorStartListening = !!paginator;
-    if(paginatorStartListening) paginator.init();
+    paginatorListens = !!paginator;
+    if(paginatorListens) paginator.init();
   });
   editor.on('change',function(){
-    if(paginatorStartListening) paginator.watchPage();
+    if(paginatorListens) paginator.watchPage();
   });
   editor.on('SetContent',function(){
     //if(paginatorStartListening) paginator.init();

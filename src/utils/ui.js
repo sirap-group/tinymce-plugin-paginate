@@ -44,20 +44,18 @@ exports.appendNavigationButtons = function(paginator){
   var body = $('body');
   var btnSelector = '<a></a>';
   var btnCommonClasses = 'btn glyphicon';
-  var btnCommonStyles = {'background': 'white', 'width':'100%', 'top':'0'};
+  var btnCommonStyles = {
+    'background': 'whitesmoke',
+    'width':'100%',
+    'top':'0'
+  };
 
   // Create a div vertical wrapper to append nav elements into
-  navbar = $('<div></div>').css({
+  navbar = $('<div></div>')
+  .attr('id','paginator-navbar')
+  .css({
     'width': '60px',
     'position': 'absolute',
-    '-moz-box-shadow': '0px 0px 10px 10px #000000',
-    '-webkit-box-shadow': '0px 0px 10px 10px #000000',
-    '-o-box-shadow': '0px 0px 10px 10px #000000',
-    'box-shadow': '0px 0px 10px 10px #000000',
-    'filter':'progid:DXImageTransform.Microsoft.Shadow(color=#000000, Direction=NaN, Strength=10)',
-    '-moz-border-radius': '50%',
-    '-webkit-border-radius': '50%',
-    'border-radius': '50%',
     'top': (window.screen.height/2 -35)+'px',
     'right': '40px',
     'z-index': '999'
@@ -67,8 +65,8 @@ exports.appendNavigationButtons = function(paginator){
   navbarElements.btnPrevious = $(btnSelector)
     .attr('href','#')
     .css($.extend(btnCommonStyles,{
-      'border-top-left-radius': '50%',
-      'border-top-right-radius': '50%',
+      'border-top-left-radius': '25%',
+      'border-top-right-radius': '25%',
       'border-bottom-left-radius': '0',
       'border-bottom-right-radius': '0'
     }))
@@ -87,6 +85,10 @@ exports.appendNavigationButtons = function(paginator){
     .change(onInputRankChanges).appendTo(navbar)
   ;
 
+  setTimeout(function(){
+    navbarElements.inputRank.val(paginator.getCurrentPage().rank);
+  },500);
+
   // navigate to next page
   navbarElements.btnNext = $(btnSelector)
     .attr('href','#')
@@ -94,8 +96,8 @@ exports.appendNavigationButtons = function(paginator){
       'width': '100%',
       'border-top-left-radius': '0',
       'border-top-right-radius': '0',
-      'border-bottom-left-radius': '50%',
-      'border-bottom-right-radius': '50%'
+      'border-bottom-left-radius': '25%',
+      'border-bottom-right-radius': '25%'
     }))
     .addClass(btnCommonClasses + ' glyphicon-chevron-down')
     .click(function(){
@@ -104,6 +106,15 @@ exports.appendNavigationButtons = function(paginator){
     })
     .appendTo(navbar)
   ;
+};
+
+/**
+ * Remove navigation buttons
+ * @function
+ * @static
+ */
+exports.removeNavigationButtons = function(){
+  $('#paginator-navbar').remove();
 };
 
 exports.updatePageRankInput = function(rank){
