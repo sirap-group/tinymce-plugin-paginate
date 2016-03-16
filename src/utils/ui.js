@@ -47,7 +47,9 @@ exports.appendNavigationButtons = function(paginator){
   var btnCommonStyles = {'background': 'white', 'width':'100%', 'top':'0'};
 
   // Create a div vertical wrapper to append nav elements into
-  navbar = $('<div></div>').css({
+  navbar = $('<div></div>')
+  .attr('id','paginator-navbar')
+  .css({
     'width': '60px',
     'position': 'absolute',
     '-moz-box-shadow': '0px 0px 10px 10px #000000',
