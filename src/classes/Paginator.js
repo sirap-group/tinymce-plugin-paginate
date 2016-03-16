@@ -289,10 +289,10 @@ Paginator.prototype.gotoPage = function(toPage,cursorPosition){
           $(toPageContent).css({ display:'block' });
         break;
         case fromPage.rank:
-          $(fromPageContent).css({ display:'hidden' });
+          $(fromPageContent).css({ display:'none' });
         break;
         default:
-          $(that.getPage(page.rank).content()).css({ display:'hidden' });
+          $(that.getPage(page.rank).content()).css({ display:'none' });
         break;
       }
     });
