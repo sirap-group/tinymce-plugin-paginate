@@ -24,7 +24,7 @@ function deferizeExec(cmd){
       if (err) {
         console.error(stderr);
         console.log('... FAIL ! <<<');
-        d.reject();
+        d.reject(err);
       } else {
         console.log(stdout);
         console.log('... SUCCES ! <<<');
