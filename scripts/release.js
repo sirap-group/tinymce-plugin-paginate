@@ -53,15 +53,15 @@ function confirmPrompt(){
   return d.promise;
 }
 
-var gitCheckoutMaster = deferizedExec('git checkout master');
-var gitPullUpstream = deferizedExec('git pull gh-sirap-group master');
-var gruntBuild = deferizedExec('grunt build');
-var gruntBump = function(level){ return deferizedExec('grunt bump:'+level); };
-var gitPushRemote = function(remote){ return deferizedExec('git push '+remote+' master'); };
-var gitPushTags = function(remote){ return deferizedExec('git push --tags '+remote); };
-var gitStash = deferizedExec('git stash');
-var gruntAddBuildedFiles = deferizedExec('git add . --all');
-var gruntCommitBuild = function(semverLevel){ return deferizedExec('git commit -m "build dist and docs to release '+semverLevel+'"'); };
+var gitCheckoutMaster = deferizeExec('git checkout master');
+var gitPullUpstream = deferizeExec('git pull gh-sirap-group master');
+var gruntBuild = deferizeExec('grunt build');
+var gruntBump = function(level){ return deferizeExec('grunt bump:'+level); };
+var gitPushRemote = function(remote){ return deferizeExec('git push '+remote+' master'); };
+var gitPushTags = function(remote){ return deferizeExec('git push --tags '+remote); };
+var gitStash = deferizeExec('git stash');
+var gruntAddBuildedFiles = deferizeExec('git add . --all');
+var gruntCommitBuild = function(semverLevel){ return deferizeExec('git commit -m "build dist and docs to release '+semverLevel+'"'); };
 
 
 cli.option('-c --continue', 'Do not prompt for confirmation');
