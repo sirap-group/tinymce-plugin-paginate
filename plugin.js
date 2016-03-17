@@ -126,7 +126,8 @@ var supportedFormats = require('../utils/page-formats');
 
 var InvalidOrientationLabelError = (function(){
   /**
-   * @constructor InvalidOrientationLabelError Must be thrown when trying to orientate a page with an invalid orientation label
+   * Must be thrown when trying to orientate a page with an invalid orientation label
+   * @constructor
    * @param {string} label The invalid orientation label
    */
   function InvalidOrientationLabelError(label){
@@ -135,6 +136,7 @@ var InvalidOrientationLabelError = (function(){
     this.stack = (new Error()).stack;
   }
   InvalidOrientationLabelError.prototype = Error.prototype;
+  InvalidOrientationLabelError.prototype.name = 'InvalidOrientationLabelError';
   return InvalidOrientationLabelError;
 })();
 
@@ -257,8 +259,11 @@ var Page = require('./Page');
 var parser = require('./paginator/parser');
 
 var errors = require('./paginator/errors');
-var InvalidFocusedRangeError = errors.InvalidFocusedRangeError;
 var InvalidPageRankError = errors.InvalidPageRankError;
+var InvalidFocusedRangeError = errors.InvalidFocusedRangeError;
+var InvalidPageHeightError = errors.InvalidPageHeightError;
+var InvalidCursorPosition = errors.InvalidCursorPosition;
+
 
 /**
  * Paginator is the page manager
@@ -322,6 +327,14 @@ var pages = [];
  * @private
  */
 var editor;
+
+/**
+ * Set of the two constant values representing the `origin` or the `end` of possible ranges to focus when focusing/navigating to a page.
+ * @type {object}
+ * @property {string} ORIGIN equals 'ORIGIN'
+ * @property {string} END equals 'END'
+ */
+Paginator.prototype.CURSOR_POSITION = { ORIGIN:'ORIGIN', END: 'END' };
 
 /**
  * Initialize the paginator. The editor and its content has to be loaded before initialize the paginator
@@ -428,10 +441,12 @@ Paginator.prototype.getNext = function(){
 /**
  * Navigate to the given page
  * @method
- * @param {Page} the page to navigate to
+ * @param {Page} toPage - The page to navigate to
+ * @param {string} [cursorPosition] - The requested cursor  position to set after navigating to
  * @return void
  */
-Paginator.prototype.gotoPage = function(toPage){
+Paginator.prototype.gotoPage = function(toPage,cursorPosition){
+
   /**
    * Set cursor location to the bottom of the destination page
    * @function
@@ -439,6 +454,7 @@ Paginator.prototype.gotoPage = function(toPage){
    * @return void
    */
   function focusToBottom(){
+
     /**
      * Get all text nodes from a given node
      * @function
@@ -461,6 +477,7 @@ Paginator.prototype.gotoPage = function(toPage){
       }
       return result;
     }
+
     // get all Textnodes from lastchild, calc length
     var content, lastChild, textNodes, lastNode, locationOffset, cursorLocation;
     content = toPage.content();
@@ -471,7 +488,6 @@ Paginator.prototype.gotoPage = function(toPage){
     }
     if (lastChild) {
       textNodes = getTextNodes(lastChild) ;
-
       if (textNodes.length) {
         lastNode = textNodes[textNodes.length-1];
         locationOffset = lastNode.textContent.length;
@@ -487,6 +503,25 @@ Paginator.prototype.gotoPage = function(toPage){
     editor.selection.setCursorLocation(lastNode, locationOffset);
   }
 
+  /**
+   * Set cursor location to the bottom of the destination page
+   * @function
+   * @inner
+   * @return void
+   */
+  function focusToTop(){
+    var content, firstNode;
+    content = toPage.content();
+    firstNode = content.firstChild;
+    // set Cursor to last position
+    editor.selection.setCursorLocation(firstNode, 0);
+  }
+
+  function focusToNode(node){
+    console.log('focus to node',node);
+    editor.selection.setCursorLocation(node,0);
+  }
+
   var that = this;
   var fromPage = currentPage;
   var fromPageContent = this.getPage(fromPage.rank).content();
@@ -496,12 +531,25 @@ Paginator.prototype.gotoPage = function(toPage){
 
   if (toPage !== fromPage) {
 
-    $(fromPageContent).hide('slide', { direction: 'up' }, 200, function(){
-      $(toPageContent).show('slide', { direction: 'down' }, 200);
+    $.each(this.getPages(),function(i,page){
+      switch (page.rank) {
+        case toPage.rank:
+          $(toPageContent).css({ display:'block' });
+        break;
+        case fromPage.rank:
+          $(fromPageContent).css({ display:'none' });
+        break;
+        default:
+          $(that.getPage(page.rank).content()).css({ display:'none' });
+        break;
+      }
     });
 
-    // Move cursor to the end of the destination page
-    focusToBottom();
+    // cursorPosition may be a DOM Element, `ORIGIN`, `END` or undefined
+    if (typeof(cursorPosition) === 'object') focusToNode(cursorPosition);
+    else if (cursorPosition === this.CURSOR_POSITION.ORIGIN) focusToTop();
+    else if (cursorPosition === this.CURSOR_POSITION.END) focusToBottom();
+    else if (cursorPosition !== undefined) throw new InvalidCursorPosition(cursorPosition);
 
     // set the page as current page
     currentPage = toPage;
@@ -521,32 +569,45 @@ Paginator.prototype.gotoPage = function(toPage){
  * @return void
  */
 Paginator.prototype.gotoFocusedPage = function(){
-  var focusedDiv = _getFocusedPageDiv.call(this);
-  var pageRank = $(focusedDiv).attr('data-paginator-page-rank');
-  var focusedPage = this.getPage(pageRank);
-  currentPage = focusedPage;
-  this.gotoPage(focusedPage);
+  var focusedPage, focusedDiv;
+
+  try {
+    var pageRank;
+    focusedDiv = _getFocusedPageDiv.call(this);
+    pageRank = $(focusedDiv).attr('data-paginator-page-rank');
+    focusedPage = this.getPage(pageRank);
+  } catch (e) {
+    // if there is no focused page div, focus to the first page
+    focusedPage = this.getPage(1);
+    focusedDiv = focusedPage.content();
+    editor.selection.select(focusedDiv, true);
+  } finally {
+    currentPage = focusedPage;
+    this.gotoPage(focusedPage);
+  }
 };
 
 /**
  * Navigate to the previous page
  * @method
+ * @param {string} [cursorPosition] - The requested cursor  position to set after navigating to
  * @return {Page|null} The previous page after navigation is done, null if previous page doesn'nt exist.
  */
-Paginator.prototype.gotoPrevious = function(){
+Paginator.prototype.gotoPrevious = function(cursorPosition){
   var prevPage = this.getPrevious();
-  if (prevPage) return this.gotoPage(prevPage);
+  if (prevPage) return this.gotoPage(prevPage,cursorPosition);
   else return null;
 };
 
 /**
  * Navigate to the next page
  * @method
+ * @param {string} [cursorPosition] - The requested cursor  position to set after navigating to
  * @return {Page|null} The next page after navigation is done, null if next page doesn'nt exist.
  */
-Paginator.prototype.gotoNext = function(){
+Paginator.prototype.gotoNext = function(cursorPosition){
   var nextPage = this.getNext();
-  if (nextPage) return this.gotoPage(nextPage);
+  if (nextPage) return this.gotoPage(nextPage,cursorPosition);
   else return null;
 };
 
@@ -554,13 +615,42 @@ Paginator.prototype.gotoNext = function(){
  * Watch the current page, to check if content overflows the page's max-height.
  * @method
  * @return void
+ * @throws {InvalidPageHeightError} if `currentHeight` fall down to zero meaning the link with DOM element is broken
  */
 Paginator.prototype.watchPage = function(){
-  var maxHeight = _getPageInnerHeight.call(this);
-  var currentHeight = _getPageContentHeight.call(this);
-  if (currentHeight > maxHeight) {
-    _repage.call(this);
+  var maxHeight;
+  var currentHeight;
+  var iteratee = -1; // pass to zero during the first loop
+  var cursorPositionAfterRepaging;
+  var lastBlock, savedLastBlock;
+
+  // check if the current page is overflown by its content
+  // if true, repage the content
+  do {
+    if (lastBlock) savedLastBlock = lastBlock;
+    iteratee++; lastBlock = null;
+
+    maxHeight = _getPageInnerHeight.call(this);
+    currentHeight = _getPageContentHeight.call(this);
+
+    if (currentHeight===0) throw new InvalidPageHeightError(currentHeight);
+
+    if (currentHeight > maxHeight) {
+      lastBlock = _repage.call(this);
+    }
+
+  } while ( lastBlock );
+
+  // if more than one loop ocured, there was be repaging.
+  if (iteratee) {
+
+    var loc = editor.selection.getRng();
+    console.log(loc);
+
+    // pass the saved lastblock to the gotoNext() method for focusing on it after page change.
+    this.gotoNext(savedLastBlock);
   }
+
 };
 
 /**
@@ -590,7 +680,7 @@ var _getFocusedPageDiv = function(){
  * Must be called when the page's content overflows.
  * @method
  * @private
- * @return void
+ * @returns {boolean} True if success to move last block to the next page.
  *
  * @todo If it overflows, put the content that overflows in the next page, then, check if
  * the text on the next page can fill the current one without overflowing.
@@ -608,8 +698,7 @@ var _repage = function(){ console.info('repaging...');
       $(lastBlock).prependTo($(nextPage.content()));
       // Append page to document
       $(nextPage.content()).appendTo(this._body);
-      // Goto nextPage
-      this.gotoNext();
+
     break;
 
     default:
@@ -618,6 +707,7 @@ var _repage = function(){ console.info('repaging...');
 
   }
 
+  return lastBlock;
 };
 
 /**
@@ -658,10 +748,13 @@ var _getPageInnerHeight = function(){
  * Compute the real height of the page's content. It must equals the page inner height, except the time where the content overflows it, juste before to be repaged by the `Paginator::_repage()` method that bring back the content height to the page inner one.
  * @method
  * @private
- * @return {Number} The resulted height in pixels.
+ * @returns {Number} The resulted height in pixels.
  */
 var _getPageContentHeight = function(){
-  return Number($(currentPage.content()).css('height').split('px').join(''));
+  var currentPageContent = currentPage.content();
+  var currentPageContentHeight = $(currentPageContent).css('height');
+  var inPixels = currentPageContentHeight.split('px').join('');
+  return Number(inPixels);
 };
 
 /**
@@ -704,10 +797,12 @@ var _createNextPage = function(contentNodeList){
   return newPage;
 };
 
-/**
- * Paginator class
- */
-module.exports = Paginator;
+
+// Exports Paginator class
+exports = module.exports = Paginator;
+
+// Bind errors to the classes/paginator module.
+exports.errors = errors;
 
 },{"./Display":2,"./Page":3,"./paginator/errors":5,"./paginator/parser":6}],5:[function(require,module,exports){
 /**
@@ -730,6 +825,7 @@ function InvalidPageRankError(rank){
   this.stack = (new Error()).stack;
 }
 InvalidPageRankError.prototype = Error.prototype;
+InvalidPageRankError.prototype.name = 'InvalidPageRankError';
 
 /**
  * Must be thrown when the DOM range of the text cursor is out of a paginated DOM tree.
@@ -743,13 +839,45 @@ function InvalidFocusedRangeError(){
   this.stack = (new Error()).stack;
 }
 InvalidFocusedRangeError.prototype = Error.prototype;
+InvalidFocusedRangeError.prototype.name = 'InvalidFocusedRangeError';
 
+/**
+ * Must be thrown when the current page height doesn't match required values
+ * @class
+ * @memberof  Paginator.errors
+ * @extends Error
+ */
+function InvalidPageHeightError(height){
+  this.name = 'InvalidPageHeightError';
+  this.message = height + 'px is an invalid page height.';
+  this.stack = (new Error()).stack;
+}
+InvalidPageHeightError.prototype = Error.prototype;
+InvalidPageHeightError.prototype.name = 'InvalidPageHeightError';
+
+/**
+ * Must be thrown when the requested cursor position doesn't match required values.
+ * @class
+ * @memberof  Paginator.errors
+ * @extends Error
+ */
+function InvalidCursorPosition(requestedPosition){
+  this.name = 'InvalidCursorPosition';
+  this.message = requestedPosition + 'is an invalid cursor position.';
+  this.stack = (new Error()).stack;
+}
+InvalidCursorPosition.prototype = Error.prototype;
+InvalidCursorPosition.prototype.name = 'InvalidCursorPosition';
 
 //
-// export namespace
+// export Paginator.errors namespace
 //
-exports.InvalidPageRankError = InvalidPageRankError;
-exports.InvalidFocusedRangeError = InvalidFocusedRangeError;
+module.exports = {
+  InvalidPageRankError:InvalidPageRankError,
+  InvalidFocusedRangeError:InvalidFocusedRangeError,
+  InvalidPageHeightError:InvalidPageHeightError,
+  InvalidCursorPosition:InvalidCursorPosition
+};
 
 },{}],6:[function(require,module,exports){
 'use strict';
@@ -788,12 +916,49 @@ module.exports = {};
  */
 
 
+/**
+ * Tinymce library - injected by the plugin loader.
+ * @external tinymce
+ * @see {@link https://www.tinymce.com/docs/api/class/tinymce/|Tinymce API Reference}
+ */
 /*global tinymce:true */
 
+/**
+ * The jQuery plugin namespace - plugin dependency.
+ * @external "jQuery.fn"
+ * @see {@link http://learn.jquery.com/plugins/|jQuery Plugins}
+ */
+/*global jquery:true */
+
+/**
+ * Paginator class
+ * @type {Paginator}
+ * @global
+ */
 var Paginator = require('./classes/Paginator');
+
+/**
+ * Paginator ui module
+ * @type {object}
+ * @global
+ */
 var ui = require('./utils/ui');
 
-tinymce.PluginManager.add('paginate', function(editor) {
+/**
+ * InvalidPageHeightError
+ * @type {InvalidPageHeightError}
+ * @global
+ */
+var InvalidPageHeightError = Paginator.errors.InvalidPageHeightError;
+
+/**
+ * Tinymce plugin paginate
+ * @function
+ * @global
+ * @param {tinymce.Editor} editor - The injected tinymce editor.
+ * @returns void
+ */
+function tinymcePluginPaginate(editor) {
 
   /**
    * Debug all useful editor events to see the order of their happen
@@ -835,8 +1000,38 @@ tinymce.PluginManager.add('paginate', function(editor) {
     window.logCount = mycount;
   }
 
+  /**
+   * On 'PageChange' event listener. Update page rank input on paginator's navigation buttons.
+   * @function
+   * @private
+   */
   function onPageChange(evt){
     ui.updatePageRankInput(evt.toPage.rank);
+  }
+
+  /**
+   * Wrap Paginator#watchPage() in try catch statements and private function to allow watch recursively on error
+   * @function
+   * @private
+   * @returns void
+   * @throws {Error} if error thrown is not instance of InvalidPageHeightError
+   */
+  function watchPage(){
+    try {
+      paginator.watchPage();
+    } catch (e) {
+      watchPageIterationsCount++;
+      // Due to a suspecte bug in tinymce that break the binding of DOM elements with the paginator.
+      if (e instanceof InvalidPageHeightError) {
+        console.error(e.message+'... re-init paginator then watch page again...');
+        paginator.init();
+        if (watchPageIterationsCount<10) {
+          watchPage();
+        } else {
+          watchPageIterationsCount = 0;
+        }
+      } else throw e;
+    }
   }
 
   /**
@@ -849,36 +1044,44 @@ tinymce.PluginManager.add('paginate', function(editor) {
   /**
    * A 'Display' object to handle graphics behaviors for the paginator needs.
    * @var {Display} display
-   * @private
+   * @global
    */
   var display;
 
   /**
    * Is set to true when paginator is initialized.
-   * @var {Boolean} paginatorStartListening
-   * @private
+   * @var {Boolean} paginatorListens
+   * @global
    */
-  var paginatorStartListening = false;
+  var paginatorListens = false;
+
+  /**
+   * Count of the iterations of watchPage() calls triggered by thrown of `InvalidPageHeightError`. This is a temporary bugfix
+   * @var {integer}
+   * @global
+   */
+  var watchPageIterationsCount=0;
 
   editor.once('init',function(){
     paginator = new Paginator('A4','portrait', editor);
-    if(!paginatorStartListening) paginator.init();
-    paginatorStartListening = true;
+    if(!paginatorListens) paginator.init();
+    paginatorListens = true;
     ui.appendNavigationButtons(paginator);
     editor.dom.bind(editor.getDoc(),'PageChange',onPageChange);
   });
+  editor.on('remove',ui.removeNavigationButtons);
   editor.once('change',function(){
-    paginatorStartListening = !!paginator;
-    if(paginatorStartListening) paginator.init();
+    paginatorListens = !!paginator;
+    if(paginatorListens) paginator.init();
   });
   editor.on('change',function(){
-    if(paginatorStartListening) paginator.watchPage();
+    if(paginatorListens) paginator.watchPage();
   });
   editor.on('SetContent',function(){
     //if(paginatorStartListening) paginator.init();
   });
   editor.on('NodeChange',function(){
-    if (paginatorStartListening) {
+    if (paginatorListens) {
       try {
         paginator.gotoFocusedPage();
       } catch (e) {
@@ -888,7 +1091,10 @@ tinymce.PluginManager.add('paginate', function(editor) {
     }
   });
 
-});
+}
+
+// Add the plugin to the tinymce PluginManager
+tinymce.PluginManager.add('paginate', tinymcePluginPaginate);
 
 },{"./classes/Paginator":4,"./utils/ui":9}],8:[function(require,module,exports){
 /**
@@ -982,20 +1188,18 @@ exports.appendNavigationButtons = function(paginator){
   var body = $('body');
   var btnSelector = '<a></a>';
   var btnCommonClasses = 'btn glyphicon';
-  var btnCommonStyles = {'background': 'white', 'width':'100%', 'top':'0'};
+  var btnCommonStyles = {
+    'background': 'whitesmoke',
+    'width':'100%',
+    'top':'0'
+  };
 
   // Create a div vertical wrapper to append nav elements into
-  navbar = $('<div></div>').css({
+  navbar = $('<div></div>')
+  .attr('id','paginator-navbar')
+  .css({
     'width': '60px',
     'position': 'absolute',
-    '-moz-box-shadow': '0px 0px 10px 10px #000000',
-    '-webkit-box-shadow': '0px 0px 10px 10px #000000',
-    '-o-box-shadow': '0px 0px 10px 10px #000000',
-    'box-shadow': '0px 0px 10px 10px #000000',
-    'filter':'progid:DXImageTransform.Microsoft.Shadow(color=#000000, Direction=NaN, Strength=10)',
-    '-moz-border-radius': '50%',
-    '-webkit-border-radius': '50%',
-    'border-radius': '50%',
     'top': (window.screen.height/2 -35)+'px',
     'right': '40px',
     'z-index': '999'
@@ -1005,8 +1209,8 @@ exports.appendNavigationButtons = function(paginator){
   navbarElements.btnPrevious = $(btnSelector)
     .attr('href','#')
     .css($.extend(btnCommonStyles,{
-      'border-top-left-radius': '50%',
-      'border-top-right-radius': '50%',
+      'border-top-left-radius': '25%',
+      'border-top-right-radius': '25%',
       'border-bottom-left-radius': '0',
       'border-bottom-right-radius': '0'
     }))
@@ -1025,6 +1229,10 @@ exports.appendNavigationButtons = function(paginator){
     .change(onInputRankChanges).appendTo(navbar)
   ;
 
+  setTimeout(function(){
+    navbarElements.inputRank.val(paginator.getCurrentPage().rank);
+  },500);
+
   // navigate to next page
   navbarElements.btnNext = $(btnSelector)
     .attr('href','#')
@@ -1032,8 +1240,8 @@ exports.appendNavigationButtons = function(paginator){
       'width': '100%',
       'border-top-left-radius': '0',
       'border-top-right-radius': '0',
-      'border-bottom-left-radius': '50%',
-      'border-bottom-right-radius': '50%'
+      'border-bottom-left-radius': '25%',
+      'border-bottom-right-radius': '25%'
     }))
     .addClass(btnCommonClasses + ' glyphicon-chevron-down')
     .click(function(){
@@ -1042,6 +1250,15 @@ exports.appendNavigationButtons = function(paginator){
     })
     .appendTo(navbar)
   ;
+};
+
+/**
+ * Remove navigation buttons
+ * @function
+ * @static
+ */
+exports.removeNavigationButtons = function(){
+  $('#paginator-navbar').remove();
 };
 
 exports.updatePageRankInput = function(rank){

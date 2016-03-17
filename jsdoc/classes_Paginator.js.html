@@ -40,14 +40,21 @@
 			<li class="dropdown">
 				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="module-class_Display-Display.html">class/Display~Display</a></li><li><a href="module-class_Page-InvalidOrientationLabelError%2520Must%2520be%2520thrown%2520when%2520trying%2520to%2520orientate%2520a%2520page%2520with%2520an%2520invalid%2520orientation%2520label.html">class/Page~InvalidOrientationLabelError Must be thrown when trying to orientate a page with an invalid orientation label</a></li><li><a href="module-class_Page-Page.html">class/Page~Page</a></li><li><a href="module-classes_Paginator-Paginator.html">classes/Paginator~Paginator</a></li><li><a href="module-utils_page-formats-Format.html">utils/page-formats~Format</a></li>
+					<li><a href="module-class_Display-Display.html">class/Display~Display</a></li><li><a href="module-class_Page-Page.html">class/Page~Page</a></li><li><a href="module-classes_Paginator-Paginator.html">classes/Paginator~Paginator</a></li><li><a href="module-utils_page-formats-Format.html">utils/page-formats~Format</a></li>
 				</ul>
 			</li>
 			
 			<li class="dropdown">
 				<a href="global.html" class="dropdown-toggle" data-toggle="dropdown">Global<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="global.html#paginator">paginator</a></li><li><a href="global.html#supportedFormats">supportedFormats</a></li>
+					<li><a href="global.html#display">display</a></li><li><a href="global.html#InvalidPageHeightError">InvalidPageHeightError</a></li><li><a href="global.html#Paginator">Paginator</a></li><li><a href="global.html#paginator">paginator</a></li><li><a href="global.html#paginatorListens">paginatorListens</a></li><li><a href="global.html#supportedFormats">supportedFormats</a></li><li><a href="global.html#tinymcePluginPaginate">tinymcePluginPaginate</a></li><li><a href="global.html#ui">ui</a></li><li><a href="global.html#watchPageIterationsCount">watchPageIterationsCount</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="externals.list.html" class="dropdown-toggle" data-toggle="dropdown">Externals<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="external-_jQuery.fn_.html">jQuery.fn</a></li><li><a href="external-tinymce.html">tinymce</a></li>
 				</ul>
 			</li>
 			
@@ -95,8 +102,11 @@ var Page = require('./Page');
 var parser = require('./paginator/parser');
 
 var errors = require('./paginator/errors');
-var InvalidFocusedRangeError = errors.InvalidFocusedRangeError;
 var InvalidPageRankError = errors.InvalidPageRankError;
+var InvalidFocusedRangeError = errors.InvalidFocusedRangeError;
+var InvalidPageHeightError = errors.InvalidPageHeightError;
+var InvalidCursorPosition = errors.InvalidCursorPosition;
+
 
 /**
  * Paginator is the page manager
@@ -160,6 +170,14 @@ var pages = [];
  * @private
  */
 var editor;
+
+/**
+ * Set of the two constant values representing the `origin` or the `end` of possible ranges to focus when focusing/navigating to a page.
+ * @type {object}
+ * @property {string} ORIGIN equals 'ORIGIN'
+ * @property {string} END equals 'END'
+ */
+Paginator.prototype.CURSOR_POSITION = { ORIGIN:'ORIGIN', END: 'END' };
 
 /**
  * Initialize the paginator. The editor and its content has to be loaded before initialize the paginator
@@ -266,10 +284,12 @@ Paginator.prototype.getNext = function(){
 /**
  * Navigate to the given page
  * @method
- * @param {Page} the page to navigate to
+ * @param {Page} toPage - The page to navigate to
+ * @param {string} [cursorPosition] - The requested cursor  position to set after navigating to
  * @return void
  */
-Paginator.prototype.gotoPage = function(toPage){
+Paginator.prototype.gotoPage = function(toPage,cursorPosition){
+
   /**
    * Set cursor location to the bottom of the destination page
    * @function
@@ -277,6 +297,7 @@ Paginator.prototype.gotoPage = function(toPage){
    * @return void
    */
   function focusToBottom(){
+
     /**
      * Get all text nodes from a given node
      * @function
@@ -299,6 +320,7 @@ Paginator.prototype.gotoPage = function(toPage){
       }
       return result;
     }
+
     // get all Textnodes from lastchild, calc length
     var content, lastChild, textNodes, lastNode, locationOffset, cursorLocation;
     content = toPage.content();
@@ -309,7 +331,6 @@ Paginator.prototype.gotoPage = function(toPage){
     }
     if (lastChild) {
       textNodes = getTextNodes(lastChild) ;
-
       if (textNodes.length) {
         lastNode = textNodes[textNodes.length-1];
         locationOffset = lastNode.textContent.length;
@@ -325,6 +346,25 @@ Paginator.prototype.gotoPage = function(toPage){
     editor.selection.setCursorLocation(lastNode, locationOffset);
   }
 
+  /**
+   * Set cursor location to the bottom of the destination page
+   * @function
+   * @inner
+   * @return void
+   */
+  function focusToTop(){
+    var content, firstNode;
+    content = toPage.content();
+    firstNode = content.firstChild;
+    // set Cursor to last position
+    editor.selection.setCursorLocation(firstNode, 0);
+  }
+
+  function focusToNode(node){
+    console.log('focus to node',node);
+    editor.selection.setCursorLocation(node,0);
+  }
+
   var that = this;
   var fromPage = currentPage;
   var fromPageContent = this.getPage(fromPage.rank).content();
@@ -334,12 +374,25 @@ Paginator.prototype.gotoPage = function(toPage){
 
   if (toPage !== fromPage) {
 
-    $(fromPageContent).hide('slide', { direction: 'up' }, 200, function(){
-      $(toPageContent).show('slide', { direction: 'down' }, 200);
+    $.each(this.getPages(),function(i,page){
+      switch (page.rank) {
+        case toPage.rank:
+          $(toPageContent).css({ display:'block' });
+        break;
+        case fromPage.rank:
+          $(fromPageContent).css({ display:'none' });
+        break;
+        default:
+          $(that.getPage(page.rank).content()).css({ display:'none' });
+        break;
+      }
     });
 
-    // Move cursor to the end of the destination page
-    focusToBottom();
+    // cursorPosition may be a DOM Element, `ORIGIN`, `END` or undefined
+    if (typeof(cursorPosition) === 'object') focusToNode(cursorPosition);
+    else if (cursorPosition === this.CURSOR_POSITION.ORIGIN) focusToTop();
+    else if (cursorPosition === this.CURSOR_POSITION.END) focusToBottom();
+    else if (cursorPosition !== undefined) throw new InvalidCursorPosition(cursorPosition);
 
     // set the page as current page
     currentPage = toPage;
@@ -359,32 +412,45 @@ Paginator.prototype.gotoPage = function(toPage){
  * @return void
  */
 Paginator.prototype.gotoFocusedPage = function(){
-  var focusedDiv = _getFocusedPageDiv.call(this);
-  var pageRank = $(focusedDiv).attr('data-paginator-page-rank');
-  var focusedPage = this.getPage(pageRank);
-  currentPage = focusedPage;
-  this.gotoPage(focusedPage);
+  var focusedPage, focusedDiv;
+
+  try {
+    var pageRank;
+    focusedDiv = _getFocusedPageDiv.call(this);
+    pageRank = $(focusedDiv).attr('data-paginator-page-rank');
+    focusedPage = this.getPage(pageRank);
+  } catch (e) {
+    // if there is no focused page div, focus to the first page
+    focusedPage = this.getPage(1);
+    focusedDiv = focusedPage.content();
+    editor.selection.select(focusedDiv, true);
+  } finally {
+    currentPage = focusedPage;
+    this.gotoPage(focusedPage);
+  }
 };
 
 /**
  * Navigate to the previous page
  * @method
+ * @param {string} [cursorPosition] - The requested cursor  position to set after navigating to
  * @return {Page|null} The previous page after navigation is done, null if previous page doesn'nt exist.
  */
-Paginator.prototype.gotoPrevious = function(){
+Paginator.prototype.gotoPrevious = function(cursorPosition){
   var prevPage = this.getPrevious();
-  if (prevPage) return this.gotoPage(prevPage);
+  if (prevPage) return this.gotoPage(prevPage,cursorPosition);
   else return null;
 };
 
 /**
  * Navigate to the next page
  * @method
+ * @param {string} [cursorPosition] - The requested cursor  position to set after navigating to
  * @return {Page|null} The next page after navigation is done, null if next page doesn'nt exist.
  */
-Paginator.prototype.gotoNext = function(){
+Paginator.prototype.gotoNext = function(cursorPosition){
   var nextPage = this.getNext();
-  if (nextPage) return this.gotoPage(nextPage);
+  if (nextPage) return this.gotoPage(nextPage,cursorPosition);
   else return null;
 };
 
@@ -392,13 +458,42 @@ Paginator.prototype.gotoNext = function(){
  * Watch the current page, to check if content overflows the page's max-height.
  * @method
  * @return void
+ * @throws {InvalidPageHeightError} if `currentHeight` fall down to zero meaning the link with DOM element is broken
  */
 Paginator.prototype.watchPage = function(){
-  var maxHeight = _getPageInnerHeight.call(this);
-  var currentHeight = _getPageContentHeight.call(this);
-  if (currentHeight > maxHeight) {
-    _repage.call(this);
+  var maxHeight;
+  var currentHeight;
+  var iteratee = -1; // pass to zero during the first loop
+  var cursorPositionAfterRepaging;
+  var lastBlock, savedLastBlock;
+
+  // check if the current page is overflown by its content
+  // if true, repage the content
+  do {
+    if (lastBlock) savedLastBlock = lastBlock;
+    iteratee++; lastBlock = null;
+
+    maxHeight = _getPageInnerHeight.call(this);
+    currentHeight = _getPageContentHeight.call(this);
+
+    if (currentHeight===0) throw new InvalidPageHeightError(currentHeight);
+
+    if (currentHeight > maxHeight) {
+      lastBlock = _repage.call(this);
+    }
+
+  } while ( lastBlock );
+
+  // if more than one loop ocured, there was be repaging.
+  if (iteratee) {
+
+    var loc = editor.selection.getRng();
+    console.log(loc);
+
+    // pass the saved lastblock to the gotoNext() method for focusing on it after page change.
+    this.gotoNext(savedLastBlock);
   }
+
 };
 
 /**
@@ -428,7 +523,7 @@ var _getFocusedPageDiv = function(){
  * Must be called when the page's content overflows.
  * @method
  * @private
- * @return void
+ * @returns {boolean} True if success to move last block to the next page.
  *
  * @todo If it overflows, put the content that overflows in the next page, then, check if
  * the text on the next page can fill the current one without overflowing.
@@ -446,8 +541,7 @@ var _repage = function(){ console.info('repaging...');
       $(lastBlock).prependTo($(nextPage.content()));
       // Append page to document
       $(nextPage.content()).appendTo(this._body);
-      // Goto nextPage
-      this.gotoNext();
+
     break;
 
     default:
@@ -456,6 +550,7 @@ var _repage = function(){ console.info('repaging...');
 
   }
 
+  return lastBlock;
 };
 
 /**
@@ -496,10 +591,13 @@ var _getPageInnerHeight = function(){
  * Compute the real height of the page's content. It must equals the page inner height, except the time where the content overflows it, juste before to be repaged by the `Paginator::_repage()` method that bring back the content height to the page inner one.
  * @method
  * @private
- * @return {Number} The resulted height in pixels.
+ * @returns {Number} The resulted height in pixels.
  */
 var _getPageContentHeight = function(){
-  return Number($(currentPage.content()).css('height').split('px').join(''));
+  var currentPageContent = currentPage.content();
+  var currentPageContentHeight = $(currentPageContent).css('height');
+  var inPixels = currentPageContentHeight.split('px').join('');
+  return Number(inPixels);
 };
 
 /**
@@ -542,10 +640,12 @@ var _createNextPage = function(contentNodeList){
   return newPage;
 };
 
-/**
- * Paginator class
- */
-module.exports = Paginator;
+
+// Exports Paginator class
+exports = module.exports = Paginator;
+
+// Bind errors to the classes/paginator module.
+exports.errors = errors;
 </pre>
     </article>
 </section>
@@ -591,7 +691,7 @@ module.exports = Paginator;
 <span class="jsdoc-message">
 	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a>
 	
-		on 14/03/2016
+		on 17/03/2016
 	
 	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
 </span>
