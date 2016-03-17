@@ -56,14 +56,6 @@ function confirmPrompt(){
   return d.promise;
 }
 
-
-function gitPushRemote(remote){
-  return deferizeExec('git push '+remote+' master');
-}
-function gitPushTags(remote){stach
-  return deferizeExec('git push --tags '+remote);
-}
-
 cli.option('-c --continue', 'Do not prompt for confirmation');
 
 cli.arguments('<semverLevel>').action(function(semverLevel){
@@ -84,10 +76,10 @@ cli.arguments('<semverLevel>').action(function(semverLevel){
         .then((function(level){
           return deferizeExec('grunt bump:'+level);
         })(semverLevel))
-        .then(gitPushRemote('origin'))
-        .then(gitPushTags('origin'))
-        .then(gitPushRemote('gl-open-source'))
-        .then(gitPushTags('gl-open-source'))
+        .then(deferizeExec('git push origin master'))
+        .then(deferizeExec('git push gl-open-source master'))
+        .then(deferizeExec('git push origin --tags'))
+        .then(deferizeExec('git push gl-open-source --tags'))
       ;
     } else {
       console.log('Aborted by user');
