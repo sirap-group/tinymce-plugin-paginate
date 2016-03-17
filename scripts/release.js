@@ -73,7 +73,7 @@ cli.arguments('<semverLevel>').action(function(semverLevel){
         .then(deferizeExec('grunt build'))
         .then(deferizeExec('git add . --all'))
         .then((function(level){
-          return deferizeExec('git commit -m "build dist and docs to release '+level+'"')();
+          return deferizeExec('git commit -m "build dist and docs to release '+level+'"')()
           .catch(function(err){
             // if there is nothing to commit, the child_process will end with error code at 1
             // but we want to continue, its not really an error, but a warning.
