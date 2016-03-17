@@ -73,13 +73,13 @@ cli.arguments('<semverLevel>').action(function(semverLevel){
         .then(deferizeExec('grunt build'))
         .then(deferizeExec('git add . --all'))
         .then((function(level){
-          return deferizeExec('git commit -m "build dist and docs to release '+level+'"')
+          return deferizeExec('git commit -m "build dist and docs to release '+level+'"')();
           .catch(function(err){
             // if there is nothing to commit, the child_process will end with error code at 1
             // but we want to continue, its not really an error, but a warning.
             // We will ask to confirm for continuing.
             confirmPromptMessage = 'WARNING: It seems there is nothing to commit. Do you want to continue ?';
-            return confirmRelease(confirmPromptMessage);
+            return confirmPrompt(confirmPromptMessage);
           })
           .then(function(confirmation){
             if (!confirmation) throw new Error('Aborted by user because there is nothing to commit for this release.');
@@ -87,7 +87,7 @@ cli.arguments('<semverLevel>').action(function(semverLevel){
           });
         })(semverLevel))
         .then((function(level){
-          return deferizeExec('grunt bump:'+level);
+          return deferizeExec('grunt bump:'+level)();
         })(semverLevel))
         .then(deferizeExec('git push origin master'))
         .then(deferizeExec('git push gl-open-source master'))
