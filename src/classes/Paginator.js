@@ -270,7 +270,6 @@ Paginator.prototype.gotoPage = function(toPage,cursorPosition){
   }
 
   function focusToNode(node){
-    console.log('focus to node',node);
     editor.selection.setCursorLocation(node,0);
   }
 
@@ -395,10 +394,6 @@ Paginator.prototype.watchPage = function(){
 
   // if more than one loop ocured, there was be repaging.
   if (iteratee) {
-
-    var loc = editor.selection.getRng();
-    console.log(loc);
-
     // pass the saved lastblock to the gotoNext() method for focusing on it after page change.
     this.gotoNext(savedLastBlock);
   }
