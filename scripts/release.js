@@ -60,7 +60,7 @@ function confirmPrompt(){
 function gitPushRemote(remote){
   return deferizeExec('git push '+remote+' master');
 }
-function gitPushTags(remote){
+function gitPushTags(remote){stach
   return deferizeExec('git push --tags '+remote);
 }
 
@@ -73,7 +73,7 @@ cli.arguments('<semverLevel>').action(function(semverLevel){
   confirmPrompt() // if -c or --continue is not defined in the command line.
   .then(function(confirmation){
     if (confirmation) {
-      return deferizeExec('git stash')
+      return deferizeExec('git stash')()
         .then(deferizeExec('git checkout master'))
         .then(deferizeExec('git pull gh-sirap-group master'))
         .then(deferizeExec('grunt build'))
