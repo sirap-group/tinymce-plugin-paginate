@@ -31,6 +31,12 @@ var InvalidCursorPosition = errors.InvalidCursorPosition;
  */
 function Paginator(pageFormatLabel, pageOrientation, ed){
 
+  /**
+   * The current page
+   * @property {Page}
+   */
+  this._currentPage = null;
+
   editor = ed;
   /**
    * The DOMDocument given in the constructor
@@ -59,12 +65,7 @@ function Paginator(pageFormatLabel, pageOrientation, ed){
 
 }
 
-/**
- * The current page
- * @property {Page}
- * @private
- */
-var currentPage;
+
 
 /**
  * The list of pages
@@ -122,7 +123,7 @@ Paginator.prototype.init = function(){
  * @return {Page} the current page loaded in editor
  */
 Paginator.prototype.getCurrentPage = function(){
-  return currentPage;
+  return this._currentPage;
 };
 
 /**
@@ -274,7 +275,7 @@ Paginator.prototype.gotoPage = function(toPage,cursorPosition){
   }
 
   var that = this;
-  var fromPage = currentPage;
+  var fromPage = this._currentPage;
   var fromPageContent = this.getPage(fromPage.rank).content();
   var toPageContent = this.getPage(toPage.rank).content();
 
@@ -303,7 +304,7 @@ Paginator.prototype.gotoPage = function(toPage,cursorPosition){
     else if (cursorPosition !== undefined) throw new InvalidCursorPosition(cursorPosition);
 
     // set the page as current page
-    currentPage = toPage;
+    this._currentPage = toPage;
 
     editor.dom.fire(editor.getDoc(),'PageChange',{
       fromPage: fromPage,
@@ -333,7 +334,7 @@ Paginator.prototype.gotoFocusedPage = function(){
     focusedDiv = focusedPage.content();
     editor.selection.select(focusedDiv, true);
   } finally {
-    currentPage = focusedPage;
+    this._currentPage = focusedPage;
     this.gotoPage(focusedPage);
   }
 };
@@ -434,7 +435,7 @@ var _getFocusedPageDiv = function(){
  */
 var _repage = function(){ console.info('repaging...');
   var currentRng = editor.selection.getRng();
-  var children = $(currentPage.content()).children();
+  var children = $(this._currentPage.content()).children();
   var lastBlock = children[children.length - 1];
   var nextPage = this.getNext() || _createNextPage.call(this);
 
@@ -498,7 +499,7 @@ var _getPageInnerHeight = function(){
  * @returns {Number} The resulted height in pixels.
  */
 var _getPageContentHeight = function(){
-  var currentPageContent = currentPage.content();
+  var currentPageContent = this._currentPage.content();
   var currentPageContentHeight = $(currentPageContent).css('height');
   var inPixels = currentPageContentHeight.split('px').join('');
   return Number(inPixels);
@@ -534,7 +535,7 @@ var _createEmptyDivWrapper = function(pageRank){
  */
 var _createNextPage = function(contentNodeList){
   var newPage;
-  var nextRank = (currentPage) ? (currentPage.rank+1) : 1 ;
+  var nextRank = (this._currentPage) ? (this._currentPage.rank+1) : 1 ;
   var divWrapper = _createEmptyDivWrapper.call(this,nextRank);
   if (contentNodeList) {
     $(contentNodeList).appendTo(divWrapper);
