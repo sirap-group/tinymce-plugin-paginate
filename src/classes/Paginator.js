@@ -43,7 +43,12 @@ function Paginator(pageFormatLabel, pageOrientation, ed){
    */
   this._pages = [];
 
-  editor = ed;
+  /**
+   * Current editor
+   * @property {Editor}
+   */
+  this._editor = ed;
+
   /**
    * The DOMDocument given in the constructor
    * @property {DOMDocument}
@@ -70,15 +75,6 @@ function Paginator(pageFormatLabel, pageOrientation, ed){
   this._body = this._document.getElementsByTagName('body');
 
 }
-
-
-
-/**
- * Current editor
- * @property {Editor}
- * @private
- */
-var editor;
 
 /**
  * Set of the two constant values representing the `origin` or the `end` of possible ranges to focus when focusing/navigating to a page.
@@ -252,7 +248,7 @@ Paginator.prototype.gotoPage = function(toPage,cursorPosition){
       locationOffset = 0;
     }
     // set Cursor to last position
-    editor.selection.setCursorLocation(lastNode, locationOffset);
+    that._editor.selection.setCursorLocation(lastNode, locationOffset);
   }
 
   /**
@@ -266,11 +262,11 @@ Paginator.prototype.gotoPage = function(toPage,cursorPosition){
     content = toPage.content();
     firstNode = content.firstChild;
     // set Cursor to last position
-    editor.selection.setCursorLocation(firstNode, 0);
+    that._editor.selection.setCursorLocation(firstNode, 0);
   }
 
   function focusToNode(node){
-    editor.selection.setCursorLocation(node,0);
+    that._editor.selection.setCursorLocation(node,0);
   }
 
   var that = this;
@@ -305,7 +301,7 @@ Paginator.prototype.gotoPage = function(toPage,cursorPosition){
     // set the page as current page
     this._currentPage = toPage;
 
-    editor.dom.fire(editor.getDoc(),'PageChange',{
+    this._editor.dom.fire(this._editor.getDoc(),'PageChange',{
       fromPage: fromPage,
       toPage: toPage
     });
@@ -409,7 +405,7 @@ Paginator.prototype.watchPage = function(){
  */
 var _getFocusedPageDiv = function(){
   var ret, selectedElement, parents;
-  var currentRng = editor.selection.getRng();
+  var currentRng = this._editor.selection.getRng();
 
   selectedElement = currentRng.startContainer;
   parents = $(selectedElement).closest('div[data-paginator="true"]');
@@ -433,7 +429,7 @@ var _getFocusedPageDiv = function(){
  * the text on the next page can fill the current one without overflowing.
  */
 var _repage = function(){ console.info('repaging...');
-  var currentRng = editor.selection.getRng();
+  var currentRng = this._editor.selection.getRng();
   var children = $(this._currentPage.content()).children();
   var lastBlock = children[children.length - 1];
   var nextPage = this.getNext() || _createNextPage.call(this);
