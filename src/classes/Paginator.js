@@ -37,6 +37,12 @@ function Paginator(pageFormatLabel, pageOrientation, ed){
    */
   this._currentPage = null;
 
+  /**
+   * The list of pages
+   * @property {Array}
+   */
+  this._pages = [];
+
   editor = ed;
   /**
    * The DOMDocument given in the constructor
@@ -66,13 +72,6 @@ function Paginator(pageFormatLabel, pageOrientation, ed){
 }
 
 
-
-/**
- * The list of pages
- * @property {Array}
- * @private
- */
-var pages = [];
 
 /**
  * Current editor
@@ -110,9 +109,9 @@ Paginator.prototype.init = function(){
     wrappedPages = findPageWrappers();
   }
 
-  pages = [];
+  this._pages = [];
   $.each(wrappedPages,function(i,el){
-    pages.push(new Page(that._defaultPage.format().label, that._defaultPage.orientation, i+1, el));
+    that._pages.push(new Page(that._defaultPage.format().label, that._defaultPage.orientation, i+1, el));
   });
 
 };
@@ -140,16 +139,16 @@ Paginator.prototype.getPage = function(rank){
   } catch(err){
     throw new InvalidPageRankError(rank);
   }
-  if (!pages.length)
+  if (!this._pages.length)
     throw new Error('Paginator pages length in null. Can\'t iterate on it.');
 
   var ret;
   var isLower = rank-1 < 0;
-  var isGreater = rank-1 > pages.length;
+  var isGreater = rank-1 > this._pages.length;
 
   if (isLower || isGreater) throw new InvalidPageRankError(rank);
   else {
-    $.each(pages,function(i,page){
+    $.each(this._pages,function(i,page){
       if (page.rank === rank) ret = page;
     });
     return ret;
@@ -162,7 +161,7 @@ Paginator.prototype.getPage = function(rank){
  * @return {Array<Page>} all paginator pages
  */
 Paginator.prototype.getPages = function(){
-  return pages;
+  return this._pages;
 };
 
 /**
@@ -541,7 +540,7 @@ var _createNextPage = function(contentNodeList){
     $(contentNodeList).appendTo(divWrapper);
   }
   newPage = new Page(this._defaultPage.format().label, this._defaultPage.orientation, nextRank, divWrapper[0]);
-  pages.push(newPage);
+  this._pages.push(newPage);
   return newPage;
 };
 
