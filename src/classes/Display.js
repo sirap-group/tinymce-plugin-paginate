@@ -6,11 +6,24 @@
 'use strict';
 
 /**
- * Create the test DPI element
- * @function
+ * @constructor
  */
-function createTestDPIElement(){
-  testDPIElement = $('<div/>')
+function Display(_document){
+  /**
+  * @property {Element}
+  */
+  this._testDPIElement = null;
+  this.document = _document;
+  this._setScreenDPI();
+}
+
+/**
+ * Create the test DPI element
+ * @method
+ * @private
+ */
+var _createTestDPIElement = function(){
+  this._testDPIElement = $('<div/>')
   .attr('id','dpi-test')
   .css({
     position: 'absolute',
@@ -20,34 +33,20 @@ function createTestDPIElement(){
     width: '1in',
     border: 'red 1px solid'
   });
-  $('body').prepend(testDPIElement);
-}
-
-/**
- * @constructor
- */
-function Display(_document){
-  this.document = _document;
-  this._setScreenDPI();
-}
-
-/**
- * @property {Element}
- * @private
- */
-var testDPIElement;
+  $('body').prepend(this._testDPIElement);
+};
 
 /**
  * @method
  * @return the screen DPI
  */
 Display.prototype._setScreenDPI = function(){
-  createTestDPIElement();
+  _createTestDPIElement.call(this);
 
-  if (testDPIElement[0].offsetWidth !== testDPIElement[0].offsetHeight)
+  if (this._testDPIElement[0].offsetWidth !== this._testDPIElement[0].offsetHeight)
     throw new Error('FATAL ERROR: Bad Screen DPI !');
 
-  this.screenDPI = testDPIElement[0].offsetWidth;
+  this.screenDPI = this._testDPIElement[0].offsetWidth;
 };
 
 /**
