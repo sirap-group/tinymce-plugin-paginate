@@ -126,6 +126,13 @@ function tinymcePluginPaginate(editor) {
     ui.updatePageRankInput(evt.toPage.rank);
   }
 
+  function onRemoveEditor(evt){
+    ui.removeNavigationButtons();
+    paginator.destroy();
+    watchPageIterationsCount = 0;
+    paginatorListens = false;
+  }
+
   /**
    * Wrap Paginator#watchPage() in try catch statements and private function to allow watch recursively on error
    * @function
@@ -186,7 +193,9 @@ function tinymcePluginPaginate(editor) {
     ui.appendNavigationButtons(paginator);
     editor.dom.bind(editor.getDoc(),'PageChange',onPageChange);
   });
-  editor.on('remove',ui.removeNavigationButtons);
+
+  editor.on('remove',onRemoveEditor);
+
   editor.once('change',function(){
     paginatorListens = !!paginator;
     if(paginatorListens) paginator.init();
