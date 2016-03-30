@@ -202,12 +202,15 @@ function tinymcePluginPaginate(editor) {
     paginatorListens = !!paginator;
     if(paginatorListens) paginator.init();
   });
+
   editor.on('change',function(){
     if(paginatorListens) paginator.watchPage();
   });
+
   editor.on('SetContent',function(){
     //if(paginatorStartListening) paginator.init();
   });
+
   editor.on('NodeChange',function(){
     if (paginatorListens) {
       try {
