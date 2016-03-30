@@ -378,7 +378,7 @@ Paginator.prototype.watchPage = function(){
     iteratee++; lastBlock = null;
 
     maxHeight = _getPageInnerHeight.call(this);
-    currentHeight = _getPageContentHeight.call(this);
+    currentHeight = this.getCurrentPage().getContentHeight();
 
     if (currentHeight===0) throw new InvalidPageHeightError(currentHeight);
 
@@ -485,19 +485,6 @@ var _getPageInnerHeight = function(){
   var innerHeight = outerHeight - paddingTop - paddingBottom;
 
   return Math.ceil(innerHeight-1); // -1 is the dirty fix mentionned in the todo tag
-};
-
-/**
- * Compute the real height of the page's content. It must equals the page inner height, except the time where the content overflows it, juste before to be repaged by the `Paginator::_repage()` method that bring back the content height to the page inner one.
- * @method
- * @private
- * @returns {Number} The resulted height in pixels.
- */
-var _getPageContentHeight = function(){
-  var currentPageContent = this._currentPage.content();
-  var currentPageContentHeight = $(currentPageContent).css('height');
-  var inPixels = currentPageContentHeight.split('px').join('');
-  return Number(inPixels);
 };
 
 /**
