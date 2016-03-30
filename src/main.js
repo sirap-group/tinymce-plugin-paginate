@@ -198,7 +198,7 @@ function tinymcePluginPaginate(editor) {
 
   editor.on('remove',onRemoveEditor);
 
-  editor.once('change',function(){
+  editor.once('change',function(evt){
     paginatorListens = !!paginator;
     if(paginatorListens) paginator.init();
   });
