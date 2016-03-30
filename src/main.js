@@ -92,21 +92,25 @@ function tinymcePluginPaginate(editor) {
       myevents.push({'init':evt});
       mycount.init ++;
       console.log(myevents,mycount);
+      // alert('pause after "init" event');
     });
     editor.on('change',function(evt){
       myevents.push({'change':evt});
       mycount.change ++;
       console.log(myevents,mycount);
+      // alert('pause after "change" event');
     });
     editor.on('NodeChange',function(evt){
       myevents.push({'NodeChange':evt});
       mycount.nodechange ++;
       console.log(myevents,mycount);
+      // alert('pause after "NodeChange" event');
     });
     editor.on('SetContent',function(evt){
       myevents.push({'SetContent':evt});
       mycount.setcontent ++;
       console.log(myevents,mycount);
+      // alert('pause after "SetContent" event');
     });
 
     window.logEvents = myevents;
