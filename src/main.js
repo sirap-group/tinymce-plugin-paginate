@@ -186,6 +186,8 @@ function tinymcePluginPaginate(editor) {
    */
   var watchPageIterationsCount=0;
 
+  // _debugEditorEvents();
+
   editor.once('init',function(){
     paginator = new Paginator('A4','portrait', editor);
     if(!paginatorListens) paginator.init();
