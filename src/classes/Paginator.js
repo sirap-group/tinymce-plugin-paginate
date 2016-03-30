@@ -76,6 +76,16 @@ function Paginator(pageFormatLabel, pageOrientation, ed){
 
 }
 
+Paginator.prototype.destroy = function(){
+  this._pages = null;
+  this._currentPage = null;
+  this._editor = null;
+  this._document = null;
+  this._display = null;
+  this._defaultPage = null;
+  this._body = null;
+};
+
 /**
  * Set of the two constant values representing the `origin` or the `end` of possible ranges to focus when focusing/navigating to a page.
  * @type {object}
