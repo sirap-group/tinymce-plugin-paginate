@@ -112,6 +112,7 @@ Paginator.prototype.init = function(){
   // wrap unwrapped content
   if (!wrappedPages.length){
     $(this._body).wrapInner(wrapper);
+    this._editor.save();
     wrappedPages = findPageWrappers();
   }
 
