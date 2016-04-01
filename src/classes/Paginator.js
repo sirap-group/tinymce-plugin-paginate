@@ -338,7 +338,7 @@ Paginator.prototype.gotoFocusedPage = function(){
     // if there is no focused page div, focus to the first page
     focusedPage = this.getPage(1);
     focusedDiv = focusedPage.content();
-    editor.selection.select(focusedDiv, true);
+    this._editor.selection.select(focusedDiv, true);
   } finally {
     this._currentPage = focusedPage;
     this.gotoPage(focusedPage);
