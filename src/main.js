@@ -124,6 +124,7 @@ function tinymcePluginPaginate(editor) {
    */
   function onPageChange(evt){
     ui.updatePageRankInput(evt.toPage.rank);
+    editor.nodeChanged();
   }
 
   function onRemoveEditor(evt){
