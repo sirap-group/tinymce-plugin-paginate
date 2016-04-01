@@ -191,10 +191,13 @@ function tinymcePluginPaginate(editor) {
 
   editor.once('init',function(){
     paginator = new Paginator('A4','portrait', editor);
-    if(!paginatorListens) paginator.init();
-    paginatorListens = true;
-    ui.appendNavigationButtons(paginator);
     editor.dom.bind(editor.getDoc(),'PageChange',onPageChange);
+    setTimeout(function(){
+      paginator.init();
+      paginator.gotoFocusedPage();
+      paginatorListens = true;
+      ui.appendNavigationButtons(paginator);
+    },500);
   });
 
   editor.on('remove',onRemoveEditor);
