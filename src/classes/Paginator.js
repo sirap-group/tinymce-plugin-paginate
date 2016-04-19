@@ -238,7 +238,7 @@ Paginator.prototype.gotoPage = function(toPage,cursorPosition){
     }
 
     // get all Textnodes from lastchild, calc length
-    var content, lastChild, textNodes, lastNode, locationOffset, cursorLocation;
+    var content, lastChild, textNodes, lastNode, locationOffset;
     content = toPage.content();
     if (content.length) {
       lastChild = content[0].lastChild;
