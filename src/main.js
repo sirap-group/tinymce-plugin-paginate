@@ -187,7 +187,31 @@ function tinymcePluginPaginate(editor) {
    */
   var watchPageIterationsCount=0;
 
+  /**
+   * The watch of active page is enabled if this var is true
+   * @var
+   * @global
+   */
+  var watchPageEnabled = false;
+
   // _debugEditorEvents();
+
+  /**
+   * Plugin method that disable the wath of page (to allow edition of extenal elements like headers and footers)
+   * @method
+   * @returns void
+   */
+  this.disableWatchPage = function(){  // jshint ignore:line
+    watchPageEnabled = false;
+  };
+  /**
+   * Plugin method that enable the wath of page (after used this#disableWatchPage())
+   * @method
+   * @returns void
+   */
+  this.enableWatchPage = function(){  // jshint ignore:line
+    watchPageEnabled = true;
+  };
 
   editor.once('init',function(){
     paginator = new Paginator('A4','portrait', editor);
@@ -202,13 +226,22 @@ function tinymcePluginPaginate(editor) {
 
   editor.on('remove',onRemoveEditor);
 
-  editor.once('change',function(evt){
-    paginatorListens = !!paginator;
-    if(paginatorListens) paginator.init();
-  });
+  editor.on('change',function(evt){
+    // var newContent, beforeContent;
+    // if (evt.level && evt.lastLevel) {
+    //     newContent = evt.level.content;
+    //     beforeContent = evt.lastLevel.content;
+    //
+    //     if (newContent === '<p><br data-mce-bogus="1"></p>') {
+    //       if ( $('div[data-paginator]', $('<div>').append(beforeContent)).length ) {
+    //         editor.setContent(beforeContent);
+    //         paginator.init();
+    //         paginator.gotoFocusedPage();
+    //       }
+    //     }
+    // }
 
-  editor.on('change',function(){
-    if(paginatorListens) paginator.watchPage();
+    if(paginatorListens && watchPageEnabled) paginator.watchPage();
   });
 
   editor.on('SetContent',function(){
@@ -216,7 +249,7 @@ function tinymcePluginPaginate(editor) {
   });
 
   editor.on('NodeChange',function(){
-    if (paginatorListens) {
+    if (paginatorListens && watchPageEnabled) {
       try {
         paginator.gotoFocusedPage();
       } catch (e) {
