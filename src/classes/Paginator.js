@@ -355,8 +355,8 @@ Paginator.prototype.gotoFocusedPage = function(){
  */
 Paginator.prototype.gotoPrevious = function(cursorPosition){
   var prevPage = this.getPrevious();
-  if (prevPage) return this.gotoPage(prevPage,cursorPosition);
-  else return null;
+  cursorPosition = cursorPosition || this.CURSOR_POSITION.END;
+  return (prevPage) ? this.gotoPage(prevPage,cursorPosition) : null;
 };
 
 /**
@@ -367,8 +367,8 @@ Paginator.prototype.gotoPrevious = function(cursorPosition){
  */
 Paginator.prototype.gotoNext = function(cursorPosition){
   var nextPage = this.getNext();
-  if (nextPage) return this.gotoPage(nextPage,cursorPosition);
-  else return null;
+  cursorPosition = cursorPosition || this.CURSOR_POSITION.END;
+  return (nextPage) ? this.gotoPage(nextPage,cursorPosition) : null;
 };
 
 /**
