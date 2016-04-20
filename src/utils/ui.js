@@ -64,6 +64,7 @@ exports.appendNavigationButtons = function(paginator){
   // navigate to previous page
   navbarElements.btnPrevious = $(btnSelector)
     .attr('href','#')
+    .attr('title','Previous page')
     .css($.extend(btnCommonStyles,{
       'border-top-left-radius': '25%',
       'border-top-right-radius': '25%',
@@ -92,6 +93,7 @@ exports.appendNavigationButtons = function(paginator){
   // navigate to next page
   navbarElements.btnNext = $(btnSelector)
     .attr('href','#')
+    .attr('title','Next page')
     .css($.extend(btnCommonStyles,{
       'width': '100%',
       'border-top-left-radius': '0',
