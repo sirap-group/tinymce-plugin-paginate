@@ -220,6 +220,7 @@ function tinymcePluginPaginate(editor) {
       paginator.init();
       paginator.gotoFocusedPage();
       paginatorListens = true;
+      watchPageEnabled = true;
       ui.appendNavigationButtons(paginator);
     },500);
   });
