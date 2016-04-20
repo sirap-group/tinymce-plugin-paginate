@@ -209,8 +209,16 @@ function tinymcePluginPaginate(editor) {
    * @method
    * @returns void
    */
-  this.enableWatchPage = function(){  // jshint ignore:line
+  this.enableWatchPage = function(){ // jshint ignore:line
     watchPageEnabled = true;
+  };
+
+  /**
+   * Get the current page
+   * @returns {Page} the paginator current page.
+   */
+  this.getCurrentPage = function(){ // jshint ignore:line
+    return paginator.getCurrentPage();
   };
 
   editor.once('init',function(){
