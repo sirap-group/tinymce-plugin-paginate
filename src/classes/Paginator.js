@@ -304,10 +304,22 @@ Paginator.prototype.gotoPage = function(toPage,cursorPosition){
     });
 
     // cursorPosition may be a DOM Element, `ORIGIN`, `END` or undefined
-    if (typeof(cursorPosition) === 'object') focusToNode(cursorPosition);
-    else if (cursorPosition === this.CURSOR_POSITION.ORIGIN) focusToTop();
-    else if (cursorPosition === this.CURSOR_POSITION.END) focusToBottom();
-    else if (cursorPosition !== undefined) throw new InvalidCursorPosition(cursorPosition);
+    if (typeof(cursorPosition) === 'object'){
+      console.info('focus to node',cursorPosition);
+      focusToNode(cursorPosition);
+    } else if (cursorPosition === this.CURSOR_POSITION.ORIGIN){
+      console.info('focus to top');
+      focusToTop();
+    } else if (cursorPosition === this.CURSOR_POSITION.END) {
+      console.info('focus to bottom');
+      focusToBottom();
+    } else if (cursorPosition !== undefined){
+      console.error('InvalidCursorPosition');
+      throw new InvalidCursorPosition(cursorPosition);
+    } else {
+      console.error('no valid cursor position');
+      console.log(cursorPosition);
+    }
 
     this._editor.focus();
 
