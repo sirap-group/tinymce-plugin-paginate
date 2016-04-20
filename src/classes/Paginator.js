@@ -309,6 +309,8 @@ Paginator.prototype.gotoPage = function(toPage,cursorPosition){
     else if (cursorPosition === this.CURSOR_POSITION.END) focusToBottom();
     else if (cursorPosition !== undefined) throw new InvalidCursorPosition(cursorPosition);
 
+    this._editor.focus();
+
     // set the page as current page
     this._currentPage = toPage;
 
