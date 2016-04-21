@@ -4,6 +4,7 @@ before_script:
   - nvm install v0.12.9
   - nvm alias default v0.12.9
   - nvm use default
+  - nvm ls
   - npm i -g grunt-cli
   - npm i -g bower
 
