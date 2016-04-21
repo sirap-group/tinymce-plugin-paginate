@@ -281,25 +281,24 @@ Paginator.prototype.gotoPage = function(toPage,cursorPosition){
   }
 
   var that = this;
-  var fromPage = this._currentPage;
-  var fromPageContent = this.getPage(fromPage.rank).content();
   var toPageContent = this.getPage(toPage.rank).content();
+  var fromPage = this._currentPage;
+  var fromPageContent;
+  if (fromPage) {
+    fromPageContent = this.getPage(fromPage.rank).content();
+  }
 
   if (!toPage) throw new Error('Cant navigate to undefined page');
 
   if (toPage !== fromPage) {
 
     $.each(this.getPages(),function(i,page){
-      switch (page.rank) {
-        case toPage.rank:
-          $(toPageContent).css({ display:'block' });
-        break;
-        case fromPage.rank:
-          $(fromPageContent).css({ display:'none' });
-        break;
-        default:
-          $(that.getPage(page.rank).content()).css({ display:'none' });
-        break;
+      if (page.rank === toPage.rank) {
+        $(toPageContent).css({ display:'block' });
+      } else if (fromPage && page.rank === fromPage.rank) {
+        $(fromPageContent).css({ display:'none' });
+      } else {
+        $(that.getPage(page.rank).content()).css({ display:'none' });
       }
     });
 
@@ -328,7 +327,8 @@ Paginator.prototype.gotoPage = function(toPage,cursorPosition){
 
     this._editor.dom.fire(this._editor.getDoc(),'PageChange',{
       fromPage: fromPage,
-      toPage: toPage
+      toPage: toPage,
+      timestamp: new Date().getTime()
     });
 
   }
