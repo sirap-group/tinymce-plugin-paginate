@@ -93,6 +93,7 @@ cli.arguments('<semverLevel>').action(function(semverLevel){
         .then(deferizeExec('git push gl-open-source master'))
         .then(deferizeExec('git push origin --tags'))
         .then(deferizeExec('git push gl-open-source --tags'))
+        .then(deferizeExec('git push gh-sirap-group --tags'))
       ;
     } else {
       console.log('Aborted by user');

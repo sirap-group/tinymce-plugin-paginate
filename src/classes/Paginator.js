@@ -31,7 +31,24 @@ var InvalidCursorPosition = errors.InvalidCursorPosition;
  */
 function Paginator(pageFormatLabel, pageOrientation, ed){
 
-  editor = ed;
+  /**
+   * The current page
+   * @property {Page}
+   */
+  this._currentPage = null;
+
+  /**
+   * The list of pages
+   * @property {Array}
+   */
+  this._pages = [];
+
+  /**
+   * Current editor
+   * @property {Editor}
+   */
+  this._editor = ed;
+
   /**
    * The DOMDocument given in the constructor
    * @property {DOMDocument}
@@ -59,26 +76,15 @@ function Paginator(pageFormatLabel, pageOrientation, ed){
 
 }
 
-/**
- * The current page
- * @property {Page}
- * @private
- */
-var currentPage;
-
-/**
- * The list of pages
- * @property {Array}
- * @private
- */
-var pages = [];
-
-/**
- * Current editor
- * @property {Editor}
- * @private
- */
-var editor;
+Paginator.prototype.destroy = function(){
+  this._pages = null;
+  this._currentPage = null;
+  this._editor = null;
+  this._document = null;
+  this._display = null;
+  this._defaultPage = null;
+  this._body = null;
+};
 
 /**
  * Set of the two constant values representing the `origin` or the `end` of possible ranges to focus when focusing/navigating to a page.
@@ -106,12 +112,13 @@ Paginator.prototype.init = function(){
   // wrap unwrapped content
   if (!wrappedPages.length){
     $(this._body).wrapInner(wrapper);
+    this._editor.save();
     wrappedPages = findPageWrappers();
   }
 
-  pages = [];
+  this._pages = [];
   $.each(wrappedPages,function(i,el){
-    pages.push(new Page(that._defaultPage.format().label, that._defaultPage.orientation, i+1, el));
+    that._pages.push(new Page(that._defaultPage.format().label, that._defaultPage.orientation, i+1, el));
   });
 
 };
@@ -122,7 +129,7 @@ Paginator.prototype.init = function(){
  * @return {Page} the current page loaded in editor
  */
 Paginator.prototype.getCurrentPage = function(){
-  return currentPage;
+  return this._currentPage;
 };
 
 /**
@@ -139,16 +146,16 @@ Paginator.prototype.getPage = function(rank){
   } catch(err){
     throw new InvalidPageRankError(rank);
   }
-  if (!pages.length)
+  if (!this._pages.length)
     throw new Error('Paginator pages length in null. Can\'t iterate on it.');
 
   var ret;
   var isLower = rank-1 < 0;
-  var isGreater = rank-1 > pages.length;
+  var isGreater = rank-1 > this._pages.length;
 
   if (isLower || isGreater) throw new InvalidPageRankError(rank);
   else {
-    $.each(pages,function(i,page){
+    $.each(this._pages,function(i,page){
       if (page.rank === rank) ret = page;
     });
     return ret;
@@ -161,7 +168,7 @@ Paginator.prototype.getPage = function(rank){
  * @return {Array<Page>} all paginator pages
  */
 Paginator.prototype.getPages = function(){
-  return pages;
+  return this._pages;
 };
 
 /**
@@ -231,7 +238,7 @@ Paginator.prototype.gotoPage = function(toPage,cursorPosition){
     }
 
     // get all Textnodes from lastchild, calc length
-    var content, lastChild, textNodes, lastNode, locationOffset, cursorLocation;
+    var content, lastChild, textNodes, lastNode, locationOffset;
     content = toPage.content();
     if (content.length) {
       lastChild = content[0].lastChild;
@@ -252,7 +259,7 @@ Paginator.prototype.gotoPage = function(toPage,cursorPosition){
       locationOffset = 0;
     }
     // set Cursor to last position
-    editor.selection.setCursorLocation(lastNode, locationOffset);
+    that._editor.selection.setCursorLocation(lastNode, locationOffset);
   }
 
   /**
@@ -266,49 +273,62 @@ Paginator.prototype.gotoPage = function(toPage,cursorPosition){
     content = toPage.content();
     firstNode = content.firstChild;
     // set Cursor to last position
-    editor.selection.setCursorLocation(firstNode, 0);
+    that._editor.selection.setCursorLocation(firstNode, 0);
   }
 
   function focusToNode(node){
-    console.log('focus to node',node);
-    editor.selection.setCursorLocation(node,0);
+    that._editor.selection.setCursorLocation(node,0);
   }
 
   var that = this;
-  var fromPage = currentPage;
-  var fromPageContent = this.getPage(fromPage.rank).content();
   var toPageContent = this.getPage(toPage.rank).content();
+  var fromPage = this._currentPage;
+  var fromPageContent;
+  if (fromPage) {
+    fromPageContent = this.getPage(fromPage.rank).content();
+  }
 
   if (!toPage) throw new Error('Cant navigate to undefined page');
 
   if (toPage !== fromPage) {
 
     $.each(this.getPages(),function(i,page){
-      switch (page.rank) {
-        case toPage.rank:
-          $(toPageContent).css({ display:'block' });
-        break;
-        case fromPage.rank:
-          $(fromPageContent).css({ display:'none' });
-        break;
-        default:
-          $(that.getPage(page.rank).content()).css({ display:'none' });
-        break;
+      if (page.rank === toPage.rank) {
+        $(toPageContent).css({ display:'block' });
+      } else if (fromPage && page.rank === fromPage.rank) {
+        $(fromPageContent).css({ display:'none' });
+      } else {
+        $(that.getPage(page.rank).content()).css({ display:'none' });
       }
     });
 
     // cursorPosition may be a DOM Element, `ORIGIN`, `END` or undefined
-    if (typeof(cursorPosition) === 'object') focusToNode(cursorPosition);
-    else if (cursorPosition === this.CURSOR_POSITION.ORIGIN) focusToTop();
-    else if (cursorPosition === this.CURSOR_POSITION.END) focusToBottom();
-    else if (cursorPosition !== undefined) throw new InvalidCursorPosition(cursorPosition);
+    if (typeof(cursorPosition) === 'object'){
+      console.info('focus to node',cursorPosition);
+      focusToNode(cursorPosition);
+    } else if (cursorPosition === this.CURSOR_POSITION.ORIGIN){
+      console.info('focus to top');
+      focusToTop();
+    } else if (cursorPosition === this.CURSOR_POSITION.END) {
+      console.info('focus to bottom');
+      focusToBottom();
+    } else if (cursorPosition !== undefined){
+      console.error('InvalidCursorPosition');
+      throw new InvalidCursorPosition(cursorPosition);
+    } else {
+      console.error('no valid cursor position');
+      console.log(cursorPosition);
+    }
+
+    this._editor.focus();
 
     // set the page as current page
-    currentPage = toPage;
+    this._currentPage = toPage;
 
-    editor.dom.fire(editor.getDoc(),'PageChange',{
+    this._editor.dom.fire(this._editor.getDoc(),'PageChange',{
       fromPage: fromPage,
-      toPage: toPage
+      toPage: toPage,
+      timestamp: new Date().getTime()
     });
 
   }
@@ -332,10 +352,9 @@ Paginator.prototype.gotoFocusedPage = function(){
     // if there is no focused page div, focus to the first page
     focusedPage = this.getPage(1);
     focusedDiv = focusedPage.content();
-    editor.selection.select(focusedDiv, true);
+    this._editor.selection.select(focusedDiv, true);
   } finally {
-    currentPage = focusedPage;
-    this.gotoPage(focusedPage);
+    this.gotoPage(focusedPage,this.CURSOR_POSITION.END);
   }
 };
 
@@ -347,8 +366,8 @@ Paginator.prototype.gotoFocusedPage = function(){
  */
 Paginator.prototype.gotoPrevious = function(cursorPosition){
   var prevPage = this.getPrevious();
-  if (prevPage) return this.gotoPage(prevPage,cursorPosition);
-  else return null;
+  cursorPosition = cursorPosition || this.CURSOR_POSITION.END;
+  return (prevPage) ? this.gotoPage(prevPage,cursorPosition) : null;
 };
 
 /**
@@ -359,8 +378,8 @@ Paginator.prototype.gotoPrevious = function(cursorPosition){
  */
 Paginator.prototype.gotoNext = function(cursorPosition){
   var nextPage = this.getNext();
-  if (nextPage) return this.gotoPage(nextPage,cursorPosition);
-  else return null;
+  cursorPosition = cursorPosition || this.CURSOR_POSITION.END;
+  return (nextPage) ? this.gotoPage(nextPage,cursorPosition) : null;
 };
 
 /**
@@ -383,7 +402,7 @@ Paginator.prototype.watchPage = function(){
     iteratee++; lastBlock = null;
 
     maxHeight = _getPageInnerHeight.call(this);
-    currentHeight = _getPageContentHeight.call(this);
+    currentHeight = this.getCurrentPage().getContentHeight();
 
     if (currentHeight===0) throw new InvalidPageHeightError(currentHeight);
 
@@ -395,10 +414,6 @@ Paginator.prototype.watchPage = function(){
 
   // if more than one loop ocured, there was be repaging.
   if (iteratee) {
-
-    var loc = editor.selection.getRng();
-    console.log(loc);
-
     // pass the saved lastblock to the gotoNext() method for focusing on it after page change.
     this.gotoNext(savedLastBlock);
   }
@@ -414,7 +429,7 @@ Paginator.prototype.watchPage = function(){
  */
 var _getFocusedPageDiv = function(){
   var ret, selectedElement, parents;
-  var currentRng = editor.selection.getRng();
+  var currentRng = this._editor.selection.getRng();
 
   selectedElement = currentRng.startContainer;
   parents = $(selectedElement).closest('div[data-paginator="true"]');
@@ -438,8 +453,8 @@ var _getFocusedPageDiv = function(){
  * the text on the next page can fill the current one without overflowing.
  */
 var _repage = function(){ console.info('repaging...');
-  var currentRng = editor.selection.getRng();
-  var children = $(currentPage.content()).children();
+  var currentRng = this._editor.selection.getRng();
+  var children = $(this._currentPage.content()).children();
   var lastBlock = children[children.length - 1];
   var nextPage = this.getNext() || _createNextPage.call(this);
 
@@ -497,19 +512,6 @@ var _getPageInnerHeight = function(){
 };
 
 /**
- * Compute the real height of the page's content. It must equals the page inner height, except the time where the content overflows it, juste before to be repaged by the `Paginator::_repage()` method that bring back the content height to the page inner one.
- * @method
- * @private
- * @returns {Number} The resulted height in pixels.
- */
-var _getPageContentHeight = function(){
-  var currentPageContent = currentPage.content();
-  var currentPageContentHeight = $(currentPageContent).css('height');
-  var inPixels = currentPageContentHeight.split('px').join('');
-  return Number(inPixels);
-};
-
-/**
  * Create an empty HTML div element to wrap the futur content to fill a new page.
  * @method
  * @private
@@ -539,13 +541,13 @@ var _createEmptyDivWrapper = function(pageRank){
  */
 var _createNextPage = function(contentNodeList){
   var newPage;
-  var nextRank = (currentPage) ? (currentPage.rank+1) : 1 ;
+  var nextRank = (this._currentPage) ? (this._currentPage.rank+1) : 1 ;
   var divWrapper = _createEmptyDivWrapper.call(this,nextRank);
   if (contentNodeList) {
     $(contentNodeList).appendTo(divWrapper);
   }
   newPage = new Page(this._defaultPage.format().label, this._defaultPage.orientation, nextRank, divWrapper[0]);
-  pages.push(newPage);
+  this._pages.push(newPage);
   return newPage;
 };
 
