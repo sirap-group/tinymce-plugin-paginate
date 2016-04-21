@@ -8,6 +8,7 @@ before_script:
   - npm i -g bower
 
 build:
-  - npm install
-  - bower install
-  - grunt build
+  script:
+    - npm install
+    - bower install
+    - grunt build
