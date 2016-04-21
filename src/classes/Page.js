@@ -127,4 +127,15 @@ Page.prototype.format = function(label){
   else return this._format;
 };
 
+/**
+ * Compute the real height of the page's content. It must equals the page inner height, except the time where the content overflows it, juste before to be repaged by the `Paginator::_repage()` method that bring back the content height to the page inner one.
+ * @method
+ * @returns {Number} The resulted height in pixels.
+ */
+Page.prototype.getContentHeight = function() {
+  var contentHeight = $(this.content()).css('height');
+  var inPixels = contentHeight.split('px').join('');
+  return Number(inPixels);
+};
+
 module.exports = Page;

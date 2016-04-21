@@ -92,21 +92,25 @@ function tinymcePluginPaginate(editor) {
       myevents.push({'init':evt});
       mycount.init ++;
       console.log(myevents,mycount);
+      // alert('pause after "init" event');
     });
     editor.on('change',function(evt){
       myevents.push({'change':evt});
       mycount.change ++;
       console.log(myevents,mycount);
+      // alert('pause after "change" event');
     });
     editor.on('NodeChange',function(evt){
       myevents.push({'NodeChange':evt});
       mycount.nodechange ++;
       console.log(myevents,mycount);
+      // alert('pause after "NodeChange" event');
     });
     editor.on('SetContent',function(evt){
       myevents.push({'SetContent':evt});
       mycount.setcontent ++;
       console.log(myevents,mycount);
+      // alert('pause after "SetContent" event');
     });
 
     window.logEvents = myevents;
@@ -120,6 +124,14 @@ function tinymcePluginPaginate(editor) {
    */
   function onPageChange(evt){
     ui.updatePageRankInput(evt.toPage.rank);
+    editor.nodeChanged();
+  }
+
+  function onRemoveEditor(evt){
+    ui.removeNavigationButtons();
+    paginator.destroy();
+    watchPageIterationsCount = 0;
+    paginatorListens = false;
   }
 
   /**
@@ -175,31 +187,85 @@ function tinymcePluginPaginate(editor) {
    */
   var watchPageIterationsCount=0;
 
+  /**
+   * The watch of active page is enabled if this var is true
+   * @var
+   * @global
+   */
+  var watchPageEnabled = false;
+
+  // _debugEditorEvents();
+
+  /**
+   * Plugin method that disable the wath of page (to allow edition of extenal elements like headers and footers)
+   * @method
+   * @returns void
+   */
+  this.disableWatchPage = function(){  // jshint ignore:line
+    watchPageEnabled = false;
+  };
+  /**
+   * Plugin method that enable the wath of page (after used this#disableWatchPage())
+   * @method
+   * @returns void
+   */
+  this.enableWatchPage = function(){ // jshint ignore:line
+    watchPageEnabled = true;
+  };
+
+  /**
+   * Get the current page
+   * @returns {Page} the paginator current page.
+   */
+  this.getCurrentPage = function(){ // jshint ignore:line
+    return paginator.getCurrentPage();
+  };
+
   editor.once('init',function(){
     paginator = new Paginator('A4','portrait', editor);
-    if(!paginatorListens) paginator.init();
-    paginatorListens = true;
-    ui.appendNavigationButtons(paginator);
     editor.dom.bind(editor.getDoc(),'PageChange',onPageChange);
+    setTimeout(function(){
+      paginator.init();
+      paginator.gotoFocusedPage();
+      paginatorListens = true;
+      watchPageEnabled = true;
+      ui.appendNavigationButtons(paginator);
+    },500);
   });
-  editor.on('remove',ui.removeNavigationButtons);
-  editor.once('change',function(){
-    paginatorListens = !!paginator;
-    if(paginatorListens) paginator.init();
+
+  editor.on('remove',onRemoveEditor);
+
+  editor.on('change',function(evt){
+    // var newContent, beforeContent;
+    // if (evt.level && evt.lastLevel) {
+    //     newContent = evt.level.content;
+    //     beforeContent = evt.lastLevel.content;
+    //
+    //     if (newContent === '<p><br data-mce-bogus="1"></p>') {
+    //       if ( $('div[data-paginator]', $('<div>').append(beforeContent)).length ) {
+    //         editor.setContent(beforeContent);
+    //         paginator.init();
+    //         paginator.gotoFocusedPage();
+    //       }
+    //     }
+    // }
+
+    if(paginatorListens && watchPageEnabled) paginator.watchPage();
   });
-  editor.on('change',function(){
-    if(paginatorListens) paginator.watchPage();
-  });
+
   editor.on('SetContent',function(){
     //if(paginatorStartListening) paginator.init();
   });
-  editor.on('NodeChange',function(){
-    if (paginatorListens) {
-      try {
-        paginator.gotoFocusedPage();
-      } catch (e) {
-        console.info('Can\'t go to focused page now.');
-        console.error(e.stack);
+
+  editor.on('NodeChange',function(evt){
+    if (evt.element && $(evt.element).attr('data-paginator')) {
+      if (paginatorListens && watchPageEnabled) {
+        try {
+          paginator.gotoFocusedPage();
+        } catch (e) {
+          console.info('Can\'t go to focused page now.');
+          console.error(e.stack);
+        }
       }
     }
   });
