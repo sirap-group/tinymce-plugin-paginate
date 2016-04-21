@@ -6,3 +6,8 @@ before_script:
   - nvm use default
   - npm i -g grunt-cli
   - npm i -g bower
+
+build:
+  - npm install
+  - bower install
+  - grunt build
