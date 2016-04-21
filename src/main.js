@@ -257,13 +257,15 @@ function tinymcePluginPaginate(editor) {
     //if(paginatorStartListening) paginator.init();
   });
 
-  editor.on('NodeChange',function(){
-    if (paginatorListens && watchPageEnabled) {
-      try {
-        paginator.gotoFocusedPage();
-      } catch (e) {
-        console.info('Can\'t go to focused page now.');
-        console.error(e.stack);
+  editor.on('NodeChange',function(evt){
+    if (evt.element && $(evt.element).attr('data-paginator')) {
+      if (paginatorListens && watchPageEnabled) {
+        try {
+          paginator.gotoFocusedPage();
+        } catch (e) {
+          console.info('Can\'t go to focused page now.');
+          console.error(e.stack);
+        }
       }
     }
   });
