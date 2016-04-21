@@ -1,6 +1,6 @@
 {
   "name": "tinymce-plugin-paginate",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "description": "A tinymce plugin that provides pagination",
   "main": "plugin.js",
   "devDependencies": {
