@@ -354,8 +354,7 @@ Paginator.prototype.gotoFocusedPage = function(){
     focusedDiv = focusedPage.content();
     this._editor.selection.select(focusedDiv, true);
   } finally {
-    this._currentPage = focusedPage;
-    this.gotoPage(focusedPage);
+    this.gotoPage(focusedPage,this.CURSOR_POSITION.END);
   }
 };
 
