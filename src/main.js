@@ -253,8 +253,19 @@ function tinymcePluginPaginate(editor) {
     if(paginatorListens && watchPageEnabled) paginator.watchPage();
   });
 
-  editor.on('SetContent',function(){
-    //if(paginatorStartListening) paginator.init();
+  editor.on('setContent',function(evt){
+    paginatorListens = false;
+    if (evt.content) {
+      paginator = new Paginator('A4','portrait', editor);
+      setTimeout(function(){
+        paginator.init();
+        setTimeout(function(){
+          paginator.gotoFocusedPage();
+          paginatorListens = true;
+          watchPageEnabled = true;
+        },100);
+      },100);
+    }
   });
 
   editor.on('NodeChange',function(evt){
