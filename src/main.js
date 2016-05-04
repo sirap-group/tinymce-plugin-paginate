@@ -130,6 +130,11 @@ function tinymcePluginPaginate (editor) {
   editor.on('setContent', onEditorSetContent)
   editor.on('NodeChange', onEditorNodeChange)
 
+  /**
+   * Instanciate and init a Paginator the first time the editor init
+   * @function
+   * @returns void
+   */
   function onceEditorInit () {
     paginator = new Paginator('A4', 'portrait', editor)
     editor.dom.bind(editor.getDoc(), 'PageChange', onPageChange)
@@ -142,6 +147,12 @@ function tinymcePluginPaginate (editor) {
     }, 500)
   }
 
+  /**
+   * (hotfix) Reset old content on change when the new content is a blank content overriding the old one
+   * @function
+   * @param {tinymce.Event} evt The change event
+   * @returns void
+   */
   function onEditorChange (evt) {
     var newContent
     var oldContent
@@ -168,6 +179,12 @@ function tinymcePluginPaginate (editor) {
     if (paginatorListens && watchPageEnabled) paginator.watchPage()
   }
 
+  /**
+   * Go to focused page on node change from a page to an other
+   * @function
+   * @param {tinymce.Event} the NodeChange Event
+   * @returns void
+   */
   function onEditorNodeChange (evt) {
     if (evt.element && $(evt.element).attr('data-paginator')) {
       if (paginatorListens && watchPageEnabled) {
@@ -181,6 +198,12 @@ function tinymcePluginPaginate (editor) {
     }
   }
 
+  /**
+   * Reset paginator when all content is replaced by a new one (SetContent)
+   * @function
+   * @param {tinymce.Event}
+   * @returns void
+   */
   function onEditorSetContent (evt) {
     paginatorListens = false
     if (evt.content) {
@@ -197,15 +220,22 @@ function tinymcePluginPaginate (editor) {
   }
 
   /**
-   * On 'PageChange' event listener. Update page rank input on paginator's navigation buttons.
+   * Update page rank input on paginator's navigation buttons on 'PageChange' event
    * @function
-   * @private
+   * @param {tinymce.Event}  evt The PageChange event
+   * @returns void
    */
   function onPageChange (evt) {
     ui.updatePageRankInput(evt.toPage.rank)
     editor.nodeChanged()
   }
 
+  /**
+   * Destroy the paginator when the editor is removed
+   * @function
+   * @param {tinymce.Event} evt The RemoveEditor event
+   * @returns void
+   */
   function onRemoveEditor (evt) {
     ui.removeNavigationButtons()
     paginator.destroy()
