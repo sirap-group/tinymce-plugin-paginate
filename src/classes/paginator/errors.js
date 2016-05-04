@@ -3,7 +3,7 @@
  * @module classes/paginator/errors
  * @namespace Pagiantor.errors
  */
-'use strict';
+'use strict'
 
 /**
  * Must be thrown when trying to access a page with an invalid rank
@@ -12,13 +12,13 @@
  * @extends Error
  * @param {Number} rank The invalid page rank
  */
-function InvalidPageRankError(rank){
-  this.name = 'InvalidPageRankError';
-  this.message = rank + ' is an invalid page rank';
-  this.stack = (new Error()).stack;
+function InvalidPageRankError (rank) {
+  this.name = 'InvalidPageRankError'
+  this.message = rank + ' is an invalid page rank'
+  this.stack = (new Error()).stack
 }
-InvalidPageRankError.prototype = Error.prototype;
-InvalidPageRankError.prototype.name = 'InvalidPageRankError';
+InvalidPageRankError.prototype = Error.prototype
+InvalidPageRankError.prototype.name = 'InvalidPageRankError'
 
 /**
  * Must be thrown when the DOM range of the text cursor is out of a paginated DOM tree.
@@ -26,13 +26,13 @@ InvalidPageRankError.prototype.name = 'InvalidPageRankError';
  * @memberof  Paginator.errors
  * @extends Error
  */
-function InvalidFocusedRangeError(){
-  this.name = 'InvalidFocusedRangeError';
-  this.message = 'The text cursor if out of any page.';
-  this.stack = (new Error()).stack;
+function InvalidFocusedRangeError () {
+  this.name = 'InvalidFocusedRangeError'
+  this.message = 'The text cursor if out of any page.'
+  this.stack = (new Error()).stack
 }
-InvalidFocusedRangeError.prototype = Error.prototype;
-InvalidFocusedRangeError.prototype.name = 'InvalidFocusedRangeError';
+InvalidFocusedRangeError.prototype = Error.prototype
+InvalidFocusedRangeError.prototype.name = 'InvalidFocusedRangeError'
 
 /**
  * Must be thrown when the current page height doesn't match required values
@@ -40,13 +40,13 @@ InvalidFocusedRangeError.prototype.name = 'InvalidFocusedRangeError';
  * @memberof  Paginator.errors
  * @extends Error
  */
-function InvalidPageHeightError(height){
-  this.name = 'InvalidPageHeightError';
-  this.message = height + 'px is an invalid page height.';
-  this.stack = (new Error()).stack;
+function InvalidPageHeightError (height) {
+  this.name = 'InvalidPageHeightError'
+  this.message = height + 'px is an invalid page height.'
+  this.stack = (new Error()).stack
 }
-InvalidPageHeightError.prototype = Error.prototype;
-InvalidPageHeightError.prototype.name = 'InvalidPageHeightError';
+InvalidPageHeightError.prototype = Error.prototype
+InvalidPageHeightError.prototype.name = 'InvalidPageHeightError'
 
 /**
  * Must be thrown when the requested cursor position doesn't match required values.
@@ -54,20 +54,20 @@ InvalidPageHeightError.prototype.name = 'InvalidPageHeightError';
  * @memberof  Paginator.errors
  * @extends Error
  */
-function InvalidCursorPosition(requestedPosition){
-  this.name = 'InvalidCursorPosition';
-  this.message = requestedPosition + 'is an invalid cursor position.';
-  this.stack = (new Error()).stack;
+function InvalidCursorPosition (requestedPosition) {
+  this.name = 'InvalidCursorPosition'
+  this.message = requestedPosition + 'is an invalid cursor position.'
+  this.stack = (new Error()).stack
 }
-InvalidCursorPosition.prototype = Error.prototype;
-InvalidCursorPosition.prototype.name = 'InvalidCursorPosition';
+InvalidCursorPosition.prototype = Error.prototype
+InvalidCursorPosition.prototype.name = 'InvalidCursorPosition'
 
 //
 // export Paginator.errors namespace
 //
 module.exports = {
-  InvalidPageRankError:InvalidPageRankError,
-  InvalidFocusedRangeError:InvalidFocusedRangeError,
-  InvalidPageHeightError:InvalidPageHeightError,
-  InvalidCursorPosition:InvalidCursorPosition
-};
+  InvalidPageRankError: InvalidPageRankError,
+  InvalidFocusedRangeError: InvalidFocusedRangeError,
+  InvalidPageHeightError: InvalidPageHeightError,
+  InvalidCursorPosition: InvalidCursorPosition
+}

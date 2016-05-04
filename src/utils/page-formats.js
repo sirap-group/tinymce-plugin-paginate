@@ -5,7 +5,7 @@
  * @description When required, this module exports an array of formats supported by the application
  */
 
-'use strict';
+'use strict'
 
 /**
  * Define a page format
@@ -14,10 +14,10 @@
  * @param {number} long The format's long dimension in milimeters
  * @param {number} short The format's short dimension in milimeters
  */
-function Format(label,long,short){
-  this.label = label;
-  this.long = long;
-  this.short = short;
+function Format (label, long, short) {
+  this.label = label
+  this.long = long
+  this.short = short
 }
 
 /**
@@ -32,12 +32,11 @@ var supportedFormats = {
     long: '297',
     short: '210'
   }
-};
+}
 
-var exp = [];
-$.each(supportedFormats,function(label,format){
-  exp[label] = new Format(label, format.long, format.short);
-});
+var exp = []
+$.each(supportedFormats, function (label, format) {
+  exp[label] = new Format(label, format.long, format.short)
+})
 
-
-module.exports = exp;
+module.exports = exp
