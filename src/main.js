@@ -176,7 +176,7 @@ function tinymcePluginPaginate (editor) {
       }
     }
 
-    if (paginatorListens && watchPageEnabled) paginator.watchPage()
+    if (paginatorListens && watchPageEnabled) watchPage()
   }
 
   /**
