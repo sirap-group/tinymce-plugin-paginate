@@ -10,7 +10,7 @@ var $ = window.jquery
 // var _ = require('lodash')
 var Display = require('./Display')
 var Page = require('./Page')
-var parser = require('./paginator/parser')
+// var parser = require('./paginator/parser')
 
 var errors = require('./paginator/errors')
 var InvalidPageRankError = errors.InvalidPageRankError
@@ -318,7 +318,7 @@ Paginator.prototype.watchPage = function () {
   var maxHeight
   var currentHeight
   var iteratee = -1 // pass to zero during the first loop
-  var cursorPositionAfterRepaging
+  // var cursorPositionAfterRepaging
   var lastBlock, savedLastBlock
 
   // check if the current page is overflown by its content
@@ -357,7 +357,7 @@ Paginator.prototype.watchPage = function () {
 function _repage () {
   console.info('repaging...')
 
-  var currentRng = this._editor.selection.getRng()
+  // var currentRng = this._editor.selection.getRng()
   var children = $(this._currentPage.content()).children()
   var lastBlock = children[children.length - 1]
   var nextPage = this.getNext() || _createNextPage.call(this)
