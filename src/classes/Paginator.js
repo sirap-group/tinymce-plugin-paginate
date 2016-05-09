@@ -464,8 +464,9 @@ function _createNextPage (contentNodeList) {
  */
 function getTextNodes (node, nodeType, result) {
   var children = node.childNodes
-  nodeType = nodeType ? nodeType : 3
-  result = !result ? [] : result
+  nodeType = nodeType || 3
+  if (!result) result = []
+
   if (node.nodeType === nodeType) {
     result.push(node)
   }
