@@ -5,6 +5,8 @@
 
 'use strict'
 
+var $ = window.jquery
+
 /**
  * Append "previous page" and "next page" navigation buttons
  * @function appendNavigationButtons
@@ -12,7 +14,28 @@
  * @param {Paginator} paginator The instancied paginator binded to the matched editor.
  * @returns void
  */
-exports.appendNavigationButtons = function (paginator) {
+exports.appendNavigationButtons = appendNavigationButtons
+
+/**
+ * Remove navigation buttons
+ * @function
+ * @static
+ */
+exports.removeNavigationButtons = function () {
+  $('#paginator-navbar').remove()
+}
+
+exports.updatePageRankInput = function (rank) {
+  $('#input-rank').val(rank)
+}
+
+/**
+ * Append navigation buttons for the paginator:
+ * - previous page
+ * - input type number to display and change the page
+ * - next page
+ */
+function appendNavigationButtons (paginator) {
   /**
    * Validate input page rank and request a page change if input is valid
    * @callback
@@ -78,13 +101,11 @@ exports.appendNavigationButtons = function (paginator) {
     })
     .appendTo(navbar)
 
-
   // input to show and control current page
   navbarElements.inputRank = $('<input></input>')
     .attr('type', 'number').attr('id', 'input-rank')
     .css({ 'width': '100%', 'line-height': '30px', 'text-align': 'center' })
     .change(onInputRankChanges).appendTo(navbar)
-
 
   setTimeout(function () {
     navbarElements.inputRank.val(paginator.getCurrentPage().rank)
@@ -107,18 +128,4 @@ exports.appendNavigationButtons = function (paginator) {
       return false
     })
     .appendTo(navbar)
-
-}
-
-/**
- * Remove navigation buttons
- * @function
- * @static
- */
-exports.removeNavigationButtons = function () {
-  $('#paginator-navbar').remove()
-}
-
-exports.updatePageRankInput = function (rank) {
-  $('#input-rank').val(rank)
 }

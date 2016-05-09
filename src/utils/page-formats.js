@@ -7,6 +7,8 @@
 
 'use strict'
 
+var $ = window.jquery
+
 /**
  * Define a page format
  * @constructor
