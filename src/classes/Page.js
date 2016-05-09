@@ -5,23 +5,15 @@
 
 'use strict'
 
+var $ = window.jquery
+
 var supportedFormats = require('../utils/page-formats')
 
-var InvalidOrientationLabelError = (function () {
-  /**
-   * Must be thrown when trying to orientate a page with an invalid orientation label
-   * @constructor
-   * @param {string} label The invalid orientation label
-   */
-  function InvalidOrientationLabelError (label) {
-    this.name = 'InvalidOrientationLabelError'
-    this.message = label + ' is an invalid orientation label !'
-    this.stack = (new Error()).stack
-  }
-  InvalidOrientationLabelError.prototype = Error.prototype
-  InvalidOrientationLabelError.prototype.name = 'InvalidOrientationLabelError'
-  return InvalidOrientationLabelError
-})()
+var pageErrors = require('./page/errors')
+
+var InvalidOrientationLabelError = pageErrors.InvalidOrientationLabelError
+
+module.exports = Page
 
 /**
  * @constructor
@@ -92,8 +84,7 @@ Page.prototype.orientate = function (orientation) {
   var inValidType = (typeof (orientation) !== 'string')
   var inValidLabel = (orientation.toLowerCase() !== 'portrait' && orientation.toLowerCase() !== 'paysage')
 
-  if (inValidType || inValidLabel)
-    throw new InvalidOrientationLabelError(orientation)
+  if (inValidType || inValidLabel) throw new InvalidOrientationLabelError(orientation)
 
   this.orientation = orientation
 
@@ -104,7 +95,6 @@ Page.prototype.orientate = function (orientation) {
     this.width = this.format().long
     this.height = this.format().short
   }
-
 }
 
 /**
@@ -116,8 +106,7 @@ Page.prototype.orientate = function (orientation) {
  */
 Page.prototype.format = function (label) {
   if (label !== undefined) {
-    if (!supportedFormats[label])
-      throw new Error('Format ' + label + ' is not supported yet.')
+    if (!supportedFormats[label]) throw new Error('Format ' + label + ' is not supported yet.')
 
     this._format = supportedFormats[label]
     return this
@@ -136,5 +125,3 @@ Page.prototype.getContentHeight = function () {
   var inPixels = contentHeight.split('px').join('')
   return Number(inPixels)
 }
-
-module.exports = Page
