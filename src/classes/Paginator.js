@@ -156,8 +156,9 @@ Paginator.prototype.getPage = function (rank) {
   var isLower = rank - 1 < 0
   var isGreater = rank - 1 > this._pages.length
 
-  if (isLower || isGreater) throw new InvalidPageRankError(rank)
-  else {
+  if (isLower || isGreater) {
+    throw new InvalidPageRankError(rank)
+  } else {
     $.each(this._pages, function (i, page) {
       if (page.rank === rank) ret = page
     })
