@@ -5,7 +5,7 @@ module.exports = function (grunt) {
 
   grunt.initConfig({
     standard: {
-      options: { format: true },
+      options: { format: false },
       gruntfile: { src: ['gruntfile.js'] },
       scripts: { src: 'scripts/**/*.js' },
       js: { src: 'src/**/*.js' }
