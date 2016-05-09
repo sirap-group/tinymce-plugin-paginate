@@ -18,6 +18,12 @@ var InvalidFocusedRangeError = errors.InvalidFocusedRangeError
 var InvalidPageHeightError = errors.InvalidPageHeightError
 var InvalidCursorPosition = errors.InvalidCursorPosition
 
+// Exports Paginator class
+exports = module.exports = Paginator
+
+// Bind errors to the classes/paginator module.
+exports.errors = errors
+
 /**
  * Paginator is the page manager
  * @constructor
@@ -202,79 +208,6 @@ Paginator.prototype.getNext = function () {
  * @return void
  */
 Paginator.prototype.gotoPage = function (toPage, cursorPosition) {
-  /**
-   * Set cursor location to the bottom of the destination page
-   * @function
-   * @inner
-   * @return void
-   */
-  function focusToBottom () {
-    /**
-     * Get all text nodes from a given node
-     * @function
-     * @inner
-     * @param {Node} node The parent, given node
-     * @param {number} nodeType The number matching the searched node type
-     * @param {array} result The result passed for recursive iteration
-     */
-    function getTextNodes (node, nodeType, result) {
-      var children = node.childNodes
-      nodeType = nodeType ? nodeType : 3
-      result = !result ? [] : result
-      if (node.nodeType === nodeType) {
-        result.push(node)
-      }
-      if (children) {
-        for (var i = 0; i < children.length; i++) {
-          result = getTextNodes(children[i], nodeType, result)
-        }
-      }
-      return result
-    }
-
-    // get all Textnodes from lastchild, calc length
-    var content, lastChild, textNodes, lastNode, locationOffset
-    content = toPage.content()
-    if (content.length) {
-      lastChild = content[0].lastChild
-    } else {
-      lastChild = content.lastChild
-    }
-    if (lastChild) {
-      textNodes = getTextNodes(lastChild)
-      if (textNodes.length) {
-        lastNode = textNodes[textNodes.length - 1]
-        locationOffset = lastNode.textContent.length
-      } else {
-        lastNode = lastChild
-        locationOffset = 0
-      }
-    } else {
-      lastNode = content
-      locationOffset = 0
-    }
-    // set Cursor to last position
-    that._editor.selection.setCursorLocation(lastNode, locationOffset)
-  }
-
-  /**
-   * Set cursor location to the bottom of the destination page
-   * @function
-   * @inner
-   * @return void
-   */
-  function focusToTop () {
-    var content, firstNode
-    content = toPage.content()
-    firstNode = content.firstChild
-    // set Cursor to last position
-    that._editor.selection.setCursorLocation(firstNode, 0)
-  }
-
-  function focusToNode (node) {
-    that._editor.selection.setCursorLocation(node, 0)
-  }
-
   var that = this
   var toPageContent = this.getPage(toPage.rank).content()
   var fromPage = this._currentPage
@@ -302,10 +235,10 @@ Paginator.prototype.gotoPage = function (toPage, cursorPosition) {
       focusToNode(cursorPosition)
     } else if (cursorPosition === this.CURSOR_POSITION.ORIGIN) {
       console.info('focus to top')
-      focusToTop()
+      focusToTop(toPage, that._editor)
     } else if (cursorPosition === this.CURSOR_POSITION.END) {
       console.info('focus to bottom')
-      focusToBottom()
+      focusToBottom(toPage, that._editor)
     } else if (cursorPosition !== undefined) {
       console.error('InvalidCursorPosition')
       throw new InvalidCursorPosition(cursorPosition)
@@ -408,28 +341,6 @@ Paginator.prototype.watchPage = function () {
     // pass the saved lastblock to the gotoNext() method for focusing on it after page change.
     this.gotoNext(savedLastBlock)
   }
-}
-
-/**
- * Get the currently focused page div
- * @method
- * @private
- * @return {Element} The parent div element having an attribute data-paginator
- * @throws InvalidFocusedRangeError
- */
-var _getFocusedPageDiv = function () {
-  var ret, selectedElement, parents
-  var currentRng = this._editor.selection.getRng()
-
-  selectedElement = currentRng.startContainer
-  parents = $(selectedElement).closest('div[data-paginator="true"]')
-  if (!parents.length) {
-    throw new InvalidFocusedRangeError()
-  } else {
-    ret = parents[0]
-  }
-
-  return ret
 }
 
 /**
@@ -542,8 +453,108 @@ function _createNextPage (contentNodeList) {
   return newPage
 }
 
-// Exports Paginator class
-exports = module.exports = Paginator
+/**
+ * Get all text nodes from a given node
+ * @function
+ * @inner
+ * @param {Node} node The parent, given node
+ * @param {number} nodeType The number matching the searched node type
+ * @param {array} result The result passed for recursive iteration
+ */
+function getTextNodes (node, nodeType, result) {
+  var children = node.childNodes
+  nodeType = nodeType ? nodeType : 3
+  result = !result ? [] : result
+  if (node.nodeType === nodeType) {
+    result.push(node)
+  }
+  if (children) {
+    for (var i = 0; i < children.length; i++) {
+      result = getTextNodes(children[i], nodeType, result)
+    }
+  }
+  return result
+}
 
-// Bind errors to the classes/paginator module.
-exports.errors = errors
+/**
+ * Set cursor location to the bottom of the destination page
+ * @function
+ * @inner
+ * @param {Page} page The page instance to focus on top
+ * @param {Editor} editor The current editor instance
+ * @return void
+ */
+function focusToTop (page, editor) {
+  var content, firstNode
+  content = page.content()
+  firstNode = content.firstChild
+  // set Cursor to last position
+  editor.selection.setCursorLocation(firstNode, 0)
+}
+
+/**
+ * Focus to the specified node
+ * @function
+ * @private
+ * @param {DOMElement} node The node to focus on
+ * @param {Editor} editor The current editor
+ */
+function focusToNode (node, editor) {
+  editor.selection.setCursorLocation(node, 0)
+}
+
+/**
+ * Set cursor location to the bottom of the destination page
+ * @function
+ * @inner
+ * @param {Page} page The page to focus on
+ * @param {Editor} editor The current editor
+ * @return void
+ */
+function focusToBottom (page, editor) {
+  // get all Textnodes from lastchild, calc length
+  var content, lastChild, textNodes, lastNode, locationOffset
+  content = page.content()
+  if (content.length) {
+    lastChild = content[0].lastChild
+  } else {
+    lastChild = content.lastChild
+  }
+  if (lastChild) {
+    textNodes = getTextNodes(lastChild)
+    if (textNodes.length) {
+      lastNode = textNodes[textNodes.length - 1]
+      locationOffset = lastNode.textContent.length
+    } else {
+      lastNode = lastChild
+      locationOffset = 0
+    }
+  } else {
+    lastNode = content
+    locationOffset = 0
+  }
+  // set Cursor to last position
+  editor.selection.setCursorLocation(lastNode, locationOffset)
+}
+
+/**
+ * Get the currently focused page div
+ * @method
+ * @private
+ * @return {Element} The parent div element having an attribute data-paginator
+ * @throws InvalidFocusedRangeError
+ */
+function _getFocusedPageDiv () {
+  var ret, selectedElement, parents
+  var currentRng = this._editor.selection.getRng()
+
+  selectedElement = currentRng.startContainer
+  parents = $(selectedElement).closest('div[data-paginator="true"]')
+  if (!parents.length) {
+    throw new InvalidFocusedRangeError()
+  } else {
+    ret = parents[0]
+  }
+
+  return ret
+}
