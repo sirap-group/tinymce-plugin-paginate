@@ -5,6 +5,16 @@
  */
 'use strict'
 
+//
+// export Paginator.errors namespace
+//
+module.exports = {
+  InvalidPageRankError: InvalidPageRankError,
+  InvalidFocusedRangeError: InvalidFocusedRangeError,
+  InvalidPageHeightError: InvalidPageHeightError,
+  InvalidCursorPosition: InvalidCursorPosition
+}
+
 /**
  * Must be thrown when trying to access a page with an invalid rank
  * @class
@@ -61,13 +71,3 @@ function InvalidCursorPosition (requestedPosition) {
 }
 InvalidCursorPosition.prototype = Error.prototype
 InvalidCursorPosition.prototype.name = 'InvalidCursorPosition'
-
-//
-// export Paginator.errors namespace
-//
-module.exports = {
-  InvalidPageRankError: InvalidPageRankError,
-  InvalidFocusedRangeError: InvalidFocusedRangeError,
-  InvalidPageHeightError: InvalidPageHeightError,
-  InvalidCursorPosition: InvalidCursorPosition
-}
