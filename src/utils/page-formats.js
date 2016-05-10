@@ -7,7 +7,7 @@
 
 'use strict'
 
-var $ = window.jquery
+var $ = window.jQuery
 
 /**
  * Define a page format

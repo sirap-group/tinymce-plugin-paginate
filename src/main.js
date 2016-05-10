@@ -34,7 +34,7 @@
  * @see {@link http://learn.jquery.com/plugins/|jQuery Plugins}
  */
 
-var $ = window.jquery
+var $ = window.jQuery
 
 /**
  * Tinymce library - injected by the plugin loader.

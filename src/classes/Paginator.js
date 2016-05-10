@@ -5,7 +5,7 @@
 
 'use strict'
 
-var $ = window.jquery
+var $ = window.jQuery
 
 // var _ = require('lodash')
 var Display = require('./Display')

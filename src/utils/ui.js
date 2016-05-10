@@ -5,7 +5,7 @@
 
 'use strict'
 
-var $ = window.jquery
+var $ = window.jQuery
 
 /**
  * Append "previous page" and "next page" navigation buttons
