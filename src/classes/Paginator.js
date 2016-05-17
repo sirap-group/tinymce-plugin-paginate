@@ -40,18 +40,21 @@ function Paginator (pageFormatLabel, pageOrientation, ed) {
   /**
    * The current page
    * @property {Page}
+   * @private
    */
   this._currentPage = null
 
   /**
    * The list of pages
    * @property {Array}
+   * @private
    */
   this._pages = []
 
   /**
    * Current editor
    * @property {Editor}
+   * @private
    */
   this._editor = ed
 
