@@ -11,6 +11,7 @@ module.exports = function (grunt) {
       js: { src: 'src/**/*.js' }
     },
     browserify: {
+      options: {browserifyOptions: {debug: true}},
       dist: { src: 'index.js', dest: 'plugin.js' }
     },
     uglify: {
