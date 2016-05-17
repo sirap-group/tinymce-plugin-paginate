@@ -49,6 +49,9 @@ Page.prototype.content = function (wrappedPageDiv) {
     return this._content
   } else {
     this._content = wrappedPageDiv
+    $(this._content).on('remove', function (evt, d) {
+      console.error('page %s has been removed from the DOM !')
+    })
   }
 }
 
