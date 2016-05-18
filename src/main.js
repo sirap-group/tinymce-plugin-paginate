@@ -84,6 +84,8 @@ function tinymcePluginPaginate (editor) {
    */
   this._debugEditorEvents = _debugEditorEvents
 
+  var thatPlugin = this
+
   /**
   * A 'Paginator' object to handle all paginating behaviors.
   * @var {Paginator} paginator
@@ -125,6 +127,7 @@ function tinymcePluginPaginate (editor) {
   this.enableWatchPage = pluginAPIEnableWatchPage
   this.getCurrentPage = pluginAPIGetCurrentPage
   this.px2mm = pluginAPIPx2mm
+  this.paginator = paginator
 
   // display = new Display(window.document)
 
@@ -141,6 +144,7 @@ function tinymcePluginPaginate (editor) {
    */
   function onceEditorInit () {
     paginator = new Paginator('A4', 'portrait', editor)
+    thatPlugin.paginator = paginator
     editor.dom.bind(editor.getDoc(), 'PageChange', onPageChange)
     setTimeout(function () {
       paginator.init()
@@ -212,6 +216,7 @@ function tinymcePluginPaginate (editor) {
     paginatorListens = false
     if (evt.content) {
       paginator = new Paginator('A4', 'portrait', editor)
+      thatPlugin.paginator = paginator
       setTimeout(function () {
         paginator.init()
         setTimeout(function () {
