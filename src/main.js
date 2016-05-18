@@ -50,7 +50,7 @@ var tinymce = window.tinymce
  * @global
  */
 var Paginator = require('./classes/Paginator')
-// var Display = window.Display = require('./classes/Display')
+var Display = window.Display = require('./classes/Display')
 
 /**
  * Paginator ui module
@@ -299,7 +299,7 @@ function tinymcePluginPaginate (editor) {
   }
 
   function pluginAPIPx2mm (px) {
-    return paginator._display.px2mm(px)
+    return new Display(window.document).px2mm(px)
   }
 }
 
