@@ -50,6 +50,7 @@ var tinymce = window.tinymce
  * @global
  */
 var Paginator = require('./classes/Paginator')
+// var Display = window.Display = require('./classes/Display')
 
 /**
  * Paginator ui module
@@ -122,7 +123,10 @@ function tinymcePluginPaginate (editor) {
 
   this.disableWatchPage = pluginAPIDisableWatchPage
   this.enableWatchPage = pluginAPIEnableWatchPage
-  this.getCurrentPage = PluginAPIGetCurrentPage
+  this.getCurrentPage = pluginAPIGetCurrentPage
+  this.px2mm = pluginAPIPx2mm
+
+  // display = new Display(window.document)
 
   editor.once('init', onceEditorInit)
   editor.on('remove', onRemoveEditor)
@@ -281,7 +285,7 @@ function tinymcePluginPaginate (editor) {
    * Get the current page
    * @returns {Page} the paginator current page.
    */
-  function PluginAPIGetCurrentPage () {
+  function pluginAPIGetCurrentPage () {
     return paginator.getCurrentPage()
   }
 
@@ -292,6 +296,10 @@ function tinymcePluginPaginate (editor) {
    */
   function pluginAPIDisableWatchPage () {
     watchPageEnabled = false
+  }
+
+  function pluginAPIPx2mm (px) {
+    return paginator._display.px2mm(px)
   }
 }
 
